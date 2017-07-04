@@ -51,9 +51,9 @@ class TestWidget(QWidget):
 
         #Show Question
         self.layoutShowQuestion = QVBoxLayout(self)
-        self.outputAreaOneQuestion = QTextBrowser(self)
-        self.outputAreaOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
-        self.layoutShowQuestion.addWidget(self.outputAreaOneQuestion)
+        self.txtOneQuestion = QTextBrowser(self)
+        self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
+        self.layoutShowQuestion.addWidget(self.txtOneQuestion)
         self.tabBookChap = QTabWidget(self)
 
         self.tabCustom = None
@@ -162,7 +162,7 @@ class TestWidget(QWidget):
         pass
 
     def refreshoutputAreaOneQuestion(self):
-        self.outputAreaOneQuestion.setText(self.latex.getQuestion(int(self.nQIndex)))
+        self.txtOneQuestion.setText(self.latex.getQuestion(int(self.nQIndex)))
         self.reNewCustomTagCheckItem()
         #確認是否有更新版Tag List *
         if self.nQIndex in self.dicNewTagsBuffer:
@@ -381,7 +381,7 @@ class TestWidget(QWidget):
         self.outputArea.clear()
         self.outputArea.append(self.latex.read())
         self.outputArea.append(self.latex.getReport())
-        self.outputAreaOneQuestion.clear()
+        self.txtOneQuestion.clear()
         self.refreshoutputAreaOneQuestion()
         self.edtCount.setText(str(self.latex.getCountOfQ()))
         self.edtCount.setReadOnly(True)
