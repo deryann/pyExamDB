@@ -27,7 +27,9 @@ from HDYLatexParser import HDYLatexParser
 #
 class TestWidget(QWidget):
     def __init__(self):
-        QWidget.__init__(self, windowTitle=u"A Simple Example for PyQt.")
+        QWidget.__init__(self, windowTitle=u"Latex Questions Editor .")
+
+        self.setLayout(QVBoxLayout())
 
         #
         # 建構編輯Tags 的暫存資料結構
@@ -43,28 +45,22 @@ class TestWidget(QWidget):
 
         self.btnLoadFile.clicked.connect(self.onbtnLoadFile)
 
+        #Output message
         self.outputArea=QTextBrowser(self)
         self.outputArea.setFont(QFont ("Consolas", 14)) #設定字型
+
+        #Show Question
+        self.layoutShowQuestion = QVBoxLayout(self)
         self.outputAreaOneQuestion = QTextBrowser(self)
         self.outputAreaOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
-        #self.outputAreaOneQuestion.setFixedHeight(600)
+        self.layoutShowQuestion.addWidget(self.outputAreaOneQuestion)
         self.tabBookChap = QTabWidget(self)
 
         self.tabCustom = None
 
-##        self.helloButton=QPushButton("GO", self)
-
+        # 實作控制 index
         self.nQIndex = 0
         self.layoutBtnsControlIndex = QHBoxLayout()
-
-
-##        self.action = QAction(QIcon(), "L", self)
-##        self.action.setShortcut("ESC")
-##        self.action.setShortcutContext(Qt.ApplicationShortcut)
-##        self.addAction(self.action)
-##
-##        QObject.connect(self.action, SIGNAL("triggered()"), self.onLeftKey)
-
 
         self.btnFirst=QPushButton("|<", self)
         self.btnPrev=QPushButton("<",self)
@@ -72,6 +68,7 @@ class TestWidget(QWidget):
         self.edtCount = QLineEdit ("0", self)
         self.btnNext=QPushButton(">",self)
         self.btnLast=QPushButton(">|",self)
+
         self.layoutBtnsControlIndex.addWidget(self.btnFirst)
         self.layoutBtnsControlIndex.addWidget(self.btnPrev)
         self.layoutBtnsControlIndex.addWidget(self.edtIndex)
@@ -85,9 +82,8 @@ class TestWidget(QWidget):
         self.lstCheckboxs= []
 
 
-        self.setLayout(QVBoxLayout())
         self.layout().addLayout(self.layoutFileLoadUI)
-        self.layout().addWidget(self.outputAreaOneQuestion)
+        self.layout().addLayout(self.layoutShowQuestion)
         self.layout().addLayout(self.layoutBtnsControlIndex)
 
         #讀取Tag 表
@@ -128,6 +124,7 @@ class TestWidget(QWidget):
         self.loadFile(u"QContent.tex")
 
         self.showData()
+        self.showMaximized()
 
     def onLeftKey(self):
         print("[onLeftKey]")
