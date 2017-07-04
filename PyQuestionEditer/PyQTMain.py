@@ -19,6 +19,7 @@ from PyQt4.QtCore import QObject, SIGNAL
 
 from PyQt4.QtGui import *
 from HDYLatexParser import HDYLatexParser
+from HDYQuestionParser import HDYQuestionParser as QParser
 
 
 ##
@@ -53,7 +54,13 @@ class TestWidget(QWidget):
         self.layoutShowQuestion = QVBoxLayout(self)
         self.txtOneQuestion = QTextBrowser(self)
         self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
+        self.txtAns =QTextBrowser(self)
+        self.txtSol =QTextBrowser(self)
+
         self.layoutShowQuestion.addWidget(self.txtOneQuestion)
+        self.layoutShowQuestion.addWidget(self.txtAns)
+        self.layoutShowQuestion.addWidget(self.txtSol)
+
         self.tabBookChap = QTabWidget(self)
 
         self.tabCustom = None
@@ -162,7 +169,11 @@ class TestWidget(QWidget):
         pass
 
     def refreshoutputAreaOneQuestion(self):
-        self.txtOneQuestion.setText(self.latex.getQuestion(int(self.nQIndex)))
+        Qpt = QParser(self.latex.getQuestion(int(self.nQIndex)))
+        self.txtOneQuestion.setText(Qpt.getQBODY())
+        self.txtAns.setText(Qpt.getQANS())
+        self.txtSol.setText(Qpt.getQSOL())
+
         self.reNewCustomTagCheckItem()
         #確認是否有更新版Tag List *
         if self.nQIndex in self.dicNewTagsBuffer:
@@ -382,6 +393,8 @@ class TestWidget(QWidget):
         self.outputArea.append(self.latex.read())
         self.outputArea.append(self.latex.getReport())
         self.txtOneQuestion.clear()
+        self.txtAns.clear()
+        self.txtSol.clear()
         self.refreshoutputAreaOneQuestion()
         self.edtCount.setText(str(self.latex.getCountOfQ()))
         self.edtCount.setReadOnly(True)

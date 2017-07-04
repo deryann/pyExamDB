@@ -35,6 +35,15 @@ class HDYQuestionParser:
     def setQFROM(self, strInput):
         self.strQFROM = strInput
 
+    def getQBODY(self):
+        return self.strQBODY
+
+    def getQANS(self):
+        return self.strQANS
+
+    def getQSOL(self):
+        return self.strQSOL
+
     def getEnvString(self, strEnvName, strEnvContent):
         strBuffer = "        \\begin{%s}%s            %s%s        \\end{%s}%s" % (strEnvName,os.linesep,strEnvContent, os.linesep, strEnvName, os.linesep)
         return strBuffer
