@@ -23,6 +23,13 @@ from HDYQuestionParser import HDYQuestionParser as QParser
 
 
 ##
+# 程式所使用的常數區
+#
+#
+const99TagFileName = u"99TagGroup.txt"
+constAllStrTagFileName = u"allTags.txt"
+
+##
 # UI 呈現的程式碼
 #
 #
@@ -91,10 +98,8 @@ class TestWidget(QWidget):
         self.loadTagsToNewUI()
         #self.addCheckBoxInToUI()
         self.layoutTagsPanel = QHBoxLayout()
-        self.tabBookChap.setFixedWidth(400)
+        self.tabBookChap.setFixedWidth(600)
         self.layoutTagsPanel.addWidget(self.tabBookChap)
-        self.qGroupSuggestedTag = QGroupBox( u"SuggestTags",self)
-        self.layoutTagsPanel.addWidget(self.qGroupSuggestedTag)
 
         #增加檔案操作的按鈕
         self.btnsPanel = QVBoxLayout()
@@ -209,21 +214,24 @@ class TestWidget(QWidget):
     def addCheckBoxInToUI(self):
         pass
 
-    def loadTagsToNewUI(self):
-        self.tabBookChap.clear()
-        constStrTagFileName = u"Tag1Group.txt"
-        fPt = codecs.open( constStrTagFileName, "r", "utf-8" )
-        currentTab=None
+    def prepare99TagsUI(self):
+        """
+        準備所有99課綱章節的Tags UI (GridLayout)
+        """
+        fPt = codecs.open( const99TagFileName, "r", "utf-8" )
+        currentTab = QWidget(self)
+        currentGrid = QGridLayout(self)
+        currentTab.setLayout(currentGrid)
+        self.tabBookChap.addTab(currentTab, u"99課綱Tag")
+        nCurrentRow =0
+        nCurrentCol =0
         while True:
             strLine=fPt.readline()
             if strLine !=None and strLine!='':
-
                 lst = re.findall(u"\[(.*?)\]", strLine, re.DOTALL)
                 if len(lst) !=0:
-                    #New 出 TAB 內頁
-                    currentTab = QWidget(self)
-                    currentTab.setLayout(QVBoxLayout())
-                    self.tabBookChap.addTab(currentTab, lst[0])
+                    nCurrentRow +=1
+                    nCurrentCol =0
                 else:
                     lst = re.findall(u"QTAG{(.*?)}", strLine, re.DOTALL)
                     if len(lst) !=0:
@@ -232,13 +240,18 @@ class TestWidget(QWidget):
                         chkitem.strTagName=strNew
                         chkitem.stateChanged.connect(self.onChkitemStateChange)
                         self.lstCheckboxs.append(chkitem)
-                        currentTab.layout().addWidget(chkitem)
+                        currentGrid.addWidget(chkitem, nCurrentRow, nCurrentCol)
+                        nCurrentCol+=1
             else:
                 break
 
-        #New出所有Tag
-        constStrTagFileName = u"allTags.txt"
-        fPt = codecs.open( constStrTagFileName, "r", "utf-8" )
+
+    def loadTagsToNewUI(self):
+        self.tabBookChap.clear()
+        self.prepare99TagsUI()
+                #New出所有Tag
+
+        fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
         currentTab=None
         #New 出 AllTAB 內頁
         currentTab = QWidget(self)
