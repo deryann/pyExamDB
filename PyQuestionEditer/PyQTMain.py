@@ -46,10 +46,6 @@ class TestWidget(QWidget):
 
         self.btnLoadFile.clicked.connect(self.onbtnLoadFile)
 
-        #Output message
-        self.outputArea=QTextBrowser(self)
-        self.outputArea.setFont(QFont ("Consolas", 14)) #設定字型
-
         #Show Question
         self.layoutShowQuestion = QVBoxLayout(self)
         self.txtOneQuestion = QTextBrowser(self)
@@ -84,8 +80,6 @@ class TestWidget(QWidget):
         self.layoutBtnsControlIndex.addWidget(self.btnNext)
         self.layoutBtnsControlIndex.addWidget(self.btnLast)
 
-
-
         self.lstCheckboxs= []
 
 
@@ -114,7 +108,6 @@ class TestWidget(QWidget):
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
         self.layout().addLayout(self.layoutTagsPanel)
-        self.layout().addWidget(self.outputArea)
 
         #決定按鈕驅動事件
         self.btnFirst.clicked.connect(self.onbtnFirstClicked)
@@ -337,18 +330,21 @@ class TestWidget(QWidget):
     def onbtnNewTagClicked(self):
         strNewTagName, okay=QInputDialog.getText(self, "Please input new tage:", "New Tag String:")
         if not okay or strNewTagName==u"":
-            self.outputArea.append("Please Input new tag string.")
+            self.dprint("Please Input new tag string.")
         else:
-            self.outputArea.append("You add New string \""+ strNewTagName +"\"" )
+            self.dprint("You add New string \""+ strNewTagName +"\"" )
             self.addTagsIntoAllTags(strNewTagName)
         pass
+
+    def dprint(self, txt ):
+        print(txt)
 
     def onbtnNewFromClicked(self):
         strQFromName, okay=QInputDialog.getText(self, "Please input new From:", "Q From:")
         if not okay or strQFromName==u"":
-            self.outputArea.append("Please Input Q from string.")
+            self.dprint("Please Input Q from string.")
         else:
-            self.outputArea.append("You add New Q From \""+ strQFromName +"\"" )
+            self.dprint("You add New Q From \""+ strQFromName +"\"" )
             strfileName =QFileDialog.getSaveFileName(self, u"Save HDY Latex", ".", u"Tex Files (*.tex )")
             self.addQFromIntoAllQuestions(strQFromName, strfileName)
         pass
@@ -387,9 +383,8 @@ class TestWidget(QWidget):
         pass
 
     def showData(self):
-        self.outputArea.clear()
-        self.outputArea.append(self.latex.read())
-        self.outputArea.append(self.latex.getReport())
+        self.dprint(self.latex.read())
+        self.dprint(self.latex.getReport())
         self.txtOneQuestion.clear()
         self.txtAns.clear()
         self.txtSol.clear()
