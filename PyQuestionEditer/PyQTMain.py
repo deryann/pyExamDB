@@ -62,20 +62,17 @@ class TestWidget(QWidget):
         self.txtSol =QTextBrowser(self)
 
         #
-        self.comboExam = QComboBox(self)
-        self.comboExamYear =QComboBox(self)
-        self.comboExamQuestionStyle =QComboBox(self)
-        self.comboExamQuestionNum =QComboBox(self)
+
 
         self.reNewComboQuestionUI()
-        self.layoutShowQuestion.addWidget(self.txtOneQuestion, 1,0)
+        self.layoutShowQuestion.addWidget(self.txtOneQuestion, 1,0, 1,5)
 
         self.layoutShowQuestion.addWidget(self.comboExamYear,2,0)
         self.layoutShowQuestion.addWidget(self.comboExam,2,1)
         self.layoutShowQuestion.addWidget(self.comboExamQuestionStyle,2,2)
         self.layoutShowQuestion.addWidget(self.comboExamQuestionNum,2,3)
         self.layoutShowQuestion.addWidget(self.txtAns,2,4)
-        self.layoutShowQuestion.addWidget(self.txtSol,3,0)
+        self.layoutShowQuestion.addWidget(self.txtSol,3,0,3,5)
 
         self.tabBookChap = QTabWidget(self)
 
