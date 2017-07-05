@@ -74,7 +74,16 @@ class TestWidget(QWidget):
         self.layoutShowQuestion.addWidget(self.txtAns,2,4)
         self.layoutShowQuestion.addWidget(self.txtSol,3,0,3,5)
 
+
+        #Design Two mode(One Question and FileMode)
+        self.tabModes = QTabWidget(self)
         self.tabBookChap = QTabWidget(self)
+        self.tabModeOneQuestion = QWidget(self)
+        self.tabModeFilemode = QWidget(self)
+        self.tabModeOneQuestion.setLayout(QVBoxLayout())
+
+        self.tabModes.addTab(self.tabModeOneQuestion, u"Q Mode")
+        self.tabModes.addTab(self.tabModeFilemode, u"File Mode")
 
         self.tabCustom = None
 
@@ -101,8 +110,9 @@ class TestWidget(QWidget):
 
 
         self.layout().addLayout(self.layoutFileLoadUI)
-        self.layout().addLayout(self.layoutShowQuestion)
-        self.layout().addLayout(self.layoutBtnsControlIndex)
+        self.layout().addWidget(self.tabModes)
+        self.tabModeOneQuestion.layout().addLayout(self.layoutShowQuestion)
+        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnsControlIndex)
 
         #讀取Tag 表
         self.loadTagsToNewUI()
@@ -122,7 +132,7 @@ class TestWidget(QWidget):
 
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
-        self.layout().addLayout(self.layoutTagsPanel)
+        self.tabModeOneQuestion.layout().addLayout(self.layoutTagsPanel)
 
         #決定按鈕驅動事件
         self.btnFirst.clicked.connect(self.onbtnFirstClicked)
