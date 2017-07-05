@@ -54,7 +54,7 @@ class TestWidget(QWidget):
         self.layoutShowQuestion = QVBoxLayout(self)
         self.txtOneQuestion = QTextBrowser(self)
         self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
-        self.txtAns =QTextBrowser(self)
+        self.txtAns =QLineEdit("Ans" ,self)
         self.txtSol =QTextBrowser(self)
 
         self.layoutShowQuestion.addWidget(self.txtOneQuestion)
@@ -111,12 +111,10 @@ class TestWidget(QWidget):
         self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
         self.btnsPanel.addWidget(self.btnGroupTag)
 
-
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
         self.layout().addLayout(self.layoutTagsPanel)
         self.layout().addWidget(self.outputArea)
-
 
         #決定按鈕驅動事件
         self.btnFirst.clicked.connect(self.onbtnFirstClicked)
