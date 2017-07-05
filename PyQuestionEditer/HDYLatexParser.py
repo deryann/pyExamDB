@@ -100,6 +100,7 @@ class HDYLatexParser:
         return self.currQustion.getListOfTag()
 
     def read(self):
+        self.fPt.seek(self.ptFileStart)
         return self.fPt.read()
 
     def getAllLines(self):

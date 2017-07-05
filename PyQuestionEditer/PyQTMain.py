@@ -141,6 +141,9 @@ class TestWidget(QWidget):
         self.btnPrev.clicked.connect(self.onbtnPrevClicked)
         self.edtIndex.textChanged.connect(self.onedtIndexChaned)
 
+        self.prepareFileModeUI()
+
+
 
         #Data Object
         self.latex = None
@@ -148,6 +151,14 @@ class TestWidget(QWidget):
 
         self.showData()
         self.showMaximized()
+
+    def prepareFileModeUI(self):
+        container= self.tabModeFilemode
+        container.setLayout(QVBoxLayout())
+        self.txtbFile = QTextBrowser(self)
+        self.txtbFile.setFont(QFont ("Consolas", 14)) #設定字型
+        container.layout().addWidget(self.txtbFile)
+
 
     def reNewComboQuestionUI(self):
         self.comboExam = QComboBox(self)
@@ -430,8 +441,14 @@ class TestWidget(QWidget):
         self.refreshoutputAreaOneQuestion()
         self.edtCount.setText(str(self.latex.getCountOfQ()))
         self.edtCount.setReadOnly(True)
-        #self.compareQustionStrings()
+
+        self.showDataInFileMode()
         pass
+
+    def showDataInFileMode(self):
+        self.txtbFile.clear()
+        self.txtbFile.setText(self.latex.read())
+
     ##
     # 測試兩個問題字串的相似度
     #
