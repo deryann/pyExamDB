@@ -29,6 +29,10 @@ from HDYQuestionParser import HDYQuestionParser as QParser
 const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
 
+constExamStringList = ["學測","指考甲","指考乙"]
+constExamYearStringList = ["105","106"]
+constExamQuestionStyleStringList = ["單選","多選","選填","填充","計算"]
+
 ##
 # UI 呈現的程式碼
 #
@@ -84,6 +88,7 @@ class TestWidget(QWidget):
 
         self.tabModes.addTab(self.tabModeOneQuestion, u"Q Mode")
         self.tabModes.addTab(self.tabModeFilemode, u"File Mode")
+        self.tabModes.setCurrentIndex(1)
 
         self.tabCustom = None
 
@@ -159,6 +164,34 @@ class TestWidget(QWidget):
         self.txtbFile.setFont(QFont ("Consolas", 14)) #設定字型
         container.layout().addWidget(self.txtbFile)
 
+        self.qGroupExamInfoEditor = QGroupBox( u"Add ExamInfo For All Question",self)
+        self.qGroupExamInfoEditor.setLayout(QHBoxLayout())
+
+        self.comboExamAdder = QComboBox(self)
+        self.comboExamAdder.addItems(constExamStringList)
+        self.comboExamYearAdder =QComboBox(self)
+        self.comboExamYearAdder.addItems(constExamYearStringList)
+        self.comboExamQuestionStyleAdder =QComboBox(self)
+        self.comboExamQuestionStyleAdder.addItems(constExamQuestionStyleStringList)
+        self.btnRunAddExamInfo=QPushButton(u"Run",self)
+        self.btnRunAddExamInfo.clicked.connect(self.onbtnRunAddExamInfoClicked)
+
+        self.qGroupExamInfoEditor.layout().addWidget(self.comboExamAdder)
+        self.qGroupExamInfoEditor.layout().addWidget(self.comboExamYearAdder)
+        self.qGroupExamInfoEditor.layout().addWidget(self.comboExamQuestionStyleAdder)
+        self.qGroupExamInfoEditor.layout().addWidget(self.btnRunAddExamInfo)
+
+        container.layout().addWidget(self.qGroupExamInfoEditor)
+
+    def onbtnRunAddExamInfoClicked(self):
+        """
+        對檔案中的每一個題目，執行新增ExamInfo 的工作
+        """
+        strExamAdder = self.comboExamAdder.currentText()
+        strExamYearAdder = self.comboExamYearAdder.currentText()
+        strExamQuestionStyleAdder =self.comboExamQuestionStyleAdder.currentText()
+        print(strExamYearAdder+strExamAdder+strExamQuestionStyleAdder)
+        pass
 
     def reNewComboQuestionUI(self):
         self.comboExam = QComboBox(self)
