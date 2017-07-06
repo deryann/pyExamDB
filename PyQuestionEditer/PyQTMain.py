@@ -30,7 +30,7 @@ const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
 
 constExamStringList = ["學測","指考甲","指考乙"]
-constExamYearStringList = ["105","106"]
+constExamYearStringList = ["106","105"]
 constExamQuestionStyleStringList = ["單選","多選","選填","填充","計算"]
 
 ##
@@ -47,7 +47,6 @@ class TestWidget(QWidget):
         # 建構編輯Tags 的暫存資料結構
         self.dicNewTagsBuffer = {}
         self.bUserAction = True
-
 
         self.layoutFileLoadUI = QHBoxLayout()
         self.edtFile = QLineEdit("FileName" ,self)
@@ -152,7 +151,7 @@ class TestWidget(QWidget):
 
         #Data Object
         self.latex = None
-        self.loadFile(u"QContent.tex")
+        self.loadFile(u"QSingleChoice.tex")
 
         self.showData()
         self.showMaximized()
@@ -191,6 +190,8 @@ class TestWidget(QWidget):
         strExamYearAdder = self.comboExamYearAdder.currentText()
         strExamQuestionStyleAdder =self.comboExamQuestionStyleAdder.currentText()
         print(strExamYearAdder+strExamAdder+strExamQuestionStyleAdder)
+        nstartNum = 1
+        self.latex.setExamInfoForAllQuestions(strExamYearAdder,strExamAdder,strExamQuestionStyleAdder,nstartNum)
         pass
 
     def reNewComboQuestionUI(self):

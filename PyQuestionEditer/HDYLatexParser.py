@@ -135,8 +135,6 @@ class HDYLatexParser:
             fPtOutput.write(u"\\end{QUESTIONS}"+os.linesep)
         fPtOutput.close()
         pass
-
-
     ##
     # 存入新 Tag 資料到新檔案
     #
@@ -191,6 +189,8 @@ class HDYLatexParser:
             qPt = HDYQuestionParser(strBuffer)
             qPt.setQFROM(strQFrom)
             fPtOutput.write(qPt.getQuestionString())
+            if i!=self.getCountOfQ():
+                fPtOutput.write(os.linesep)
             pass
 
         #prepare end of file
@@ -200,4 +200,37 @@ class HDYLatexParser:
 
         fPtOutput.close()
         pass
+
+    def setExamInfoForAllQuestions(self, strYear, strExam,strStyle,nStartNum):
+        strFileName= "AddExamInfoTemp.tex"
+        fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
+        #Prepare Header
+        strStart = "% !TEX encoding = UTF-8 Unicode" + os.linesep
+        strStart +="% !TEX TS-program = xelatex "
+        strStart += os.linesep
+        strStart += "\\begin{QUESTIONS}"
+        strStart += os.linesep
+
+        fPtOutput.write(strStart)
+
+        for i in range(self.getCountOfQ()):
+            strBuffer = self.getQuestion(i)
+            qPt = HDYQuestionParser(strBuffer)
+            lstInput = []
+            lstInput.append(strYear)
+            lstInput.append(strExam)
+            lstInput.append(strStyle)
+            lstInput.append(str(nStartNum+i))
+            qPt.setlstExamInfo(lstInput,"")
+            fPtOutput.write(qPt.getQuestionString())
+            if i!=self.getCountOfQ():
+                fPtOutput.write(os.linesep)
+            pass
+
+        #prepare end of file
+        strEnd = os.linesep
+        strEnd += "\\end{QUESTIONS}"
+        fPtOutput.write(strEnd)
+
+        fPtOutput.close()
 

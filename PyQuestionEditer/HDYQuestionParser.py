@@ -21,20 +21,23 @@ class HDYQuestionParser:
 
     def prepareData(self):
         self.strQBODY = self.getStringFromEnvTag("QBODY")
-        self.strQFROM  = self.getStringFromEnvTag("QFROM")
+        self.strQFROMS  = self.getStringFromEnvTag("QFROMS")
         self.strQTAGS = self.getStringFromEnvTag("QTAGS")
         self.strQANS  = self.getStringFromEnvTag("QANS")
         self.strQSOL  = self.getStringFromEnvTag("QSOL")
         self.strQSOL2 = self.getStringFromEnvTag("QSOL2")
-        self.lstExamInfo = self.getParamsListFromEnvTag("ExamInfo")
+        self.strQEMPTYSPACE= self.getStringFromEnvTag("QEMPTYSPACE")
         self.lstNewTags =[]
+        self.lstExamInfoParams = self.getParamsListFromEnvTag("ExamInfo")
+        self.strExamInfoBODY = ""
+
         pass
 
     def setNewTagList(self, lstNewTagInput):
         self.lstNewTags = lstNewTagInput[:]
 
     def setQFROM(self, strInput):
-        self.strQFROM = strInput
+        self.strQFROMS = strInput
 
     def getQBODY(self):
         return self.strQBODY
@@ -46,21 +49,41 @@ class HDYQuestionParser:
         return self.strQSOL
 
     def getEnvString(self, strEnvName, strEnvContent):
-        strBuffer = "        \\begin{%s}%s            %s%s        \\end{%s}%s" % (strEnvName,os.linesep,strEnvContent, os.linesep, strEnvName, os.linesep)
+        if strEnvContent =='':
+            strBuffer = "        \\begin{%s}%s        \\end{%s}%s" % (strEnvName, os.linesep, strEnvName, os.linesep)
+        else:
+            strBuffer = "        \\begin{%s}%s            %s%s        \\end{%s}%s" % (strEnvName,os.linesep,strEnvContent, os.linesep, strEnvName, os.linesep)
         return strBuffer
+
+    def setlstExamInfo(self, lstParamsExamInfo, strBODY):
+        self.lstExamInfoParams = lstParamsExamInfo
+        self.strExamInfoBODY = strBODY
+        pass
+
+    def getExamInfoString(self):
+        strParams = u"{%s}{%s}{%s}{%s}" % (self.lstExamInfoParams[0],self.lstExamInfoParams[1],
+                                           self.lstExamInfoParams[2],self.lstExamInfoParams[3])
+        if self.strExamInfoBODY == "":
+            strReturn = u"        \\begin{ExamInfo}%s%s        \\end{ExamInfo}%s" %( strParams, os.linesep,os.linesep)
+        else:
+            strReturn = u"        \\begin{ExamInfo}%s%s%s%s        \\end{ExamInfo}%s" %( strParams, os.linesep, self.strExamInfoBODY, os.linesep,os.linesep)
+        return strReturn
 
     def getQuestionString(self):
         strBuffer  =u""
+        strBuffer += self.getExamInfoString()
         strBuffer += self.getEnvString(u"QBODY", self.strQBODY)
-        strBuffer += self.getEnvString(u"QFROM", self.strQFROM)
+        strBuffer += self.getEnvString(u"QFROMS", self.strQFROMS)
         strBuffer += self.getEnvString(u"QTAGS", self.strQTAGS)
         strBuffer += self.getEnvString(u"QANS", self.strQANS)
         strBuffer += self.getEnvString(u"QSOL", self.strQSOL)
-        strBuffer += self.getEnvString(u"QSOL2", self.strQSOL2)
-        strQ = u"    \\begin{QUESTION}%s%s%s    \\end{QUESTION}%s" %(os.linesep, strBuffer, os.linesep,os.linesep)
-        print ("[getQuestionString] get question content")
+        if self.strQSOL2 !="":
+            strBuffer += self.getEnvString(u"QSOL2", self.strQSOL2)
+        strBuffer += self.getEnvString(u"QEMPTYSPACE", self.strQEMPTYSPACE)
+        strQ = u"    \\begin{QUESTION}%s%s    \\end{QUESTION}" %(os.linesep, strBuffer)
+        print ("[getQuestionString start ] get question content")
         print (strBuffer)
-        print ("[getQuestionString]")
+        print ("[getQuestionString end]")
         return strQ
 
     def generateNewTagString(self):
