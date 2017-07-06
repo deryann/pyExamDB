@@ -26,6 +26,7 @@ class HDYQuestionParser:
         self.strQANS  = self.getStringFromEnvTag("QANS")
         self.strQSOL  = self.getStringFromEnvTag("QSOL")
         self.strQSOL2 = self.getStringFromEnvTag("QSOL2")
+        self.lstExamInfo = self.getParamsListFromEnvTag("ExamInfo")
         self.lstNewTags =[]
         pass
 
@@ -107,5 +108,17 @@ class HDYQuestionParser:
             print("[getStringFromEnvTag] Env "+strEnvTagName+" fail!" )
             return ""
         else:
-            strBuffer = lst[0].strip()
-            return strBuffer
+            strReturn = lst[0].strip()
+            return strReturn
+
+    def getParamsListFromEnvTag(self, strEnvTagName):
+        """
+        Get the first line {%s}
+        """
+        lstReturn = []
+        strEnvTagBody = self.getStringFromEnvTag(strEnvTagName)
+        strReFindString = "{(.*?)}"
+        strParams= strEnvTagBody.split('\n', 1)[0]
+        lstReturn = re.findall(strReFindString, strParams, re.DOTALL)
+        return lstReturn
+
