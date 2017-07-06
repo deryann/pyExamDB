@@ -201,7 +201,7 @@ class HDYLatexParser:
         fPtOutput.close()
         pass
 
-    def setExamInfoForAllQuestions(self, strYear, strExam,strStyle,nStartNum):
+    def setExamInfoForAllQuestions(self, strYear, strExam,strStyle,strStartNum):
         strFileName= "AddExamInfoTemp.tex"
         fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
         #Prepare Header
@@ -220,7 +220,12 @@ class HDYLatexParser:
             lstInput.append(strYear)
             lstInput.append(strExam)
             lstInput.append(strStyle)
-            lstInput.append(str(nStartNum+i))
+            if strStartNum.isdigit():
+                nStartNum =int(strStartNum)
+                lstInput.append(str(nStartNum+i))
+            else:
+                nStartNum = ord(strStartNum)
+                lstInput.append(chr(nStartNum+i))
             qPt.setlstExamInfo(lstInput,"")
             fPtOutput.write(qPt.getQuestionString())
             if i!=self.getCountOfQ():

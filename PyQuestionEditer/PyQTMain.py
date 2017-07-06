@@ -172,12 +172,17 @@ class TestWidget(QWidget):
         self.comboExamYearAdder.addItems(constExamYearStringList)
         self.comboExamQuestionStyleAdder =QComboBox(self)
         self.comboExamQuestionStyleAdder.addItems(constExamQuestionStyleStringList)
+
+        self.edtStart = QLineEdit(u"1" ,self)
+        self.lblStart = QLabel(u"Start Label：")
         self.btnRunAddExamInfo=QPushButton(u"Run",self)
         self.btnRunAddExamInfo.clicked.connect(self.onbtnRunAddExamInfoClicked)
 
         self.qGroupExamInfoEditor.layout().addWidget(self.comboExamAdder)
         self.qGroupExamInfoEditor.layout().addWidget(self.comboExamYearAdder)
         self.qGroupExamInfoEditor.layout().addWidget(self.comboExamQuestionStyleAdder)
+        self.qGroupExamInfoEditor.layout().addWidget(self.lblStart)
+        self.qGroupExamInfoEditor.layout().addWidget(self.edtStart)
         self.qGroupExamInfoEditor.layout().addWidget(self.btnRunAddExamInfo)
 
         container.layout().addWidget(self.qGroupExamInfoEditor)
@@ -190,8 +195,8 @@ class TestWidget(QWidget):
         strExamYearAdder = self.comboExamYearAdder.currentText()
         strExamQuestionStyleAdder =self.comboExamQuestionStyleAdder.currentText()
         print(strExamYearAdder+strExamAdder+strExamQuestionStyleAdder)
-        nstartNum = 1
-        self.latex.setExamInfoForAllQuestions(strExamYearAdder,strExamAdder,strExamQuestionStyleAdder,nstartNum)
+        strStartNum = self.edtStart.text()
+        self.latex.setExamInfoForAllQuestions(strExamYearAdder,strExamAdder,strExamQuestionStyleAdder,strStartNum)
         pass
 
     def reNewComboQuestionUI(self):
