@@ -197,7 +197,8 @@ class TestWidget(QWidget):
         print(strExamYearAdder+strExamAdder+strExamQuestionStyleAdder)
         strStartNum = self.edtStart.text()
         self.latex.setExamInfoForAllQuestions(strExamYearAdder,strExamAdder,strExamQuestionStyleAdder,strStartNum)
-        pass
+        self.showData()
+
 
     def reNewComboQuestionUI(self):
         self.comboExam = QComboBox(self)

@@ -9,8 +9,8 @@ from HDYQuestionParser import HDYQuestionParser
 #
 #
 class HDYLatexParser:
-    def __init__(self, strFileName):
-        self.strFileName = strFileName
+    def __init__(self, strInputFileName):
+        self.strFileName = strInputFileName
 
         self.nCountQ = 0
 
@@ -20,17 +20,22 @@ class HDYLatexParser:
 
         self.ptFileStart = 0
         self.strAllLines = []
+
+        self.openFile()
+        print("__init__ OK!!")
+        pass
+
+    def openFile(self):
+
         while True:
             try:
-                self.fPt = codecs.open( strFileName, "r", "utf-8" )
+                self.fPt = codecs.open( self.strFileName, "r", "utf-8" )
                 self.ptFileStart =self.fPt.tell()
                 print("HDYLatexParser open file OK!!")
                 break
             except IOError:
                 print ("IOError")
                 break
-        print("__init__ OK!!")
-        pass
 
     def cleanReportData(self):
         self.lstCommentLineNum = [] # 記錄哪幾行為註解
@@ -201,9 +206,17 @@ class HDYLatexParser:
         fPtOutput.close()
         pass
 
+    def backupCurrentFile(self):
+        from time import gmtime, strftime
+        strBachUpFileName = strftime("%Y%m%d%H%M%S", gmtime())+self.strFileName +".bak"
+        import shutil
+        shutil.copyfile(self.strFileName,strBachUpFileName)
+
     def setExamInfoForAllQuestions(self, strYear, strExam,strStyle,strStartNum):
-        strFileName= "AddExamInfoTemp.tex"
-        fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
+        self.fPt.close()
+        self.backupCurrentFile()
+        strOutFileName= self.strFileName
+        fPtOutput = codecs.open(strOutFileName, "w", "utf-8" )
         #Prepare Header
         strStart = "% !TEX encoding = UTF-8 Unicode" + os.linesep
         strStart +="% !TEX TS-program = xelatex "
@@ -238,4 +251,4 @@ class HDYLatexParser:
         fPtOutput.write(strEnd)
 
         fPtOutput.close()
-
+        self.openFile()
