@@ -20,10 +20,53 @@ class HDYLatexParser:
 
         self.ptFileStart = 0
         self.strAllLines = []
-
-        self.openFile()
+        if strInputFileName != None:
+            self.openFile()
         print("__init__ OK!!")
         pass
+
+    def newTemplate(self, strYear, strExam,  lstQstyle, strOutName):
+        """
+        輸入題型的編號起始值與終了值
+        可以生成出一個空白的資料，並存入檔案之中
+        """
+        fPtOutput = codecs.open(strOutName, "w", "utf-8" )
+        fPtOutput.write(self.getHeader())
+        for i in range(len(lstQstyle)):
+            fPtOutput.write(self.getQuestionsHeader())
+            lst = lstQstyle [i]
+            if lst[1].isdigit():
+                #數字題號系列
+                nStartNum = int(lst[1])
+                nEndNum = int(lst[2])
+                for num in range(nStartNum, nEndNum+1):
+                    qPt = HDYQuestionParser("")
+                    lstInput = []
+                    lstInput.append(strYear)
+                    lstInput.append(strExam)
+                    lstInput.append(lst[0])
+                    lstInput.append(str(num))
+
+                    qPt.setlstExamInfo(lstInput,"")
+                    fPtOutput.write(qPt.getQuestionString())
+                    fPtOutput.write(os.linesep)
+                    pass
+            else:
+                #非數字題號
+                nStartNum = ord(lst[1])
+                nEndNum = ord(lst[2])
+                for num in range(nStartNum, nEndNum+1):
+                    qPt = HDYQuestionParser("")
+                    lstInput = []
+                    lstInput.append(strYear)
+                    lstInput.append(strExam)
+                    lstInput.append(lst[0])
+                    lstInput.append(chr(num))
+                    qPt.setlstExamInfo(lstInput,"")
+                    fPtOutput.write(qPt.getQuestionString())
+                    fPtOutput.write(os.linesep)
+            fPtOutput.write(self.getQuestionsTail())
+        fPtOutput.close()
 
     def openFile(self):
 
@@ -181,11 +224,8 @@ class HDYLatexParser:
         strFileName= strfileName
         fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
         #Prepare Title
-        strStart = "% !TEX encoding = UTF-8 Unicode" + os.linesep
-        strStart +="% !TEX TS-program = xelatex "
-        strStart += os.linesep
-        strStart += "\\begin{QUESTIONS}"
-        strStart += os.linesep
+        strStart = self.getHeader()
+        strStart += self.getQuestionsHeader()
 
         fPtOutput.write(strStart)
 
@@ -200,7 +240,7 @@ class HDYLatexParser:
 
         #prepare end of file
         strEnd = os.linesep
-        strEnd += "\\end{QUESTIONS}"
+        strEnd += self.getQuestionsTail()
         fPtOutput.write(strEnd)
 
         fPtOutput.close()
@@ -212,17 +252,26 @@ class HDYLatexParser:
         import shutil
         shutil.copyfile(self.strFileName,strBachUpFileName)
 
+    def getHeader(self):
+        strHeader = "% !TEX encoding = UTF-8 Unicode" + os.linesep
+        strHeader +="% !TEX TS-program = xelatex "
+        strHeader += os.linesep
+        return strHeader
+
+    def getQuestionsHeader(self):
+        return "\\begin{QUESTIONS}" + os.linesep
+
+    def getQuestionsTail(self):
+        return "\\end{QUESTIONS}"
+
     def setExamInfoForAllQuestions(self, strYear, strExam,strStyle,strStartNum):
         self.fPt.close()
         self.backupCurrentFile()
         strOutFileName= self.strFileName
         fPtOutput = codecs.open(strOutFileName, "w", "utf-8" )
         #Prepare Header
-        strStart = "% !TEX encoding = UTF-8 Unicode" + os.linesep
-        strStart +="% !TEX TS-program = xelatex "
-        strStart += os.linesep
-        strStart += "\\begin{QUESTIONS}"
-        strStart += os.linesep
+        strStart = self.getHeader()
+        strStart += self.getQuestionsHeader()
 
         fPtOutput.write(strStart)
 
@@ -247,7 +296,7 @@ class HDYLatexParser:
 
         #prepare end of file
         strEnd = os.linesep
-        strEnd += "\\end{QUESTIONS}"
+        strEnd += self.getQuestionsTail()
         fPtOutput.write(strEnd)
 
         fPtOutput.close()

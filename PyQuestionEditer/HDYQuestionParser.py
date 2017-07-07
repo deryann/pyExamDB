@@ -124,6 +124,8 @@ class HDYQuestionParser:
         return inputTag in self.getListOfTag()
 
     def getStringFromEnvTag(self, strEnvTagName):
+        if self.strBuffer == "":
+            return ""
         strReFindString = u"\\\\begin{" + strEnvTagName+ "}"+"(.*?)"
         strReFindString += u"\\\\end{" +strEnvTagName +"}"
         lst = re.findall(strReFindString, self.strBuffer, re.DOTALL)

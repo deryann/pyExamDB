@@ -467,7 +467,6 @@ class TestWidget(QWidget):
         else:
             print ("檔案裡面已經有這個Tag了!!")
 
-
         #3.存入新檔案
         print (str(lstTags))
         pass
@@ -511,7 +510,21 @@ class TestWidget(QWidget):
         self.latex.saveNewFileWithSelectedTag(strOutPutFileName, lstSelectedTags)
         pass
 
+def generateTexFileTemplate():
+    """
+    利用無引數的物件，按照指定的題數做出空白的檔案來
+    """
+    strYear="105"
+    strExam="學測"
+    lstQstyle = [["單選","1","6"],["多選","7","13"],["選填","A","G"] ]
+    strOutFileName = "105.tex"
+    latexPt = HDYLatexParser(None)
+    latexPt.newTemplate(strYear, strExam, lstQstyle, "105.tex")
+
+#generateTexFileTemplate()   #測試自動生成 Tex 模板樣式
+
 app=QApplication(sys.argv)
 testWidget=TestWidget()
+
 testWidget.show()
 sys.exit(app.exec_())
