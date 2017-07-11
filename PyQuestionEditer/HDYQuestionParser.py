@@ -29,7 +29,10 @@ class HDYQuestionParser:
         self.strQEMPTYSPACE= self.getStringFromEnvTag("QEMPTYSPACE")
         self.lstNewTags =[]
         self.lstExamInfoParams = self.getParamsListFromEnvTag("ExamInfo")
+        self.lstExamAnsRateInfoParams = self.getParamsListFromEnvTag("ExamAnsRateInfo")
         self.strExamInfoBODY = ""
+        self.strExamAnsRateInfoBODY = ""
+
 
         pass
 
@@ -60,6 +63,11 @@ class HDYQuestionParser:
         self.strExamInfoBODY = strBODY
         pass
 
+    def setlstAnsRateInfo(self, lstParams,strBODY):
+        self.lstExamAnsRateInfoParams =lstParams
+        self.strExamAnsRateInfoBODY = strBODY
+        pass
+
     def getExamInfoString(self):
         strParams = u"{%s}{%s}{%s}{%s}" % (self.lstExamInfoParams[0],self.lstExamInfoParams[1],
                                            self.lstExamInfoParams[2],self.lstExamInfoParams[3])
@@ -69,9 +77,23 @@ class HDYQuestionParser:
             strReturn = u"        \\begin{ExamInfo}%s%s%s%s        \\end{ExamInfo}%s" %( strParams, os.linesep, self.strExamInfoBODY, os.linesep,os.linesep)
         return strReturn
 
+    def getExamAnsRateInfoString(self):
+        strParams =""
+
+        for item in self.lstExamAnsRateInfoParams:
+            strParam = "{%s}" % item
+            strParams+=strParam
+
+        if self.strExamInfoBODY == "":
+            strReturn = u"        \\begin{ExamAnsRateInfo}%s%s        \\end{ExamAnsRateInfo}%s" %( strParams, os.linesep,os.linesep)
+        else:
+            strReturn = u"        \\begin{ExamAnsRateInfo}%s%s%s%s        \\end{ExamAnsRateInfo}%s" %( strParams, os.linesep, self.strExamInfoBODY, os.linesep,os.linesep)
+        return strReturn
+
     def getQuestionString(self):
         strBuffer  =u""
         strBuffer += self.getExamInfoString()
+        strBuffer += self.getExamAnsRateInfoString()
         strBuffer += self.getEnvString(u"QBODY", self.strQBODY)
         strBuffer += self.getEnvString(u"QFROMS", self.strQFROMS)
         strBuffer += self.getEnvString(u"QTAGS", self.strQTAGS)

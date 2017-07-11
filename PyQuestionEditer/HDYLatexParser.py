@@ -68,6 +68,48 @@ class HDYLatexParser:
             fPtOutput.write(self.getQuestionsTail())
         fPtOutput.close()
 
+    def newTemplateByCsvInput(self, csvInput, strOutName):
+        """
+        輸入csv資料，根據每筆資料做輸出
+        """
+        lstnYears=[105, 106]
+        lstStrQuestionStyle = [u"單選",u"多選",u"填充"]
+        exam =csvInput
+        fPtOutput = codecs.open(strOutName, "w", "utf-8" )
+        fPtOutput.write(self.getHeader())
+        for nYear in lstnYears:
+            strYear = strTemp = "%03d" % nYear
+            yExam=exam[exam[u'年份']==nYear]
+
+            for strqStyle in lstStrQuestionStyle:
+                fPtOutput.write(self.getQuestionsHeader())
+                qs = yExam[yExam[u'題型']==strqStyle]
+
+                for index in range(len(qs.index)):
+                    row = qs.iloc[index]
+
+                    strExam =u'學測'
+                    qPt = HDYQuestionParser("")
+                    lstInput = []
+                    lstInput.append(strYear)
+                    lstInput.append(strExam)
+                    lstInput.append(strqStyle)
+                    lstInput.append(row[u'題號'])
+
+                    lstAnsRateInfoInput = []
+                    for item in row['P':'LE']:
+                        lstAnsRateInfoInput.append(item)
+
+                    qPt.setlstExamInfo(lstInput,"")
+                    lstRateInfo = lstAnsRateInfoInput[0:4]
+                    qPt.setlstAnsRateInfo(lstRateInfo,"")
+                    fPtOutput.write(qPt.getQuestionString())
+                    fPtOutput.write(os.linesep)
+
+                fPtOutput.write(self.getQuestionsTail())
+                fPtOutput.write(os.linesep)
+        fPtOutput.close()
+
     def openFile(self):
 
         while True:

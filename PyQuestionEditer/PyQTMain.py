@@ -29,9 +29,9 @@ from HDYQuestionParser import HDYQuestionParser as QParser
 const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
 
-constExamStringList = ["學測","指考甲","指考乙"]
-constExamYearStringList = ["106","105"]
-constExamQuestionStyleStringList = ["單選","多選","選填","填充","計算"]
+constExamStringList = [u"學測",u"指考甲",u"指考乙"]
+constExamYearStringList = [u"106",u"105"]
+constExamQuestionStyleStringList = [u"單選",u"多選",u"選填",u"填充",u"計算"]
 
 ##
 # UI 呈現的程式碼
@@ -521,7 +521,23 @@ def generateTexFileTemplate():
     latexPt = HDYLatexParser(None)
     latexPt.newTemplate(strYear, strExam, lstQstyle, "105.tex")
 
+def generateTexFileTemplateByCSVFile():
+    """
+    另用已經有的csv資料寫出Tex file
+    """
+    import pandas as pd
+    strFileName= u"E:\\NCTUG2\\Code\\pyExamDBF5\\PyQuestionEditer\\exam_xc.csv"
+    lstUsecols = [u'類別',u'年份',u'題型',u'題號',u'答案',
+        u'P',u'Ph',u'Pm',u'Pl',u'P90',u'P70',u'P50',u'P30',u'P10',u'T',u'D',u'D1',u'D2',u'D3',u'D4',
+        u'TA',u'TB',u'TC',u'TD',u'TE',u'HA',u'HB',u'HC',u'HD',u'HE',u'LA',u'LB',u'LC',u'LD',u'LE']
+    exam = pd.read_csv(strFileName, encoding = 'utf8',usecols = lstUsecols)
+
+    print(exam[exam[u'年份']==106])
+    latexPt = HDYLatexParser(None)
+    latexPt.newTemplateByCsvInput(exam, "QcontentDB.tex")
+
 #generateTexFileTemplate()   #測試自動生成 Tex 模板樣式
+#generateTexFileTemplateByCSVFile()
 
 app=QApplication(sys.argv)
 testWidget=TestWidget()
