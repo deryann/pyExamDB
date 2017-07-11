@@ -16,9 +16,6 @@ class HDYQuestionParser:
         self.strBuffer= strInput
         self.prepareData()
 
-    def getQuestionString(self,):
-        return self.strBuffer
-
     def prepareData(self):
         self.strQBODY = self.getStringFromEnvTag("QBODY")
         self.strQFROMS  = self.getStringFromEnvTag("QFROMS")
@@ -96,7 +93,7 @@ class HDYQuestionParser:
         strBuffer += self.getExamAnsRateInfoString()
         strBuffer += self.getEnvString(u"QBODY", self.strQBODY)
         strBuffer += self.getEnvString(u"QFROMS", self.strQFROMS)
-        strBuffer += self.getEnvString(u"QTAGS", self.strQTAGS)
+        strBuffer += self.generateNewTagString()
         strBuffer += self.getEnvString(u"QANS", self.strQANS)
         strBuffer += self.getEnvString(u"QSOL", self.strQSOL)
         if self.strQSOL2 !="":
@@ -110,10 +107,14 @@ class HDYQuestionParser:
 
     def generateNewTagString(self):
         strBuffer = ""
-        for item in self.lstNewTags:
-            strTag = u"\\QTAG{%s} " % (item)
-            strBuffer += strTag
-        strTAGS = u"\\begin{QTAGS}%s\\end{QTAGS}" % strBuffer
+        lstOri = self.getListOfTag()
+        lstTags = self.lstNewTags + list(set(lstOri) - set(self.lstNewTags))
+        if len(lstTags)!=0:
+            for item in self.lstNewTags:
+                strTag = u"\\QTAG{%s}" % (item)
+                strBuffer += strTag
+        strTAGS = u"        \\begin{QTAGS}%s\\end{QTAGS}" % strBuffer
+        strTAGS += os.linesep
         return strTAGS
 
     def getQuestionStringv2(self):

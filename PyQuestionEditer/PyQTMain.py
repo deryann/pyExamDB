@@ -527,14 +527,14 @@ def generateTexFileTemplateByCSVFile():
     """
     import pandas as pd
     strFileName= u"E:\\NCTUG2\\Code\\pyExamDBF5\\PyQuestionEditer\\exam_xc.csv"
-    lstUsecols = [u'類別',u'年份',u'題型',u'題號',u'答案',
+    lstUsecols = [u'類別',u'年份',u'題型',u'題號',u'答案',u'章節', u'章節（短）',
         u'P',u'Ph',u'Pm',u'Pl',u'P90',u'P70',u'P50',u'P30',u'P10',u'T',u'D',u'D1',u'D2',u'D3',u'D4',
         u'TA',u'TB',u'TC',u'TD',u'TE',u'HA',u'HB',u'HC',u'HD',u'HE',u'LA',u'LB',u'LC',u'LD',u'LE']
     exam = pd.read_csv(strFileName, encoding = 'utf8',usecols = lstUsecols)
 
     print(exam[exam[u'年份']==106])
     latexPt = HDYLatexParser(None)
-    latexPt.newTemplateByCsvInput(exam, "QcontentDB.tex")
+    latexPt.newTemplateByCsvInput(exam)
 
 #generateTexFileTemplate()   #測試自動生成 Tex 模板樣式
 #generateTexFileTemplateByCSVFile()

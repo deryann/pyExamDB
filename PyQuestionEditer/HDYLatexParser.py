@@ -68,46 +68,66 @@ class HDYLatexParser:
             fPtOutput.write(self.getQuestionsTail())
         fPtOutput.close()
 
-    def newTemplateByCsvInput(self, csvInput, strOutName):
+    def newTemplateByCsvInput(self, csvInput, strOutName=None):
         """
         輸入csv資料，根據每筆資料做輸出
         """
-        lstnYears=[105, 106]
+        if strOutName == None: #To  use nYears as Name
+            qs=csvInput
+            yearType = qs[u"年份"]
+            yearTypeCounts = yearType.value_counts()
+            print (yearTypeCounts.index)
+            for item in yearTypeCounts.index:
+                nYear = item
+                strTempName = "q%03d.tex" % nYear
+                yExam=qs[qs[u'年份']==nYear]
+                self.newTemplateByCsvInputIntoOutName(yExam, strTempName)
+            strOutName
+        else:
+            self.newTemplateByCsvInputIntoOutName(csvInput, strOutName)
+
+    def newTemplateByCsvInputIntoOutName(self, csvInput, strOutName):
         lstStrQuestionStyle = [u"單選",u"多選",u"填充"]
-        exam =csvInput
+        yExam =csvInput
         fPtOutput = codecs.open(strOutName, "w", "utf-8" )
         fPtOutput.write(self.getHeader())
-        for nYear in lstnYears:
-            strYear = strTemp = "%03d" % nYear
-            yExam=exam[exam[u'年份']==nYear]
+        dicMapChap = {u'三角函數':u'B3C1三角', u'二次曲線':u'B4C4二次曲線', u'多項式':u'B1C2多項式函數', u'平面向量':u'B3C3平面向量', u'指數與對數':u'B1C3指對數函數', u'排列組合與':u'B2C2排列組合',
+           u'數列與遞迴':u'B2C1數列級數',
+           u'數學綜合概':u'綜合', u'機率':u'B2C3機率', u'直線與圓':u'B3C2直線與圓', u'矩陣與方程':u'B4C3矩陣', u'空間向量':u'B4C1空間向量', u'統計':u'B2C4數據分析', u'隨機變數':u'B5C1機率與統計'}
 
-            for strqStyle in lstStrQuestionStyle:
-                fPtOutput.write(self.getQuestionsHeader())
-                qs = yExam[yExam[u'題型']==strqStyle]
 
-                for index in range(len(qs.index)):
-                    row = qs.iloc[index]
+        for strqStyle in lstStrQuestionStyle:
+            fPtOutput.write(self.getQuestionsHeader())
+            qs = yExam[yExam[u'題型']==strqStyle]
 
-                    strExam =u'學測'
-                    qPt = HDYQuestionParser("")
-                    lstInput = []
-                    lstInput.append(strYear)
-                    lstInput.append(strExam)
-                    lstInput.append(strqStyle)
-                    lstInput.append(row[u'題號'])
+            for index in range(len(qs.index)):
+                row = qs.iloc[index]
+                strExam =u'學測'
+                qPt = HDYQuestionParser("")
+                print (index)
+                strTag99 = dicMapChap[row[u"章節（短）"]]
+                qPt.setNewTagList([strTag99])
 
-                    lstAnsRateInfoInput = []
-                    for item in row['P':'LE']:
-                        lstAnsRateInfoInput.append(item)
+                lstInput = []
+                nYear=row[u'年份']
+                strYear = "%03d" % nYear
+                lstInput.append(strYear)
+                lstInput.append(strExam)
+                lstInput.append(strqStyle)
+                lstInput.append(row[u'題號'])
 
-                    qPt.setlstExamInfo(lstInput,"")
-                    lstRateInfo = lstAnsRateInfoInput[0:4]
-                    qPt.setlstAnsRateInfo(lstRateInfo,"")
-                    fPtOutput.write(qPt.getQuestionString())
-                    fPtOutput.write(os.linesep)
+                lstAnsRateInfoInput = []
+                for item in row['P':'LE']:
+                    lstAnsRateInfoInput.append(item)
 
-                fPtOutput.write(self.getQuestionsTail())
+                qPt.setlstExamInfo(lstInput,"")
+                lstRateInfo = lstAnsRateInfoInput[0:4]
+                qPt.setlstAnsRateInfo(lstRateInfo,"")
+                fPtOutput.write(qPt.getQuestionString())
                 fPtOutput.write(os.linesep)
+
+            fPtOutput.write(self.getQuestionsTail())
+            fPtOutput.write(os.linesep)
         fPtOutput.close()
 
     def openFile(self):
