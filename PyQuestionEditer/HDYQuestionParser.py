@@ -36,6 +36,9 @@ class HDYQuestionParser:
     def setNewTagList(self, lstNewTagInput):
         self.lstNewTags = lstNewTagInput[:]
 
+    def setQAns(self, strInput):
+        self.strQANS = strInput
+
     def setQFROM(self, strInput):
         self.strQFROMS = strInput
 

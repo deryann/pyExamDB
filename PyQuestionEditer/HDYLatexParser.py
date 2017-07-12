@@ -86,15 +86,25 @@ class HDYLatexParser:
         else:
             self.newTemplateByCsvInputIntoOutName(csvInput, strOutName)
 
+    def transformAnsAsNum(self,strInput):
+        dicReplaceAns= {u"(A)":u"(1)",
+                        u"(B)":u"(2)",
+                        u"(C)":u"(3)",
+                        u"(D)":u"(4)",
+                        u"(E)":u"(5)"}
+        for item in dicReplaceAns.keys():
+            strInput = strInput.replace(item, dicReplaceAns[item])
+        return strInput
+
     def newTemplateByCsvInputIntoOutName(self, csvInput, strOutName):
         lstStrQuestionStyle = [u"單選",u"多選",u"填充"]
+        lstChooseStyle = [u"單選",u"多選"]
         yExam =csvInput
         fPtOutput = codecs.open(strOutName, "w", "utf-8" )
         fPtOutput.write(self.getHeader())
         dicMapChap = {u'三角函數':u'B3C1三角', u'二次曲線':u'B4C4二次曲線', u'多項式':u'B1C2多項式函數', u'平面向量':u'B3C3平面向量', u'指數與對數':u'B1C3指對數函數', u'排列組合與':u'B2C2排列組合',
            u'數列與遞迴':u'B2C1數列級數',
            u'數學綜合概':u'綜合', u'機率':u'B2C3機率', u'直線與圓':u'B3C2直線與圓', u'矩陣與方程':u'B4C3矩陣', u'空間向量':u'B4C1空間向量', u'統計':u'B2C4數據分析', u'隨機變數':u'B5C1機率與統計'}
-
 
         for strqStyle in lstStrQuestionStyle:
             fPtOutput.write(self.getQuestionsHeader())
@@ -105,6 +115,10 @@ class HDYLatexParser:
                 strExam =u'學測'
                 qPt = HDYQuestionParser("")
                 print (index)
+                strQANS = row[u"答案"]
+                if strqStyle in lstChooseStyle:
+                    strQANS = self.transformAnsAsNum(strQANS)
+                qPt.setQAns(strQANS)
                 strTag99 = dicMapChap[row[u"章節（短）"]]
                 qPt.setNewTagList([strTag99])
 
