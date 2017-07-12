@@ -21,8 +21,12 @@ FileName=$[Project-Path]HDYQuestionParser.py
 ClassName=TProjectFileNode
 FileName=$[Project-Path]PyQTMain.py
 
+[Project\ChildNodes\Node0\ChildNodes\Node3]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]TexFileGenerator.py
+
 [Project\ChildNodes\Node0\ChildNodes]
-Count=3
+Count=4
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode

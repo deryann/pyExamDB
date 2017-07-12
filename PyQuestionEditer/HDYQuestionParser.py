@@ -21,16 +21,13 @@ class HDYQuestionParser:
         self.strQFROMS  = self.getStringFromEnvTag("QFROMS")
         self.strQTAGS = self.getStringFromEnvTag("QTAGS")
         self.strQANS  = self.getStringFromEnvTag("QANS")
-        self.strQSOL  = self.getStringFromEnvTag("QSOL")
-        self.strQSOL2 = self.getStringFromEnvTag("QSOL2")
+        self.strQSOLLIST  = self.getStringFromEnvTag("QSOLLIST")
         self.strQEMPTYSPACE= self.getStringFromEnvTag("QEMPTYSPACE")
         self.lstNewTags =[]
         self.lstExamInfoParams = self.getParamsListFromEnvTag("ExamInfo")
         self.lstExamAnsRateInfoParams = self.getParamsListFromEnvTag("ExamAnsRateInfo")
         self.strExamInfoBODY = ""
         self.strExamAnsRateInfoBODY = ""
-
-
         pass
 
     def setNewTagList(self, lstNewTagInput):
@@ -48,8 +45,8 @@ class HDYQuestionParser:
     def getQANS(self):
         return self.strQANS
 
-    def getQSOL(self):
-        return self.strQSOL
+    def getQSOLLISTstring(self):
+        return self.strQSOLLIST
 
     def getEnvString(self, strEnvName, strEnvContent):
         if strEnvContent =='':
@@ -98,9 +95,7 @@ class HDYQuestionParser:
         strBuffer += self.getEnvString(u"QFROMS", self.strQFROMS)
         strBuffer += self.generateNewTagString()
         strBuffer += self.getEnvString(u"QANS", self.strQANS)
-        strBuffer += self.getEnvString(u"QSOL", self.strQSOL)
-        if self.strQSOL2 !="":
-            strBuffer += self.getEnvString(u"QSOL2", self.strQSOL2)
+        strBuffer += self.getEnvString(u"QSOLLIST", self.strQSOLLIST)
         strBuffer += self.getEnvString(u"QEMPTYSPACE", self.strQEMPTYSPACE)
         strQ = u"    \\begin{QUESTION}%s%s    \\end{QUESTION}" %(os.linesep, strBuffer)
         print ("[getQuestionString start ] get question content")
