@@ -385,6 +385,23 @@
         \end{ExamAnsRateInfo}
         \begin{QBODY}
 			如圖，老王在平地點 $A$ 測得遠方山頂點 $P$  的仰角為 $13{}^\circ $。老王朝著山的方向前進 $37$ 公丈後來到點 $B$ ， 再測得山頂點 $P$ 的仰角為 $15{}^\circ $。則山高約為$\TCNBOX{\TCN\TCN}$公丈。（四捨五入至個位數， $\tan 13{}^\circ \approx 0.231$， $\tan 15{}^\circ \approx 0.268$）
+			
+			\begin{tikzpicture}[line width=2pt, scale=1.5] 
+			\node (vO) at (0,0) {};
+			\draw (0,0) rectangle (-.2,.2);
+			\foreach \n/\l\x/\y  in {A/-90/-8/0, B/-90/-6/0, P/0/0/1.8}{
+					\node[label=\l:$\n$, draw, inner sep=0pt, circle,fill] (v\n) at (\x,\y)  {};
+			}
+			\foreach \x/\y in {A/B, B/O, O/P, P/B, P/A}{
+					\draw (v\x) to (v\y);
+			}
+			\draw[blue, line width=1.5pt] (-5,0) arc [start angle = 0, end angle =15, radius=1cm];
+			\node[right, blue] at (-4.8,0.2) {\small $15\circ$};
+			\node[right, blue] at (-6.7,1) {\small $13\circ$};
+			\draw[->, line width=1.5pt, blue] (-7,0.1) to[bend right] (-6.5,0.7);
+			\draw[blue, line width=1.5pt] (-7,0) arc [start angle = 0, end angle =13, radius=1cm];
+			\end{tikzpicture}
+
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
@@ -572,6 +589,23 @@
         \end{ExamAnsRateInfo}
         \begin{QBODY}
 		有一底面為正方形的四角錐， 其展開圖如下圖所示， 其中兩側面的三角形邊長為 $3,\ 4,\ 5$，則此角錐的體積為$\TCNBOX{\frac{\TCN\TCN\sqrt{\TCN}}{3}}$。(化成最簡根式) 
+		
+		\begin{tikzpicture}[line width=2pt, scale=0.8]
+			\foreach \n/\x/\y in {A/-2/2,B/2/2,C/-2/5,D/6.58/0,E/-4.24/0}{
+					\node[inner sep=0pt,fill, draw, circle] (v\n) at (\x, \y) {};
+					\node[inner sep=0pt,fill, draw, circle] (u\n) at (\x, -\y) {};
+			}
+			\foreach \x/\y/\l in {B/A/4,A/E/,A/C/3,C/B/5,B/D/}{
+					\draw (v\x) to node[auto] {$\l$} (v\y);
+			}
+			\foreach \x/\y/\l in {A/B/4,A/E/,C/A/3,B/C/5,B/D/}{
+					\draw (u\x) to node[auto] {$\l$}  (u\y);
+			}
+			\foreach \x/\y in {uA/vA,uB/vB}{
+					\draw (\x) to (\y);
+			}
+		\end{tikzpicture}
+
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
@@ -591,6 +625,15 @@
         \end{ExamAnsRateInfo}
         \begin{QBODY}
 			在空間中， 一個斜面的「坡度」定義為斜面與水平面夾角 $\theta $ 的正切值 $\tan \theta $ 。若一金字塔（ 底部為一正方形， 四個斜面為等腰三角形）的每一個斜面的坡度皆為$\frac{\ 2\ }{5}$，如圖。則相鄰斜面的夾角的餘弦函數的絕對值為$\TCNBOX{\frac{\TCN\TCN}{\TCN\TCN}}$。(化成最簡分數)
+			\begin{tikzpicture}[line width=2pt, scale=1.5]
+				\foreach \n/\x/\y in {A/-2/-2,B/-1/2,C/3/2,D/2/-2,E/0/1}{
+						\node[inner sep=0pt,fill, draw, circle]  (v\n) at  (\x,\y) {};
+				}
+				\foreach \x/\y in {A/B,B/C,C/D,D/A}{
+						\draw (v\x) to (v\y);
+						\draw[gray,dashed] (v\x) to (vE);
+				}
+			\end{tikzpicture}
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
@@ -610,6 +653,32 @@
         \end{ExamAnsRateInfo}
         \begin{QBODY}
 		下圖為汽車迴轉示意圖。汽車迴轉時，將方向盤轉動到極限，以低速讓汽車進行轉向圓周運動，汽車轉向時所形成的圓周的半徑就是迴轉半徑，如圖中的 $\overline{BC}$ 即是。已知在低速前進時，圖中$A$  處的輪胎行進方向與 $\overline{AC}$ 垂直， $B$ 處的輪胎行進方向與 $\overline{BC}$ 垂直。在圖中， 已知軸距 $AB$ 為 2.85 公尺，方向盤轉到極限時，輪子方向偏了 $28$ 度， 試問此車的迴轉半徑 $\overline{BC}$ 為$\TCNBOX{\TCN.\TCN}$ 公尺。（ 小數點後第一位以下四捨五入，$\sin 28{}^\circ \approx 0.4695,\ \cos 28{}^\circ \approx 0.8829$）
+		\begin{tikzpicture}[line width=2pt,scale=1.2]
+			\foreach \n/\x/\y/\l in {A/0/0/270, B/2.85/0/270, C/0/5.36/90}{
+					\node[label=\l:$\n$, draw, fill, inner sep=1pt, circle, blue] (v\n) at (\x,\y) {};
+			}
+			\draw (-1.5,-0.2) rectangle(4.5,1.7);
+			\draw (2.83,0) to(2.83,1.5);
+			\draw[dotted] (2.83,0) to(4.3,0);
+			\node[blue] at (4,0.3) {$28^\circ$};
+			\node[blue] at (1.2,0.25) {$2.85$};
+			\draw[rounded corners=2pt] (-0.4,-0.2) rectangle (0.4,0.2);
+			\begin{scope}[yshift=1.5cm]
+			\draw[rounded corners=2pt] (-0.4,-0.2) rectangle (0.4,0.2);
+			\end{scope}
+			\begin{scope}[xshift=2.83cm, yshift=1.5cm]
+			\draw[rounded corners=2pt, rotate=28] (-0.4,-0.2) rectangle (0.4,0.2);
+			\end{scope}
+			\begin{scope}[xshift=2.83cm, yshift=0cm]
+			\draw[rounded corners=2pt, rotate=28] (-0.4,-0.2) rectangle (0.4,0.2);
+			\end{scope}
+			\foreach \x/\y in{A/B,B/C,C/A}
+					\draw (v\x) to (v\y);
+			\begin{scope} [yshift=5.36cm]
+					\draw (250:3.66) arc [start angle =250, end angle= 290, radius =3.66cm];
+					\draw[dashed] (278:6.1) arc [start angle =278, end angle= 323, radius =6.1cm];
+			\end{scope}
+		\end{tikzpicture}
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
