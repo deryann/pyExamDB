@@ -19,18 +19,22 @@ FileName=$[Project-Path]HDYQuestionParser.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node2]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]PyQTMain.py
+FileName=$[Project-Path]HDYSQLiteTranslator.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node3]
 ClassName=TProjectFileNode
-FileName=$[Project-Path]RunXelatex.py
+FileName=$[Project-Path]PyQTMain.py
 
 [Project\ChildNodes\Node0\ChildNodes\Node4]
+ClassName=TProjectFileNode
+FileName=$[Project-Path]RunXelatex.py
+
+[Project\ChildNodes\Node0\ChildNodes\Node5]
 ClassName=TProjectFileNode
 FileName=$[Project-Path]TexFileGenerator.py
 
 [Project\ChildNodes\Node0\ChildNodes]
-Count=5
+Count=6
 
 [Project\ChildNodes\Node1]
 ClassName=TProjectRunConfiguationsNode
