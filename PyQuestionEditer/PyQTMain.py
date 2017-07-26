@@ -21,7 +21,7 @@ from PyQt4.QtGui import *
 from HDYLatexParser import HDYLatexParser
 from HDYQuestionParser import HDYQuestionParser as QParser
 
-
+DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
 ##
 # 程式所使用的常數區
 #
@@ -151,7 +151,7 @@ class TestWidget(QWidget):
 
         #Data Object
         self.latex = None
-        self.loadFile(u"QSingleChoice.tex")
+        self.loadFile(DEFAULT_FILE_INPUT_NAME)
 
         self.showData()
         self.showMaximized()
@@ -245,7 +245,7 @@ class TestWidget(QWidget):
         Qpt = QParser(self.latex.getQuestion(int(self.nQIndex)))
         self.txtOneQuestion.setText(Qpt.getQBODY())
         self.txtAns.setText(Qpt.getQANS())
-        self.txtSol.setText(Qpt.getQSOL())
+        self.txtSol.setText(Qpt.getQSOLLISTstring())
 
         self.reNewCustomTagCheckItem()
         #確認是否有更新版Tag List *
