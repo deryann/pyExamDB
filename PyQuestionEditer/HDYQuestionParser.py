@@ -168,3 +168,83 @@ class HDYQuestionParser:
         lstReturn = re.findall(strReFindString, strParams, re.DOTALL)
         return lstReturn
 
+    def getEXAMINFO_STR(self):
+        strParams = u"{%s}{%s}{%s}{%s}" % (self.lstExamInfoParams[0],self.lstExamInfoParams[1],
+                                           self.lstExamInfoParams[2],self.lstExamInfoParams[3])
+        return strParams
+
+    def getEXAMINFO_YEAR(self):
+        return int(self.lstExamInfoParams[0])
+
+    def getnLstExamAnsRateInfoParams(self):
+        nLst=[]
+        for i in self.lstExamAnsRateInfoParams:
+            nLst.append(int(i))
+        return nLst
+
+    def correctSQL(self,strInput):
+        strOutput = strInput.replace("'", "''")
+        return strOutput
+
+
+    def getSQLString(self):
+        """
+
+        """
+        nLst = self.getnLstExamAnsRateInfoParams()
+        strR = """
+                    (EXAMINFO_STR,
+                         EXAMINFO_YEAR,
+                         EXAMINFO_EXAM_TYPE,
+                         EXAMINFO_QUESTION_STYLE,
+                         EXAMINFO_QUESTION_NUMBER,
+                         EXAMANSRATEINFO_P,
+                         EXAMANSRATEINFO_PH,
+                         EXAMANSRATEINFO_PM,
+                         EXAMANSRATEINFO_PL,
+                         QBODY ,
+                         QFROMS ,
+                         QTAGS ,
+                         QANS ,
+                         QSOLLIST ,
+                         QEMPTYSPACE ,
+                         FULLQUESTION
+                         )
+                         VALUES
+                         (
+                         '%s',
+                         %d,
+                         '%s',
+                         '%s',
+                         '%s',
+                         %d,
+                         %d,
+                         %d,
+                         %d,
+                         '%s' ,
+                         '%s' ,
+                         '%s' ,
+                         '%s' ,
+                         '%s' ,
+                         '%s' ,
+                         '%s'
+                         )
+                    """ % ( self.getEXAMINFO_STR(),
+                            self.getEXAMINFO_YEAR(),
+                            self.lstExamInfoParams[1],
+                            self.lstExamInfoParams[2],
+                            self.lstExamInfoParams[3],
+                            nLst[0],
+                            nLst[1],
+                            nLst[2],
+                            nLst[3],
+                            self.correctSQL(self.strQBODY),
+                            self.strQFROMS,
+                            self.strQTAGS,
+                            self.correctSQL(self.strQANS),
+                            self.correctSQL(self.strQSOLLIST),
+                            self.strQEMPTYSPACE,
+                            self.correctSQL(self.getQuestionString())
+                            )
+        return strR
+        pass
