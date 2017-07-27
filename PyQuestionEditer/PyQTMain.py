@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Name:        module1
+# Name:        Questions Tags editor
 # Purpose:
 #
 # Author:      USER
@@ -49,34 +49,12 @@ class TestWidget(QWidget):
         self.bUserAction = True
 
         self.layoutFileLoadUI = QHBoxLayout()
-        self.edtFile = QLineEdit("FileName" ,self)
-        self.btnLoadFile = QPushButton ("Load",self)
+        self.edtFile = QLineEdit(u"FileName" ,self)
+        self.btnLoadFile = QPushButton (u"Load",self)
         self.layoutFileLoadUI.addWidget(self.edtFile)
         self.layoutFileLoadUI.addWidget(self.btnLoadFile)
 
         self.btnLoadFile.clicked.connect(self.onbtnLoadFile)
-
-        #Show Question
-        self.layoutShowQuestion = QGridLayout(self)
-        self.txtOneQuestion = QTextBrowser(self)
-        self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
-
-        self.txtAns =QLineEdit("Ans" ,self)
-        self.txtSol =QTextBrowser(self)
-
-        #
-
-
-        self.reNewComboQuestionUI()
-        self.layoutShowQuestion.addWidget(self.txtOneQuestion, 1,0, 1,5)
-
-        self.layoutShowQuestion.addWidget(self.comboExamYear,2,0)
-        self.layoutShowQuestion.addWidget(self.comboExam,2,1)
-        self.layoutShowQuestion.addWidget(self.comboExamQuestionStyle,2,2)
-        self.layoutShowQuestion.addWidget(self.comboExamQuestionNum,2,3)
-        self.layoutShowQuestion.addWidget(self.txtAns,2,4)
-        self.layoutShowQuestion.addWidget(self.txtSol,3,0,3,5)
-
 
         #Design Two mode(One Question and FileMode)
         self.tabModes = QTabWidget(self)
@@ -87,11 +65,105 @@ class TestWidget(QWidget):
 
         self.tabModes.addTab(self.tabModeOneQuestion, u"Q Mode")
         self.tabModes.addTab(self.tabModeFilemode, u"File Mode")
-        self.tabModes.setCurrentIndex(1)
+        self.tabModes.setCurrentIndex(0)
 
         self.tabCustom = None
+        self.prepareShowQuestionUI()
+        self.prepareTagsLayout()
 
-        # 實作控制 index
+
+        self.layout().addLayout(self.layoutFileLoadUI)
+        self.layout().addWidget(self.tabModes)
+
+        self.tabModeOneQuestion.layout().addLayout(self.layoutShowQuestion)
+
+        self.prepareIndexSettingLayout()
+
+        self.prepareFileModeUI()
+
+        self.tabModeOneQuestion.layout().addLayout(self.layoutTagsPanel)
+        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnsControlIndex)
+
+        self.latex = None
+        self.loadFile(DEFAULT_FILE_INPUT_NAME)
+
+        self.showData()
+        self.showMaximized()
+
+    def prepareTagsLayout(self):
+        self.lstCheckboxs= []
+        #讀取Tag 表
+        self.loadTagsToNewUI()
+        self.layoutTagsPanel = QHBoxLayout()
+        self.tabBookChap.setFixedWidth(600)
+        self.layoutTagsPanel.addWidget(self.tabBookChap)
+
+        #增加檔案操作的按鈕
+
+        self.btnsPanel = QVBoxLayout()
+        self.btnSaveFile=QPushButton("Save", self)
+        self.btnSaveFile.clicked.connect(self.onbtnSaveFileClicked)
+        self.btnsPanel.addWidget(self.btnSaveFile)
+        self.btnGroupTag=QPushButton("GroupingTags", self)
+        self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
+        self.btnsPanel.addWidget(self.btnGroupTag)
+
+        self.layoutTagsPanel.addLayout(self.btnsPanel)
+
+
+
+    def prepareShowQuestionUI(self):
+        self.layoutShowQuestion = QGridLayout(self)
+        self.txtOneQuestion = QTextBrowser(self)
+        self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
+
+        self.txtAns =QLineEdit("Ans" ,self)
+        self.txtSol =QTextBrowser(self)
+        self.reNewComboQuestionUI()
+        self.layoutShowQuestion.addWidget(self.txtOneQuestion, 1,0, 1,5)
+
+        self.layoutShowQuestion.addWidget(self.comboExamYear,2,0)
+        self.layoutShowQuestion.addWidget(self.comboExam,2,1)
+        self.layoutShowQuestion.addWidget(self.comboExamQuestionStyle,2,2)
+        self.layoutShowQuestion.addWidget(self.comboExamQuestionNum,2,3)
+        self.layoutShowQuestion.addWidget(self.txtAns,2,4)
+        self.layoutShowQuestion.addWidget(self.txtSol,3,0,3,5)
+        self.addQuestionTagsList()
+        
+        
+    def addQuestionTagsList(self):
+        self.btnTagsList = QHBoxLayout()
+        self.tabModeOneQuestion.layout().addLayout(self.btnTagsList)
+        
+    def clearBtnTagsList(self):
+        layout = self.btnTagsList
+        nNumDelete = layout.count()
+        print (u"[clearBtnTagsList] %d" %(nNumDelete) )
+        for i in reversed(range(nNumDelete)):
+            layout.takeAt(i).widget().setParent(None)
+            
+    
+    def refreshUIforQuetionTag(self):
+        self.clearBtnTagsList()
+            
+        lst = self.latex.getQuestionTagList(self.nQIndex)
+        for item in lst :
+            strButtonTitle = u"x %s" % (item)
+            btn=QPushButton(strButtonTitle, self)
+            btn.strCurrTag = item
+            #TODO:NOW
+            btn.clicked.connect(lambda: self.onbtnRemoveTagClicked( btn.strCurrTag))
+            self.btnTagsList.addWidget(btn)
+            
+    def onbtnRemoveTagClicked(self, strRemoveTag):
+        strMessage = "[onbtnRemoveTagClicked] %s" %(strRemoveTag)
+        print (strMessage)
+
+    def prepareIndexSettingLayout(self):
+        """
+        實作控制 index 決定按鈕驅動事件
+        """
+
         self.nQIndex = 0
         self.layoutBtnsControlIndex = QHBoxLayout()
 
@@ -106,55 +178,14 @@ class TestWidget(QWidget):
         self.layoutBtnsControlIndex.addWidget(self.btnPrev)
         self.layoutBtnsControlIndex.addWidget(self.edtIndex)
         self.layoutBtnsControlIndex.addWidget(self.edtCount)
-
         self.layoutBtnsControlIndex.addWidget(self.btnNext)
         self.layoutBtnsControlIndex.addWidget(self.btnLast)
-
-        self.lstCheckboxs= []
-
-
-        self.layout().addLayout(self.layoutFileLoadUI)
-        self.layout().addWidget(self.tabModes)
-        self.tabModeOneQuestion.layout().addLayout(self.layoutShowQuestion)
-        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnsControlIndex)
-
-        #讀取Tag 表
-        self.loadTagsToNewUI()
-        #self.addCheckBoxInToUI()
-        self.layoutTagsPanel = QHBoxLayout()
-        self.tabBookChap.setFixedWidth(600)
-        self.layoutTagsPanel.addWidget(self.tabBookChap)
-
-        #增加檔案操作的按鈕
-        self.btnsPanel = QVBoxLayout()
-        self.btnSaveFile=QPushButton("Save", self)
-        self.btnSaveFile.clicked.connect(self.onbtnSaveFileClicked)
-        self.btnsPanel.addWidget(self.btnSaveFile)
-        self.btnGroupTag=QPushButton("GroupingTags", self)
-        self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
-        self.btnsPanel.addWidget(self.btnGroupTag)
-
-        self.layoutTagsPanel.addLayout(self.btnsPanel)
-
-        self.tabModeOneQuestion.layout().addLayout(self.layoutTagsPanel)
-
-        #決定按鈕驅動事件
         self.btnFirst.clicked.connect(self.onbtnFirstClicked)
         self.btnLast.clicked.connect(self.onbtnLastClicked)
         self.btnNext.clicked.connect(self.onbtnNextClicked)
         self.btnPrev.clicked.connect(self.onbtnPrevClicked)
         self.edtIndex.textChanged.connect(self.onedtIndexChaned)
 
-        self.prepareFileModeUI()
-
-
-
-        #Data Object
-        self.latex = None
-        self.loadFile(DEFAULT_FILE_INPUT_NAME)
-
-        self.showData()
-        self.showMaximized()
 
     def prepareFileModeUI(self):
         container= self.tabModeFilemode
@@ -253,6 +284,7 @@ class TestWidget(QWidget):
             lst = self.dicNewTagsBuffer[self.nQIndex]
         else :
             lst = self.latex.getQuestionTagList(self.nQIndex)
+            
         self.bUserAction = False
         self.refreshTagListData(lst)
         self.bUserAction = True
@@ -347,7 +379,9 @@ class TestWidget(QWidget):
                     currentTab.layout().addWidget(chkitem)
             else:
                 break
+
         self.tabCustom=QWidget(self)
+        #TODO: Move out this ThisQ function 
         self.tabBookChap.addTab(self.tabCustom, u"ThisQ")
         self.tabCustom.setLayout(QVBoxLayout())
         self.newUIforEditTag()
@@ -366,11 +400,12 @@ class TestWidget(QWidget):
                 self.lstCheckboxs.append(chkitem)
                 self.tabCustom.layout().addWidget(chkitem)
 
+
+        self.refreshUIforQuetionTag()
+        
     #TODO:
     def isExistedInCustomTags(self, item):
         bReturn = False
-##        for item in self.tabCustom.layout():
-##            pass
         pass
 
     def onChkitemStateChange(self, state):
