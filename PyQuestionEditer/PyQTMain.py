@@ -143,21 +143,51 @@ class TestWidget(QWidget):
             layout.takeAt(i).widget().setParent(None)
             
     
-    def refreshUIforQuetionTag(self):
+    def refreshRemoveButtonsUIforQuetionTag(self):
         self.clearBtnTagsList()
-            
-        lst = self.latex.getQuestionTagList(self.nQIndex)
+
+        lst = self.getLatestTagsList()
+        if len(lst) == 0:
+            btn = QPushButton(u"Empty Tags", self)
+            btn.setEnabled(False)
+            self.btnTagsList.addWidget(btn)
+            return
+
         for item in lst :
             strButtonTitle = u"x %s" % (item)
             btn=QPushButton(strButtonTitle, self)
             btn.strCurrTag = item
-            #TODO:NOW
             btn.clicked.connect(lambda: self.onbtnRemoveTagClicked( btn.strCurrTag))
             self.btnTagsList.addWidget(btn)
             
     def onbtnRemoveTagClicked(self, strRemoveTag):
         strMessage = "[onbtnRemoveTagClicked] %s" %(strRemoveTag)
         print (strMessage)
+
+        self.setLatestCurrentTagsDict(strRemoveTag, Qt.Unchecked)
+
+    def getLatestCurrentTags(self):
+        if self.dicNewTagsBuffer.has_key(self.nQIndex):
+            return self.dicNewTagsBuffer[self.nQIndex]
+        else:
+            return self.latex.getQuestionTagList(self.nQIndex)
+
+
+    def setLatestCurrentTagsDict(self, strTagName, nChecked):
+        lst =self.getLatestCurrentTags()
+        if nChecked == Qt.Unchecked:
+            if strTagName in lst:
+                lst.remove(strTagName)
+        else:
+            if strTagName not in lst:
+                lst.append(strTagName)
+
+        self.dicNewTagsBuffer[self.nQIndex] = lst
+        print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
+        self.refreshTagsUI()
+
+
+
 
     def prepareIndexSettingLayout(self):
         """
@@ -272,6 +302,13 @@ class TestWidget(QWidget):
         print("onedtIndexChaned")
         pass
 
+    def getLatestTagsList(self):
+        if self.nQIndex in self.dicNewTagsBuffer:
+            lst = self.dicNewTagsBuffer[self.nQIndex]
+        else :
+            lst = self.latex.getQuestionTagList(self.nQIndex)
+        return lst
+
     def refreshoutputAreaOneQuestion(self):
         Qpt = QParser(self.latex.getQuestion(int(self.nQIndex)))
         self.txtOneQuestion.setText(Qpt.getQBODY())
@@ -279,22 +316,20 @@ class TestWidget(QWidget):
         self.txtSol.setText(Qpt.getQSOLLISTstring())
 
         self.reNewCustomTagCheckItem()
-        #確認是否有更新版Tag List *
-        if self.nQIndex in self.dicNewTagsBuffer:
-            lst = self.dicNewTagsBuffer[self.nQIndex]
-        else :
-            lst = self.latex.getQuestionTagList(self.nQIndex)
-            
-        self.bUserAction = False
-        self.refreshTagListData(lst)
-        self.bUserAction = True
+
+        self.refreshTagsUI()
 
     def saveUpdatedTagIntoFile(self):
         print("[saveUpdatedTagIntoFile]")
         self.latex.saveNewFileWithNewTag(self.dicNewTagsBuffer)
         pass
 
-    def refreshTagListData(self, lstTags):
+    def refreshTagsUI(self):
+        self.refreshTagCheckedUIListData()
+        self.refreshRemoveButtonsUIforQuetionTag()
+
+    def refreshTagCheckedUIListData(self):
+        lstTags = self.getLatestTagsList()
         if lstTags == None:
             return
 
@@ -401,7 +436,7 @@ class TestWidget(QWidget):
                 self.tabCustom.layout().addWidget(chkitem)
 
 
-        self.refreshUIforQuetionTag()
+        self.refreshRemoveButtonsUIforQuetionTag()
         
     #TODO:
     def isExistedInCustomTags(self, item):
@@ -410,20 +445,9 @@ class TestWidget(QWidget):
 
     def onChkitemStateChange(self, state):
         #透過使用者對於UI的操作才需要重新跑過的
-        if self.bUserAction:
-            self.saveCurrentQuestionTagStatusFromUI()
-
-    def saveCurrentQuestionTagStatusFromUI(self):
-        print ("saveCurrentQuestionTagStatusFromUI")
-        lst =[]
-        for item in self.lstCheckboxs:
-            if item.isChecked():
-                lst.append(item.strTagName )
-            pass
-        if self.isTagsListDifferent(lst, self.latex.getQuestionTagList(self.nQIndex)):
-            self.dicNewTagsBuffer[self.nQIndex] = lst
-        print ("self.dicNewTagsBuffer:")
-        print (str(self.dicNewTagsBuffer))
+        print("[onChkitemStateChange]")
+        sender = self.sender()
+        self.setLatestCurrentTagsDict(sender.strTagName ,state)
 
     def isTagsListDifferent(self, lst1, lst2):
         if len(lst1) != len(lst2):
