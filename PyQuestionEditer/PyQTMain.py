@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#coding=utf-8
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # Name:        Questions Tags editor
@@ -290,7 +290,7 @@ class TestWidget(QWidget):
         self.bUserAction = True
 
     def saveUpdatedTagIntoFile(self):
-        print("saveUpdatedTagIntoFile")
+        print("[saveUpdatedTagIntoFile]")
         self.latex.saveNewFileWithNewTag(self.dicNewTagsBuffer)
         pass
 

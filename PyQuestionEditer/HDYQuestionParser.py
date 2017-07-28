@@ -1,4 +1,5 @@
-﻿import os, codecs, re
+﻿#coding=utf-8
+import os, codecs, re
 
 
 ##

@@ -1,4 +1,6 @@
-﻿import os
+﻿#coding=utf-8
+
+import os
 import codecs
 from HDYQuestionParser import HDYQuestionParser
 
@@ -264,6 +266,8 @@ class HDYLatexParser:
     #
     def saveNewFileWithNewTag(self, dicNewTags):
         print("[saveNewFileWithNewTag]")
+        self.backupCurrentFile()
+        
         strFileName= "TestNewTagsOutPut.tex"
         fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
 
@@ -283,9 +287,8 @@ class HDYLatexParser:
                 strBuffer = self.getQuestion(i)
                 qPt = HDYQuestionParser(strBuffer)
                 qPt.setNewTagList(dicNewTags[i])
-                fPtOutput.write(qPt.getQuestionStringv2())
+                fPtOutput.write(qPt.getQuestionString())
             pass
-
         #prepare end of file
         strEnd = ""
         for item in self.strAllLines[self.lstQEndLineNum[self.getCountOfQ()-1]+1:]:
