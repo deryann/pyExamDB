@@ -140,7 +140,12 @@ class TestWidget(QWidget):
         nNumDelete = layout.count()
         print (u"[clearBtnTagsList] %d" %(nNumDelete) )
         for i in reversed(range(nNumDelete)):
-            layout.takeAt(i).widget().setParent(None)
+            widgetTemp = layout.takeAt(i).widget()
+            layout.removeWidget(widgetTemp)
+            widgetTemp.deleteLater()
+            widgetTemp = None
+
+
             
     
     def refreshRemoveButtonsUIforQuetionTag(self):
@@ -185,8 +190,6 @@ class TestWidget(QWidget):
         self.dicNewTagsBuffer[self.nQIndex] = lst
         print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
         self.refreshTagsUI()
-
-
 
 
     def prepareIndexSettingLayout(self):
