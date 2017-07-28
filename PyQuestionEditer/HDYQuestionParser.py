@@ -131,7 +131,6 @@ class HDYQuestionParser:
             strR = strReturn
             pass
         return strR
-        pass
 
     def isThereQTAGEnv(self):
         return self.strBuffer.find( u"\\begin{QTAGS}") != -1

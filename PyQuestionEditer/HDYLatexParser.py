@@ -264,12 +264,12 @@ class HDYLatexParser:
     ##
     # 存入新 Tag 資料到新檔案
     #
-    def saveNewFileWithNewTag(self, dicNewTags):
-        print("[saveNewFileWithNewTag]")
+    def saveFileWithNewTag(self, dicNewTags):
+        print("[saveFileWithNewTag]")
         self.backupCurrentFile()
         
-        strFileName= "TestNewTagsOutPut.tex"
-        fPtOutput = codecs.open(strFileName, "w+", "utf-8" )
+        strFileName= self.strFileName
+        fPtOutput = codecs.open(strFileName, "w", "utf-8" )
 
         #Prepare Title
         strStart= ""
@@ -278,16 +278,26 @@ class HDYLatexParser:
 
         fPtOutput.write(strStart)
 
+        #Write all question one by one
         for i in range(self.getCountOfQ()):
-            if not i in dicNewTags:
-                for item in self.strAllLines[self.lstQStartLineNum[i]:self.lstQEndLineNum[i]+1]:
+            print ("Number i = %d " % (i))
+            # Write from "i-1 th end line" to "i th start line"
+            if i > 0:
+                for item in self.strAllLines[self.lstQEndLineNum[i - 1] + 1: self.lstQStartLineNum[i]]:
                     fPtOutput.write(item)
-                pass
+            if not i in dicNewTags:
+                #If question updated tag.
+                print ("Start %d End %d" % (self.lstQStartLineNum[i], self.lstQEndLineNum[i]+1) )
+                nEndNum = min(len(self.strAllLines), self.lstQEndLineNum[i]+1)
+                for item in self.strAllLines[self.lstQStartLineNum[i]:nEndNum]:
+                    fPtOutput.write(item)
             else:
+                #If question WITHOUT updated tag.
                 strBuffer = self.getQuestion(i)
                 qPt = HDYQuestionParser(strBuffer)
                 qPt.setNewTagList(dicNewTags[i])
                 fPtOutput.write(qPt.getQuestionString())
+                fPtOutput.write(os.linesep)
             pass
         #prepare end of file
         strEnd = ""
@@ -327,7 +337,7 @@ class HDYLatexParser:
 
     def backupCurrentFile(self):
         from time import gmtime, strftime
-        strBachUpFileName = strftime("%Y%m%d%H%M%S", gmtime())+self.strFileName +".bak"
+        strBachUpFileName = self.strFileName+strftime("%Y%m%d%H%M%S", gmtime())+".bak"
         import shutil
         shutil.copyfile(self.strFileName,strBachUpFileName)
 

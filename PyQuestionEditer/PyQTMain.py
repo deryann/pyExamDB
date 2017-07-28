@@ -110,8 +110,6 @@ class TestWidget(QWidget):
 
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
-
-
     def prepareShowQuestionUI(self):
         self.layoutShowQuestion = QGridLayout(self)
         self.txtOneQuestion = QTextBrowser(self)
@@ -145,9 +143,6 @@ class TestWidget(QWidget):
             widgetTemp.deleteLater()
             widgetTemp = None
 
-
-            
-    
     def refreshRemoveButtonsUIforQuetionTag(self):
         self.clearBtnTagsList()
 
@@ -186,8 +181,9 @@ class TestWidget(QWidget):
         else:
             if strTagName not in lst:
                 lst.append(strTagName)
-
-        self.dicNewTagsBuffer[self.nQIndex] = lst
+        lstori = self.getLatestCurrentTags()
+        if self.isTagsListDifferent(lst,lstori):
+            self.dicNewTagsBuffer[self.nQIndex] = lst
         print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
         self.refreshTagsUI()
 
@@ -324,7 +320,7 @@ class TestWidget(QWidget):
 
     def saveUpdatedTagIntoFile(self):
         print("[saveUpdatedTagIntoFile]")
-        self.latex.saveNewFileWithNewTag(self.dicNewTagsBuffer)
+        self.latex.saveFileWithNewTag(self.dicNewTagsBuffer)
         pass
 
     def refreshTagsUI(self):
@@ -570,6 +566,20 @@ class TestWidget(QWidget):
         strOutPutFileName = u"GroupingTagsOutput.tex"
         lstSelectedTags = [ u"B1C1數與式",u"B1C2-1", u"B1C2-2", u"B1C2-3", u"B1C2-4", u"B1C3-1", u"B1C3-2"]
         self.latex.saveNewFileWithSelectedTag(strOutPutFileName, lstSelectedTags)
+        pass
+
+    def closeEvent(self, event):
+        print ("[closeEvent]")
+        strMsg = u"Are you sure you want to exit the program?"
+        reply = QtGui.QMessageBox.question(self, u'Message',
+                                           strMsg, QtGui.QMessageBox.Save, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Save:
+            self.saveUpdatedTagIntoFile()
+            event.accept()
+        elif reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
         pass
 
 app=QApplication(sys.argv)
