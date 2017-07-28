@@ -33,11 +33,20 @@ constExamStringList = [u"學測",u"指考甲",u"指考乙"]
 constExamYearStringList = [u"106",u"105"]
 constExamQuestionStyleStringList = [u"單選",u"多選",u"選填",u"填充",u"計算"]
 
-##
+class QLineEditWithDirModel(QLineEdit):
+    def __init__(self,strInputName, parent):
+        QLineEdit.__init__(self, strInputName, parent)
+        self.completer = QCompleter()
+        self.dir_model = QDirModel()
+        self.completer.setModel(self.dir_model)
+        self.setCompleter(self.completer)
+
+
+    ##
 # UI 呈現的程式碼
 #
 #
-class TestWidget(QWidget):
+class QuestionTagsEditor(QWidget):
     def __init__(self):
         QWidget.__init__(self, windowTitle=u"Latex Questions Editor .")
 
@@ -49,7 +58,8 @@ class TestWidget(QWidget):
         self.bUserAction = True
 
         self.layoutFileLoadUI = QHBoxLayout()
-        self.edtFile = QLineEdit(u"FileName" ,self)
+        self.edtFile = QLineEditWithDirModel(u"FileName" ,self)
+
         self.btnLoadFile = QPushButton (u"Load",self)
         self.layoutFileLoadUI.addWidget(self.edtFile)
         self.layoutFileLoadUI.addWidget(self.btnLoadFile)
@@ -392,7 +402,7 @@ class TestWidget(QWidget):
     def loadTagsToNewUI(self):
         self.tabBookChap.clear()
         self.prepare99TagsUI()
-                #New出所有Tag
+        #New出所有Tag
 
         fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
         currentTab=None
@@ -570,7 +580,8 @@ class TestWidget(QWidget):
 
     def closeEvent(self, event):
         print ("[closeEvent]")
-        strMsg = u"Are you sure you want to exit the program?"
+        strMsg = u"Are you sure you want to exit the program? \n" \
+                 u"(Yes\\Save and Yes\\No)"
         reply = QtGui.QMessageBox.question(self, u'Message',
                                            strMsg, QtGui.QMessageBox.Save, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Save:
@@ -583,7 +594,7 @@ class TestWidget(QWidget):
         pass
 
 app=QApplication(sys.argv)
-testWidget=TestWidget()
+QuestionEditor=QuestionTagsEditor()
 
-testWidget.show()
+QuestionEditor.show()
 sys.exit(app.exec_())
