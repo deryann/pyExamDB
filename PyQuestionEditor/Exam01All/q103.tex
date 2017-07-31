@@ -321,8 +321,37 @@
         \begin{ExamAnsRateInfo}{64}{97}{78}{17}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-		%TODO:缺圖
-		設圓$O$之半徑為$24$，$\overline{OC}=26$，$\overline{OC}$交圓$O$於$A$點，$\overline{CD}$切圓$O$於$D$點，$B$為$A$點到$\overline{OD}$的垂足，如右邊的示意圖。則$\overline{AB}=\TCNBOX{\FR{\TCN\TCN\TCN}{\TCN\TCN}}$
+			設圓$O$之半徑為$24$，$\overline{OC}=26$，$\overline{OC}$交圓$O$於$A$點，$\overline{CD}$切圓$O$於$D$點，$B$為$A$點到$\overline{OD}$的垂足，如右邊的示意圖。則$\overline{AB}=\TCNBOX{\FR{\TCN\TCN\TCN}{\TCN\TCN}}$
+			
+			\begin{tikzpicture}[scale=1.5] 
+				\coordinate (O) at (0:0);
+				\coordinate (A) at (23:2);
+				\coordinate (C) at (23:{13/6});
+
+				\coordinate (yaxis) at (0,2);
+				\coordinate (xaxis) at (2,0);
+				\coordinate (D) at (2,0);
+				\coordinate (B) at (xaxis -| A);
+				
+				\draw[ultra thick] (0,0) circle (2);
+				\draw [ultra thick] (O) -- (C);
+				\draw [ultra thick] (O) -- (D);
+				\draw [ultra thick] (C) -- (D);
+				\draw [ultra thick] (A) -- (B);
+
+				\foreach \v/\u/\t in 
+				{   A/180/$A$,
+					B/270/$B$,
+					C/45/$C$,
+					D/0/$D$,
+					O/225/$O$
+				}
+				{
+					\draw[ultra thick,fill] (\v) circle (1.2pt);
+					\node[label=\u:\t] at (\v){};
+				};
+				
+			\end{tikzpicture}
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
@@ -417,8 +446,21 @@
         \begin{ExamAnsRateInfo}{22}{44}{17}{5}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-		%TODO: 補圖
-		一個房間的地面是由$12$個正方形所組成，如右圖。今想用長方形瓷磚舖滿地面，已知每一塊長方形瓷磚可以覆蓋兩個相鄰的正方形，即 或 。則用$6$塊瓷磚舖滿房間地面的方法有$\TCNBOX{\TCN}{\TCN}$種
+			一個房間的地面是由$12$個正方形所組成，如右圖。今想用長方形瓷磚舖滿地面，已知每一塊長方形瓷磚可以覆蓋兩個相鄰的正方形，即
+			\begin{tikzpicture}[scale=1]
+				\draw[color=black] (0,0) grid (1,2);
+			\end{tikzpicture} 
+			或 
+			\begin{tikzpicture}[scale=1]
+				\draw[color=black] (0,0) grid (2,1);
+			\end{tikzpicture}。
+			則用$6$塊瓷磚舖滿房間地面的方法有$\TCNBOX{\TCN}{\TCN}$種
+
+			\begin{tikzpicture}[scale=1]
+				\draw[color=black] (0,0) grid (2,3);
+				\draw[color=black] (2,1) grid (5,3);
+			\end{tikzpicture}
+
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}

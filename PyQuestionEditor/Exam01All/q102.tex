@@ -494,8 +494,79 @@
         \begin{ExamAnsRateInfo}{18}{48}{6}{0}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-			%TODO 圖
-			如下圖，在坐標空間中，A,B,C,D,E,F,G,H為正立方體的八個頂點，已知其中四個點的坐標A(0,0,0)、B(6,0,0)、D(0,6,0)及E(0,0,6)，$P$在線段$\overline{CG}$上且$\overline{CP}:\overline{PG}=1:5$，$R$在線段$\overline{EH}$上且$\overline{ER}:\overline{RH}=1:1$，$Q$在線段$\overline{AD}$上。若空間中通過P,Q,R這三點的平面，與直線$AG$不相交，則$Q$點的$y$坐標為$\TCNBOX{\FR{\TCN\TCN}{\TCN\TCN}}$ 。(化成最簡分數) 
+			如下圖，在坐標空間中，$A,B,C,D,E,F,G,H$為正立方體的八個頂點，已知其中四個點的坐標A(0,0,0)、B(6,0,0)、D(0,6,0)及E(0,0,6)，$P$在線段$\overline{CG}$上且$\overline{CP}:\overline{PG}=1:5$，$R$在線段$\overline{EH}$上且$\overline{ER}:\overline{RH}=1:1$，$Q$在線段$\overline{AD}$上。若空間中通過P,Q,R這三點的平面，與直線$AG$不相交，則$Q$點的$y$坐標為$\TCNBOX{\FR{\TCN\TCN}{\TCN\TCN}}$ 。(化成最簡分數) 
+			
+			\begin{tikzpicture}[every edge quotes/.append style={auto, text=blue},
+				x={(-0.25cm,-0.15cm)},
+				y={(0.5cm,0cm)},
+				z={(0cm,0.5cm)}]
+
+				\coordinate (O) at (0,0,0);
+				\coordinate (x) at (10,0,0);
+				\coordinate (y) at (0,8,0);
+				\coordinate (z) at (0,0,8);
+
+				\coordinate (Base1) at (0,0,0);
+				\coordinate (Base2) at (6,0,0);
+				\coordinate (Base3) at (6,6,0);
+				\coordinate (Base4) at (0,6,0);
+				\coordinate (Base1Up) at (0,0,6);
+				\coordinate (Base2Up) at (6,0,6);
+				\coordinate (Base3Up) at (6,6,6);
+				\coordinate (Base4Up) at (0,6,6);
+
+				\coordinate (A) at (Base1);
+				\coordinate (B) at (Base2);
+				\coordinate (C) at (Base3);
+				\coordinate (D) at (Base4);
+				\coordinate (E) at (Base1Up);
+				\coordinate (F) at (Base2Up);
+				\coordinate (G) at (Base3Up);
+				\coordinate (H) at (Base4Up);
+
+				\coordinate (P) at (6,6,1);
+				\coordinate (Q) at (0,15/11,0);
+				\coordinate (R) at (0,3,6);
+
+				\draw [draw=black, every edge/.append style={draw=black, dashed}]
+				(Base1) edge (Base2)
+				(Base2) -- (Base3)
+				(Base3) -- (Base4)
+				(Base4) edge (Base1)
+				(Base1Up) -- (Base2Up)
+				(Base2Up) -- (Base3Up)
+				(Base3Up) -- (Base4Up)
+				(Base4Up) -- (Base1Up)
+				(Base1) edge (Base1Up)
+				(Base2) -- (Base2Up)
+				(Base3) -- (Base3Up)
+				(Base4) -- (Base4Up);
+
+				\draw[-{Stealth[scale=1.3,angle'=45]},semithick] (D) -- (y) node[right] {$y$};
+				\draw[-{Stealth[scale=1.3,angle'=45]},semithick] (B) -- (x) node[left] {$x$};
+				\draw[-{Stealth[scale=1.3,angle'=45]},semithick] (E) -- (z) node[above] {$z$};;
+
+
+				\foreach \v/\u/\t in 
+				{   P/left/$P$,
+					Q/below/$Q$,
+					R/above/$R$,
+					A/left/$A$,
+					B/left/$B$,
+					C/below/$C$,
+					D/below/$D$,
+					E/left/$E$,
+					F/left/$F$,
+					G/right/$G$,
+					H/right/$H$
+				}
+				{
+					\draw[ultra thick,fill] (\v) circle (1.5pt);
+					\node[\u] at (\v){\t};
+				}; 
+
+			\end{tikzpicture}
+
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
