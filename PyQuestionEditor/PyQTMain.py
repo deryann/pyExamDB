@@ -28,6 +28,7 @@ DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
 #
 const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
+constSuggestionTag = u"SuggestionTag.ini"
 
 constExamStringList = [u"學測",u"指考甲",u"指考乙"]
 constExamYearStringList = [u"106",u"105"]
@@ -360,8 +361,24 @@ class QuestionTagsEditor(QWidget):
         self.refreshTagCheckedUIListData()
         self.refreshRemoveButtonsUIforQuetionTag()
 
+    def readSuggestDict(self):
+        import ConfigParser
+        self.configSuggestionTag = ConfigParser.ConfigParser()
+        self.configSuggestionTag.readfp(codecs.open(constSuggestionTag,u"r",u"utf8"))
+
+
     def getSuggestedTags(self):
         lst = [u"不是99課綱", u"跨章節試題"]
+        lstsuggest = []
+        self.readSuggestDict()
+        import ast
+        lstSec = self.configSuggestionTag.sections()
+        lstCurr = self.getLatestCurrentTags()
+        for item in lstCurr:
+            if item in lstSec:
+                lstsuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'lst'))
+                lst = lst + lstsuggest
+
         return lst
 
     def onSuggestedItemChanged(self, widgetItem):
