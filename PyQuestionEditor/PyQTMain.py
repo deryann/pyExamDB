@@ -101,12 +101,22 @@ class QuestionTagsEditor(QWidget):
         self.showMaximized()
 
     def prepareTagsLayout(self):
+        """
+        Prepare checked item for tags editing
+        :return: None
+        """
         self.lstCheckboxs= []
         #讀取Tag 表
         self.loadTagsToNewUI()
         self.layoutTagsPanel = QHBoxLayout()
         self.tabBookChap.setFixedWidth(600)
         self.layoutTagsPanel.addWidget(self.tabBookChap)
+
+        #按照當下的Item 嘗試著找出一些建議的 Tageditor
+
+        self.listwidgetForSuggestedTags = QListWidget(self)
+        self.listwidgetForSuggestedTags.itemChanged.connect(self.onSuggestedItemChanged)
+        self.layoutTagsPanel.addWidget(self.listwidgetForSuggestedTags)
 
         #增加檔案操作的按鈕
 
@@ -140,27 +150,30 @@ class QuestionTagsEditor(QWidget):
         
         
     def addQuestionTagsList(self):
-        self.btnTagsList = QHBoxLayout()
-        self.tabModeOneQuestion.layout().addLayout(self.btnTagsList)
+        self.layoutBtnTagsList = QHBoxLayout()
+        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnTagsList)
         
-    def clearBtnTagsList(self):
-        layout = self.btnTagsList
+    def removeAllWidgetsInLayout(self, layout):
         nNumDelete = layout.count()
-        print (u"[clearBtnTagsList] %d" %(nNumDelete) )
+        print (u"[removeAllWidgetsInLayout] %d" % (nNumDelete))
         for i in reversed(range(nNumDelete)):
             widgetTemp = layout.takeAt(i).widget()
+            if widgetTemp in self.lstCheckboxs:
+                self.lstCheckboxs.remove(widgetTemp)
             layout.removeWidget(widgetTemp)
             widgetTemp.deleteLater()
             widgetTemp = None
 
+    def clearBtnTagsList(self):
+        self.removeAllWidgetsInLayout(self.layoutBtnTagsList)
+
     def refreshRemoveButtonsUIforQuetionTag(self):
         self.clearBtnTagsList()
-
         lst = self.getLatestTagsList()
         if len(lst) == 0:
             btn = QPushButton(u"Empty Tags", self)
             btn.setEnabled(False)
-            self.btnTagsList.addWidget(btn)
+            self.layoutBtnTagsList.addWidget(btn)
             return
 
         for item in lst :
@@ -168,10 +181,10 @@ class QuestionTagsEditor(QWidget):
             btn=QPushButton(strButtonTitle, self)
             btn.strCurrTag = item
             btn.clicked.connect(lambda: self.onbtnRemoveTagClicked( btn.strCurrTag))
-            self.btnTagsList.addWidget(btn)
+            self.layoutBtnTagsList.addWidget(btn)
             
     def onbtnRemoveTagClicked(self, strRemoveTag):
-        strMessage = "[onbtnRemoveTagClicked] %s" %(strRemoveTag)
+        strMessage = "[onbtnRemoveTagClicked] %s" % (strRemoveTag)
         print (strMessage)
 
         self.setLatestCurrentTagsDict(strRemoveTag, Qt.Unchecked)
@@ -184,19 +197,29 @@ class QuestionTagsEditor(QWidget):
 
 
     def setLatestCurrentTagsDict(self, strTagName, nChecked):
-        lst =self.getLatestCurrentTags()
-        if nChecked == Qt.Unchecked:
+        """
+        將輸入的標籤設定進入最新資料的暫存區
+        :param strTagName: 想要輸入的標籤名
+        :param nChecked: 要新增(True)，或者是移除(False)
+        :return: None
+        """
+        print (u"[setLatestCurrentTagsDict] %s %d" %(strTagName, nChecked))
+        lst = self.getLatestCurrentTags()
+        lstnew= lst[:]
+        if not nChecked:
             if strTagName in lst:
-                lst.remove(strTagName)
+                lstnew.remove(strTagName)
         else:
             if strTagName not in lst:
-                lst.append(strTagName)
-        lstori = self.getLatestCurrentTags()
-        if self.isTagsListDifferent(lst,lstori):
-            self.dicNewTagsBuffer[self.nQIndex] = lst
-        print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
-        self.refreshTagsUI()
+                lstnew.append(strTagName)
 
+        if self.isTagsListDifferent(lst,lstnew):
+            self.dicNewTagsBuffer[self.nQIndex] = lstnew
+            print("[setLatestCurrentTagsDict] modified")
+            self.refreshTagsUI()
+        else:
+            print("[setLatestCurrentTagsDict] un-modified")
+        print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
 
     def prepareIndexSettingLayout(self):
         """
@@ -337,13 +360,52 @@ class QuestionTagsEditor(QWidget):
         self.refreshTagCheckedUIListData()
         self.refreshRemoveButtonsUIforQuetionTag()
 
+    def getSuggestedTags(self):
+        lst = [u"不是99課綱", u"跨章節試題"]
+        return lst
+
+    def onSuggestedItemChanged(self, widgetItem):
+        print ("[onSuggestedItemChanged]"+ widgetItem.strTagName)
+        if widgetItem.checkState() == QtCore.Qt.Unchecked:
+            self.setLatestCurrentTagsDict( widgetItem.strTagName, False)
+        elif widgetItem.checkState() == QtCore.Qt.Checked:
+            self.setLatestCurrentTagsDict( widgetItem.strTagName, True)
+
+
+    def refreshSuggestedTagsLayout(self):
+        print("[refreshSuggestedTagsLayout]")
+        lst = self.getSuggestedTags()
+
+        for k in range(self.listwidgetForSuggestedTags.count()):
+            itemWantRemoved = self.listwidgetForSuggestedTags.item(k)
+            self.lstCheckboxs.remove(itemWantRemoved)
+
+        self.listwidgetForSuggestedTags.clear()
+
+        for item in lst:
+            chkitem = QListWidgetItem(item)
+            chkitem.strTagName = item
+            chkitem.setFlags(chkitem.flags() | QtCore.Qt.ItemIsUserCheckable)
+            chkitem.setCheckState(QtCore.Qt.Unchecked)
+            self.listwidgetForSuggestedTags.addItem(chkitem)
+            self.lstCheckboxs.append(chkitem)
+        pass
+
     def refreshTagCheckedUIListData(self):
         lstTags = self.getLatestTagsList()
         if lstTags == None:
             return
 
+        self.refreshSuggestedTagsLayout()
+
         for item in self.lstCheckboxs:
-            item.setChecked(item.strTagName in lstTags)
+            if isinstance(item, QCheckBox ):
+                item.setChecked(item.strTagName in lstTags)
+            elif isinstance(item, QListWidgetItem):
+                if item.strTagName in lstTags:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
             pass
 
     def setCurrentIndex(self, nIndex):
@@ -397,7 +459,6 @@ class QuestionTagsEditor(QWidget):
                         nCurrentCol+=1
             else:
                 break
-
 
     def loadTagsToNewUI(self):
         self.tabBookChap.clear()
@@ -456,7 +517,10 @@ class QuestionTagsEditor(QWidget):
         #透過使用者對於UI的操作才需要重新跑過的
         print("[onChkitemStateChange]")
         sender = self.sender()
-        self.setLatestCurrentTagsDict(sender.strTagName ,state)
+        if state == Qt.Unchecked:
+            self.setLatestCurrentTagsDict(sender.strTagName ,False)
+        else:
+            self.setLatestCurrentTagsDict(sender.strTagName, True)
 
     def isTagsListDifferent(self, lst1, lst2):
         if len(lst1) != len(lst2):
