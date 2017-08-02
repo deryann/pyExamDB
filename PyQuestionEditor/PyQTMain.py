@@ -43,7 +43,7 @@ class QLineEditWithDirModel(QLineEdit):
         self.setCompleter(self.completer)
 
 
-    ##
+##
 # UI 呈現的程式碼
 #
 #
@@ -366,18 +366,17 @@ class QuestionTagsEditor(QWidget):
         self.configSuggestionTag = ConfigParser.ConfigParser()
         self.configSuggestionTag.readfp(codecs.open(constSuggestionTag,u"r",u"utf8"))
 
-
     def getSuggestedTags(self):
         lst = [u"不是99課綱", u"跨章節試題"]
-        lstsuggest = []
+        lstSuggest = []
         self.readSuggestDict()
         import ast
         lstSec = self.configSuggestionTag.sections()
         lstCurr = self.getLatestCurrentTags()
         for item in lstCurr:
             if item in lstSec:
-                lstsuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'lst'))
-                lst = lst + lstsuggest
+                lstSuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'lst'))
+                lst = lst + lstSuggest
 
         return lst
 
