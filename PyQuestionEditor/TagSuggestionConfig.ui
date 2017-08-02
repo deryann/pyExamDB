@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TagSuggestionConfigEditor</class>
+ <widget class="QMainWindow" name="TagSuggestionConfigEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>867</width>
+    <height>584</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Consolas</family>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Tag suggestion config Editor</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="gbKeyWord">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Key Word</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLineEdit" name="edtKeword"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSelectNew">
+         <property name="text">
+          <string>Select/New</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnMore">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbSection">
+      <property name="title">
+       <string>Section List</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QWidget" name="widgetEditSection" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLineEdit" name="edtSection"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSectionAddRemove">
+            <property name="text">
+             <string>Add/Remove</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="lvSection"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="gbTagItems">
+      <property name="title">
+       <string>Tag Item List</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLineEdit" name="edtTag"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnTagAddremove">
+            <property name="text">
+             <string>Add/Remove</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="lvTag"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>867</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btnSelectNew</sender>
+   <signal>clicked()</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onSelectNewClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>717</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSectionAddRemove</sender>
+   <signal>clicked()</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onSectionAddRemoveClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>789</x>
+     <y>171</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnTagAddremove</sender>
+   <signal>clicked()</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onTagAddRemoveClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>789</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edtSection</sender>
+   <signal>returnPressed()</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onSectionAddRemoveClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>171</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edtTag</sender>
+   <signal>returnPressed()</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onTagAddRemoveClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onSelectNewClick()</slot>
+  <slot>onSectionAddRemoveClick()</slot>
+  <slot>onTagAddRemoveClick()</slot>
+ </slots>
+</ui>
