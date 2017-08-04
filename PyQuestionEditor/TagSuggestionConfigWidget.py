@@ -90,7 +90,7 @@ class Ui_TagSuggestionConfigEditor(object):
         self.verticalLayout_2.addWidget(self.gbTagItems)
         TagSuggestionConfigEditor.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(TagSuggestionConfigEditor)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 867, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 867, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         TagSuggestionConfigEditor.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(TagSuggestionConfigEditor)
@@ -103,6 +103,7 @@ class Ui_TagSuggestionConfigEditor(object):
         QtCore.QObject.connect(self.btnTagAddremove, QtCore.SIGNAL(_fromUtf8("clicked()")), TagSuggestionConfigEditor.onTagAddRemoveClick)
         QtCore.QObject.connect(self.edtSection, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onSectionAddRemoveClick)
         QtCore.QObject.connect(self.edtTag, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onTagAddRemoveClick)
+        QtCore.QObject.connect(self.edtKeword, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onSelectNewClick)
         QtCore.QMetaObject.connectSlotsByName(TagSuggestionConfigEditor)
 
     def retranslateUi(self, TagSuggestionConfigEditor):

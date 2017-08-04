@@ -17,12 +17,37 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        #Load config
+        import ConfigParser
+        self.configSuggestionTag = ConfigParser.ConfigParser()
+        self.configSuggestionTag.readfp(codecs.open(constSuggestionTag,u"r",u"utf8"))
+        self.completerKeyWord = QCompleter(self.configSuggestionTag.sections()) #Keyword is the section of ini file.
+        self.edtKeword.setCompleter(self.completerKeyWord)
+
+    def onChangeKeyWord(self):
+        strKeyWord = unicode(self.edtKeword.text())
+        if strKeyWord in self.configSuggestionTag.sections():
+            self.updateUIByKeyword(strKeyWord)
+        else:
+            print("[WARNING]There is no matched keyword.")
+        pass
+
+    def updateUIByKeyword(self, strKeyWord):
+        import ast
+        lst=ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'lst'))
+        lstSectionInChap = ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'seclist'))
+
+        self.lvSection.setModel(QStringListModel(lstSectionInChap))
+        self.lvTag.setModel(QStringListModel(lst))
+
     def onSelectNewClick(self):
         print("[onSelectNewClick]")
+        self.onChangeKeyWord()
+
 
     def onSectionAddRemoveClick(self):
         print("[onSectionAddRemoveClick]")
-        pass
+
 
     def onTagAddRemoveClick(self):
         print("[onTagonTagAddRemoveClick]")
