@@ -40,7 +40,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLineEdit" name="edtKeword"/>
+        <widget class="QComboBox" name="cbKeyword"/>
        </item>
        <item>
         <widget class="QPushButton" name="btnSelectNew">
@@ -212,14 +212,46 @@
    </hints>
   </connection>
   <connection>
-   <sender>edtKeword</sender>
-   <signal>returnPressed()</signal>
+   <sender>cbKeyword</sender>
+   <signal>currentIndexChanged(QString)</signal>
    <receiver>TagSuggestionConfigEditor</receiver>
-   <slot>onSelectNewClick()</slot>
+   <slot>onCbKeywordChang()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
+     <x>154</x>
      <y>79</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lvSection</sender>
+   <signal>pressed(QModelIndex)</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onLvSectionPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>433</x>
+     <y>258</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lvTag</sender>
+   <signal>pressed(QModelIndex)</signal>
+   <receiver>TagSuggestionConfigEditor</receiver>
+   <slot>onLvTagPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>433</x>
+     <y>481</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
@@ -232,5 +264,8 @@
   <slot>onSelectNewClick()</slot>
   <slot>onSectionAddRemoveClick()</slot>
   <slot>onTagAddRemoveClick()</slot>
+  <slot>onCbKeywordChang()</slot>
+  <slot>onLvSectionPressed()</slot>
+  <slot>onLvTagPressed()</slot>
  </slots>
 </ui>

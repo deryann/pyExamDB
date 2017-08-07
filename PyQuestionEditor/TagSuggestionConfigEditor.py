@@ -56,20 +56,30 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
+        self.strKeyWord=u''
 
         #Load config
         self.configSuggestionTag = configparser.ConfigParser()
         self.configSuggestionTag.read(constSuggestionTag, encoding='utf-8')
-        self.completerKeyWord = QCompleter(self.configSuggestionTag.sections()) #Keyword is the section of ini file.
-        self.edtKeword.setCompleter(self.completerKeyWord)
 
-    def onChangeKeyWord(self):
-        self.strKeyWord = unicode(self.edtKeword.text())
+        self.modelKeyword = HDYStringListModel(self.configSuggestionTag.sections())
+        self.cbKeyword.setModel(self.modelKeyword)
 
+    def onCbKeywordChang(self,qstr):
+        if self.strKeyWord !='':
+            self.onSaveLvSectionModel()
+        self.strKeyWord = unicode(self.cbKeyword.currentText())
         if self.strKeyWord in self.configSuggestionTag.sections():
             self.updateUIByKeyword()
-        else:
-            self.showWarningDialog("[WARNING]There is no matched keyword.")
+
+    def onLvSectionPressed(self, qindex):
+        print ("[onLvSectionPressed]")
+        print(qindex)
+        pass
+
+    def onLvTagPressed(self,qindex):
+        print ("[onLvTagPressed]")
+        print(qindex)
         pass
 
     def updateUIByKeyword(self):
@@ -94,9 +104,9 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         print("[onSectionAddRemoveClick]")
         strBuffer = unicode(self.edtSection.text())
         if strBuffer == u"":
-            return
-
-        if strBuffer in self.strlstModelSectionInChap.getStringList():
+            #Save List view
+            strword = self.strlstModelSectionInChap.getUnicodeStringForStringList()
+        elif strBuffer in self.strlstModelSectionInChap.getStringList():
             #remove
             strword = self.strlstModelSectionInChap.getUnicodeStringForStringListWithRemoving(strBuffer)
         else:
@@ -107,7 +117,18 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         self.backupINIandSave()
         self.updateUIByKeyword()
 
+    def onSaveLvSectionModel(self):
+        strword = self.strlstModelSectionInChap.getUnicodeStringForStringList()
+        bNeedtoUpdateIntoFile = (strword != self.configSuggestionTag.get(self.strKeyWord, u'seclist'))
+        if bNeedtoUpdateIntoFile:
+            self.configSuggestionTag.set(self.strKeyWord, u'seclist', strword)
+            self.backupINIandSave()
+            self.updateUIByKeyword()
+        else:
+            print(u"[un-necessary to updated to file]")
+
     def backupINIandSave(self):
+        print(u'backupINIandSave')
         self.backupINIFile()
         f = codecs.open(constSuggestionTag, 'w', 'utf-8')
         self.configSuggestionTag.write(f)

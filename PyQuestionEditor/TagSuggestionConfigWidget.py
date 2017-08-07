@@ -40,9 +40,9 @@ class Ui_TagSuggestionConfigEditor(object):
         self.gbKeyWord.setObjectName(_fromUtf8("gbKeyWord"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.gbKeyWord)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.edtKeword = QtGui.QLineEdit(self.gbKeyWord)
-        self.edtKeword.setObjectName(_fromUtf8("edtKeword"))
-        self.horizontalLayout.addWidget(self.edtKeword)
+        self.cbKeyword = QtGui.QComboBox(self.gbKeyWord)
+        self.cbKeyword.setObjectName(_fromUtf8("cbKeyword"))
+        self.horizontalLayout.addWidget(self.cbKeyword)
         self.btnSelectNew = QtGui.QPushButton(self.gbKeyWord)
         self.btnSelectNew.setObjectName(_fromUtf8("btnSelectNew"))
         self.horizontalLayout.addWidget(self.btnSelectNew)
@@ -103,7 +103,9 @@ class Ui_TagSuggestionConfigEditor(object):
         QtCore.QObject.connect(self.btnTagAddremove, QtCore.SIGNAL(_fromUtf8("clicked()")), TagSuggestionConfigEditor.onTagAddRemoveClick)
         QtCore.QObject.connect(self.edtSection, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onSectionAddRemoveClick)
         QtCore.QObject.connect(self.edtTag, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onTagAddRemoveClick)
-        QtCore.QObject.connect(self.edtKeword, QtCore.SIGNAL(_fromUtf8("returnPressed()")), TagSuggestionConfigEditor.onSelectNewClick)
+        QtCore.QObject.connect(self.cbKeyword, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), TagSuggestionConfigEditor.onCbKeywordChang)
+        QtCore.QObject.connect(self.lvSection, QtCore.SIGNAL(_fromUtf8("pressed(QModelIndex)")), TagSuggestionConfigEditor.onLvSectionPressed)
+        QtCore.QObject.connect(self.lvTag, QtCore.SIGNAL(_fromUtf8("pressed(QModelIndex)")), TagSuggestionConfigEditor.onLvTagPressed)
         QtCore.QMetaObject.connectSlotsByName(TagSuggestionConfigEditor)
 
     def retranslateUi(self, TagSuggestionConfigEditor):
