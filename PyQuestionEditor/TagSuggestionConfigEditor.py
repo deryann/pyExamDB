@@ -3,6 +3,7 @@
 import sys, os, re, codecs
 from backports import configparser
 import configparser
+import ast
 import difflib
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
@@ -21,10 +22,24 @@ class HDYStringListModel(QStringListModel):
 
     def getStringList(self):
         qstrlst = self.stringList()
-        lstReturn = [ unicode(item) for item in qstrlst]
+        lstReturn = [ unicode(item.toUtf8() , encoding="UTF-8" ) for item in qstrlst]
         return lstReturn
 
+    def getUnicodeStringForStringList(self):
+        """
+        將此List 變成一個合適的中括弧括起來的字串
+        :return: stR
+        """
+        strR = u"["
+        lst = self.getStringList()
+        nTotal = len(lst)
+        for k in range(nTotal):
+            strR=strR + "u\"" + lst[k] + "\""
+            if k <nTotal -1:
+                strR=strR + u","
 
+        strR = strR+u"]"
+        return strR
 
 class MainWindow(QMainWindow, TagSuggestionConfigWidget):
     def __init__(self, parent=None):
@@ -48,7 +63,6 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         pass
 
     def updateUIByKeyword(self, strKeyWord):
-        import ast
         lst=ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'lst'))
         lstSectionInChap = ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'seclist'))
         self.strlstModelSectionInChap = HDYStringListModel(lstSectionInChap)
@@ -70,14 +84,17 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         print("[onSectionAddRemoveClick]")
         self.backupINIFile()
         lst = self.strlstModelSectionInChap.getStringList()
-        strword =  str(lst)
-        self.configSuggestionTag.set(self.strKeyWord, u'seclist', unicode(lst))
+        strword = self.strlstModelSectionInChap.getUnicodeStringForStringList()
+        self.configSuggestionTag.set(self.strKeyWord, u'seclist', strword)
         # 現在存入的字串很怪 沒有存入中文字的格式, 存入了\uxxxx的格式
-        self.configSuggestionTag.write(codecs.open(constSuggestionTag, 'w', 'utf-8'))
+        f = codecs.open(constSuggestionTag, 'w', 'utf-8')
+        self.configSuggestionTag.write(f)
 
     def onTagAddRemoveClick(self):
         print("[onTagonTagAddRemoveClick]")
         pass
+
+
 
 app = QtGui.QApplication(sys.argv)
 window = MainWindow()
