@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 import sys, os, re, codecs
 from backports import configparser
@@ -11,10 +10,20 @@ from PyQt4.QtCore import QObject, SIGNAL
 import TagSuggestionConfigWidget
 from TagSuggestionConfigWidget import Ui_TagSuggestionConfigEditor as TagSuggestionConfigWidget
 
-
 constSuggestionTag = u"SuggestionTag.ini"
 
 from PyQt4.QtGui import *
+
+def stringListToUnicodeString(lstInput):
+    strR = u"["
+    nTotal = len(lstInput)
+    for k in range(nTotal):
+        strR = strR + "u\"" + lstInput[k] + "\""
+        if k < nTotal - 1:
+            strR = strR + u","
+    strR = strR + u"]"
+    return strR
+
 
 class HDYStringListModel(QStringListModel):
     def __init__(self , *var_args_tuple):
@@ -30,16 +39,18 @@ class HDYStringListModel(QStringListModel):
         將此List 變成一個合適的中括弧括起來的字串
         :return: stR
         """
-        strR = u"["
         lst = self.getStringList()
-        nTotal = len(lst)
-        for k in range(nTotal):
-            strR=strR + "u\"" + lst[k] + "\""
-            if k <nTotal -1:
-                strR=strR + u","
+        return stringListToUnicodeString(lst)
 
-        strR = strR+u"]"
-        return strR
+    def getUnicodeStringForStringListWithAppended(self, strAppended):
+        lst = self.getStringList()
+        lst.append(strAppended)
+        return stringListToUnicodeString(lst)
+
+    def getUnicodeStringForStringListWithRemoving(self, strRemoving):
+        lst =self.getStringList()
+        lst.remove(strRemoving)
+        return stringListToUnicodeString(lst)
 
 class MainWindow(QMainWindow, TagSuggestionConfigWidget):
     def __init__(self, parent=None):
@@ -47,7 +58,6 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         self.setupUi(self)
 
         #Load config
-
         self.configSuggestionTag = configparser.ConfigParser()
         self.configSuggestionTag.read(constSuggestionTag, encoding='utf-8')
         self.completerKeyWord = QCompleter(self.configSuggestionTag.sections()) #Keyword is the section of ini file.
@@ -57,14 +67,14 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
         self.strKeyWord = unicode(self.edtKeword.text())
 
         if self.strKeyWord in self.configSuggestionTag.sections():
-            self.updateUIByKeyword(self.strKeyWord)
+            self.updateUIByKeyword()
         else:
-            print("[WARNING]There is no matched keyword.")
+            self.showWarningDialog("[WARNING]There is no matched keyword.")
         pass
 
-    def updateUIByKeyword(self, strKeyWord):
-        lst=ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'lst'))
-        lstSectionInChap = ast.literal_eval(self.configSuggestionTag.get(strKeyWord, u'seclist'))
+    def updateUIByKeyword(self):
+        lst=ast.literal_eval(self.configSuggestionTag.get(self.strKeyWord, u'lst'))
+        lstSectionInChap = ast.literal_eval(self.configSuggestionTag.get(self.strKeyWord, u'seclist'))
         self.strlstModelSectionInChap = HDYStringListModel(lstSectionInChap)
         self.lvSection.setModel(self.strlstModelSectionInChap)
         self.strlstModelTag = HDYStringListModel(lst)
@@ -82,19 +92,45 @@ class MainWindow(QMainWindow, TagSuggestionConfigWidget):
 
     def onSectionAddRemoveClick(self):
         print("[onSectionAddRemoveClick]")
-        self.backupINIFile()
-        lst = self.strlstModelSectionInChap.getStringList()
-        strword = self.strlstModelSectionInChap.getUnicodeStringForStringList()
+        strBuffer = unicode(self.edtSection.text())
+        if strBuffer == u"":
+            return
+
+        if strBuffer in self.strlstModelSectionInChap.getStringList():
+            #remove
+            strword = self.strlstModelSectionInChap.getUnicodeStringForStringListWithRemoving(strBuffer)
+        else:
+            #add
+            strword = self.strlstModelSectionInChap.getUnicodeStringForStringListWithAppended(strBuffer)
+
         self.configSuggestionTag.set(self.strKeyWord, u'seclist', strword)
-        # 現在存入的字串很怪 沒有存入中文字的格式, 存入了\uxxxx的格式
+        self.backupINIandSave()
+        self.updateUIByKeyword()
+
+    def backupINIandSave(self):
+        self.backupINIFile()
         f = codecs.open(constSuggestionTag, 'w', 'utf-8')
         self.configSuggestionTag.write(f)
+        f.close()
 
     def onTagAddRemoveClick(self):
         print("[onTagonTagAddRemoveClick]")
         pass
 
+    def msgbtn(self,i):
+        print ("Button pressed is:"+ i.text())
 
+    def showWarningDialog(self,strWarningKeyWord):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(strWarningKeyWord)
+        #msg.setInformativeText(strWarningKeyWord)
+        msg.setWindowTitle("Warning Message")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.buttonClicked.connect(self.msgbtn)
+        retval = msg.exec_()
+        print ("value of pressed message box button:", retval)
+        pass
 
 app = QtGui.QApplication(sys.argv)
 window = MainWindow()
