@@ -377,7 +377,8 @@ class QuestionTagsEditor(QWidget):
             if item in lstSec:
                 lstSuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'lst'))
                 lst = lst + lstSuggest
-
+                lstSuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'seclist'))
+                lst = lst + lstSuggest
         return lst
 
     def onSuggestedItemChanged(self, widgetItem):
