@@ -18,6 +18,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import QObject, SIGNAL
 
 from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 from HDYLatexParser import HDYLatexParser
 from HDYQuestionParser import HDYQuestionParser as QParser
 
@@ -100,6 +101,17 @@ class QuestionTagsEditor(QWidget):
 
         self.showData()
         self.showMaximized()
+
+        self.setupHotkey()
+        self.bEditedAndNotSave = False
+
+    def setupHotkey(self):
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'),
+                     self.onHotkeySave)
+
+    def onHotkeySave(self):
+        print("[onHotkeySave]")
+        self.saveUpdatedTagIntoFile()
 
     def prepareTagsLayout(self):
         """
@@ -221,6 +233,7 @@ class QuestionTagsEditor(QWidget):
         else:
             print("[setLatestCurrentTagsDict] un-modified")
         print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
+        self.bEditedAndNotSave = True
 
     def prepareIndexSettingLayout(self):
         """
@@ -355,6 +368,7 @@ class QuestionTagsEditor(QWidget):
     def saveUpdatedTagIntoFile(self):
         print("[saveUpdatedTagIntoFile]")
         self.latex.saveFileWithNewTag(self.dicNewTagsBuffer)
+        self.bEditedAndNotSave = False
         pass
 
     def refreshTagsUI(self):
@@ -661,6 +675,10 @@ class QuestionTagsEditor(QWidget):
 
     def closeEvent(self, event):
         print ("[closeEvent]")
+        if self.bEditedAndNotSave:
+            self.runSaveDialogBeforeClosed()
+
+    def runSaveDialogBeforeClosed(self):
         strMsg = u"Are you sure you want to exit the program? \n" \
                  u"(Yes\\Save and Yes\\No)"
         reply = QtGui.QMessageBox.question(self, u'Message',
