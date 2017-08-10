@@ -109,7 +109,7 @@ class HDYQuestionParser:
         lstOri = self.getListOfTag()
         lstTags = self.lstNewTags + list(set(lstOri) - set(self.lstNewTags))
         if len(lstTags)!=0:
-            for item in self.lstNewTags:
+            for item in lstTags:
                 strTag = u"\\QTAG{%s}" % (item)
                 strBuffer += strTag
         strTAGS = u"        \\begin{QTAGS}%s\\end{QTAGS}" % strBuffer
@@ -192,7 +192,7 @@ class HDYQuestionParser:
 
         """
         nLst = self.getnLstExamAnsRateInfoParams()
-        strR = """
+        strR = u"""
                     (EXAMINFO_STR,
                          EXAMINFO_YEAR,
                          EXAMINFO_EXAM_TYPE,
@@ -246,5 +246,5 @@ class HDYQuestionParser:
                             self.strQEMPTYSPACE,
                             self.correctSQL(self.getQuestionString())
                             )
+        print (u"[getSQLString] %s" % (strR,))
         return strR
-        pass
