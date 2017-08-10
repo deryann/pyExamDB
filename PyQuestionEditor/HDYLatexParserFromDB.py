@@ -36,8 +36,8 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
     def getQuestionTagList(self, nQIndex):
         print("[HDYLatexParserFromDB][getQuestionTagList]")
-        self.currQustion = HDYQuestionParser(self.getQuestion(nQIndex))
-        return self.currQustion.getListOfTag()
+        self.currQuestion = HDYQuestionParser(self.getQuestion(nQIndex))
+        return self.currQuestion.getListOfTag()
 
     def getCountOfQ(self):
         return self.nCountQ
