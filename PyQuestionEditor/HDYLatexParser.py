@@ -5,24 +5,44 @@ import codecs
 from HDYQuestionParser import HDYQuestionParser
 
 
+def isTexFileMode(strFileName):
+    """
+    利用輸入的副檔名，查詢是否為Tex file Mode
+    :return:
+    """
+    if strFileName is None:
+        return False
+    if strFileName.find(u".tex") == -1:
+        return False
+    return True
+
+
+def isSQLiteDBMode(strFileName):
+    if strFileName is None:
+        return False
+    if strFileName.find(u".sqlitedb") == -1:
+        return False
+    return True
+
 ##
 #
 # 針對檔案讀出做管理
+# 支援兩種檔案 texfile, sqlite db file.
 #
-#
+
 class HDYLatexParser:
     def __init__(self, strInputFileName):
         self.strFileName = strInputFileName
 
         self.nCountQ = 0
-
         self.lstCommentLineNum = [] # 記錄哪幾行為註解
         self.lstQStartLineNum = [] # 記錄哪幾行為問題開始處
         self.lstQEndLineNum = [] #記錄哪幾行為問題結束處
 
         self.ptFileStart = 0
         self.strAllLines = []
-        if strInputFileName != None:
+
+        if isTexFileMode(self.strFileName ):
             self.openFile()
         print("__init__ OK!!")
         pass

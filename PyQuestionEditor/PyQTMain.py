@@ -20,12 +20,16 @@ from PyQt4.QtCore import QObject, SIGNAL
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from HDYLatexParser import HDYLatexParser
+from HDYLatexParser import isSQLiteDBMode, isTexFileMode
+from HDYLatexParserFromDB import HDYLatexParserFromDB
 from HDYQuestionParser import HDYQuestionParser as QParser
+#Tex file mode test filename
+#DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
+#SQLiteDb mode filename
+DEFAULT_FILE_INPUT_NAME = u"test.sqlitedb"
 
-DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
 ##
 # 程式所使用的常數區
-#
 #
 const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
@@ -337,13 +341,20 @@ class QuestionTagsEditor(QWidget):
     def onbtnLoadFile(self):
         strfileName = QFileDialog.getOpenFileName(self, u"Open HDY Latex", ".", u"Tex Files (*.tex )")
         print ("fileName:" +strfileName)
-        self.loadFile(strfileName)
+        self.loadFile(unicode(strfileName))
         pass
 
     def loadFile(self, strfileName):
         self.edtFile.setText(strfileName)
-        self.latex = HDYLatexParser(strfileName)
+        self.getDataModel(strfileName)
         self.showData()
+
+    def getDataModel(self,strFileName):
+        if isTexFileMode(strFileName):
+            self.latex = HDYLatexParser(strFileName)
+        elif isSQLiteDBMode(strFileName):
+            self.latex = HDYLatexParserFromDB(strFileName)
+
 
     def onedtIndexChaned(self, strText):
         try:

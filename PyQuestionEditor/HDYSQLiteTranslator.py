@@ -9,10 +9,11 @@
 # Copyright:   (c) user 2017
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
+import sqlite3
+from HDYLatexParser import HDYLatexParser as texParser
+from HDYQuestionParser import HDYQuestionParser as QParser
 
 def createDBandTable():
-    import sqlite3
-
     conn = sqlite3.connect('test.sqlitedb')
 
     print "Opened database successfully";
@@ -40,12 +41,10 @@ def createDBandTable():
     conn.commit()
 
 def moveDataFromFiletoDB():
-    import sqlite3
+
 
     conn = sqlite3.connect('test.sqlitedb')
 
-    from HDYLatexParser import HDYLatexParser as texParser
-    from HDYQuestionParser import HDYQuestionParser as QParser
 
     lstFileNameList = []
     #for number in range(91,107):
@@ -69,11 +68,16 @@ def moveDataFromFiletoDB():
             conn.commit()
 
     print "Records created successfully";
-    pass
+
+def movedataFromDBtoFile(strFilename= u"outFromDB.tex"):
+    conn = sqlite3.connect('test.sqlitedb')
+    for row in conn.execute('SELECT * FROM EXAM01'):
+        print(row)
 
 def main():
-    createDBandTable()
-    moveDataFromFiletoDB()
+    #createDBandTable()
+    #moveDataFromFiletoDB()
+    movedataFromDBtoFile()
 
 if __name__ == '__main__':
     main()
