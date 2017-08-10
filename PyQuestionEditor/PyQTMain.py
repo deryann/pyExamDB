@@ -47,7 +47,6 @@ class QLineEditWithDirModel(QLineEdit):
 ##
 # UI 呈現的程式碼
 #
-#
 class QuestionTagsEditor(QWidget):
     def __init__(self):
         QWidget.__init__(self, windowTitle=u"Latex Questions Editor .")
@@ -88,6 +87,7 @@ class QuestionTagsEditor(QWidget):
         self.layout().addWidget(self.tabModes)
 
         self.tabModeOneQuestion.layout().addLayout(self.layoutShowQuestion)
+        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnTagsList)
 
         self.prepareIndexSettingLayout()
 
@@ -106,8 +106,11 @@ class QuestionTagsEditor(QWidget):
         self.bEditedAndNotSave = False
 
     def setupHotkey(self):
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'),
-                     self.onHotkeySave)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'), self.onHotkeySave)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Right), self), QtCore.SIGNAL('activated()'),
+                     self.onbtnNextClicked)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Left), self), QtCore.SIGNAL('activated()'),
+                     self.onbtnPrevClicked)
 
     def onHotkeySave(self):
         print("[onHotkeySave]")
@@ -122,7 +125,7 @@ class QuestionTagsEditor(QWidget):
         #讀取Tag 表
         self.loadTagsToNewUI()
         self.layoutTagsPanel = QHBoxLayout()
-        self.tabBookChap.setFixedWidth(600)
+        self.tabBookChap.setFixedWidth(500)
         self.layoutTagsPanel.addWidget(self.tabBookChap)
 
         #按照當下的Item 嘗試著找出一些建議的 Tageditor
@@ -144,28 +147,37 @@ class QuestionTagsEditor(QWidget):
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
     def prepareShowQuestionUI(self):
-        self.layoutShowQuestion = QGridLayout(self)
+        self.layoutShowQuestionMetaData = QVBoxLayout(self)
+        self.layoutShowQuestion = QVBoxLayout(self)
+        self.layoutShowQuestionUp = QHBoxLayout(self)
+        self.layoutShowQuestionMetaData = QGridLayout(self)
         self.txtOneQuestion = QTextBrowser(self)
         self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
+        #self.txtOneQuestion.setFixedHeight(300)
+
 
         self.txtAns =QLineEdit("Ans" ,self)
         self.txtSol =QTextBrowser(self)
         self.reNewComboQuestionUI()
-        self.layoutShowQuestion.addWidget(self.txtOneQuestion, 1,0, 1,5)
 
-        self.layoutShowQuestion.addWidget(self.comboExamYear,2,0)
-        self.layoutShowQuestion.addWidget(self.comboExam,2,1)
-        self.layoutShowQuestion.addWidget(self.comboExamQuestionStyle,2,2)
-        self.layoutShowQuestion.addWidget(self.comboExamQuestionNum,2,3)
-        self.layoutShowQuestion.addWidget(self.txtAns,2,4)
-        self.layoutShowQuestion.addWidget(self.txtSol,3,0,3,5)
-        self.addQuestionTagsList()
-        
-        
-    def addQuestionTagsList(self):
-        self.layoutBtnTagsList = QHBoxLayout()
-        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnTagsList)
-        
+        self.comboExamYear.setFixedWidth(100)
+        self.comboExam.setFixedWidth(100)
+        self.comboExamQuestionStyle.setFixedWidth(100)
+        self.comboExamQuestionNum.setFixedWidth(100)
+        self.txtAns.setFixedWidth(100)
+        self.layoutShowQuestionMetaData.addWidget(self.comboExamYear)
+        self.layoutShowQuestionMetaData.addWidget(self.comboExam)
+        self.layoutShowQuestionMetaData.addWidget(self.comboExamQuestionStyle)
+        self.layoutShowQuestionMetaData.addWidget(self.comboExamQuestionNum)
+        self.layoutShowQuestionMetaData.addWidget(self.txtAns)
+        self.layoutShowQuestionUp.addWidget(self.txtOneQuestion)
+        self.layoutShowQuestionUp.addLayout(self.layoutShowQuestionMetaData)
+        self.layoutShowQuestion.addLayout(self.layoutShowQuestionUp)
+        self.layoutShowQuestion.addWidget(self.txtSol)
+        self.txtSol.setVisible(False)
+
+        self.layoutBtnTagsList = QHBoxLayout(self)
+
     def removeAllWidgetsInLayout(self, layout):
         nNumDelete = layout.count()
         print (u"[removeAllWidgetsInLayout] %d" % (nNumDelete))
@@ -312,10 +324,6 @@ class QuestionTagsEditor(QWidget):
         self.comboExamYear =QComboBox(self)
         self.comboExamQuestionStyle =QComboBox(self)
         self.comboExamQuestionNum =QComboBox(self)
-
-    def onLeftKey(self):
-        print("[onLeftKey]")
-        pass
 
     def onbtnbtnGroupTagClicked(self):
         print("onbtnbtnGroupTagClicked")
@@ -676,20 +684,20 @@ class QuestionTagsEditor(QWidget):
     def closeEvent(self, event):
         print ("[closeEvent]")
         if self.bEditedAndNotSave:
-            self.runSaveDialogBeforeClosed()
+            self.runSaveDialogBeforeClosed(event)
 
-    def runSaveDialogBeforeClosed(self):
+    def runSaveDialogBeforeClosed(self, closeEvent):
         strMsg = u"Are you sure you want to exit the program? \n" \
                  u"(Yes\\Save and Yes\\No)"
         reply = QtGui.QMessageBox.question(self, u'Message',
                                            strMsg, QtGui.QMessageBox.Save, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Save:
             self.saveUpdatedTagIntoFile()
-            event.accept()
+            closeEvent.accept()
         elif reply == QtGui.QMessageBox.Yes:
-            event.accept()
+            closeEvent.accept()
         else:
-            event.ignore()
+            closeEvent.ignore()
         pass
 
 app=QApplication(sys.argv)
