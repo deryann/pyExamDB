@@ -11,6 +11,7 @@
 #-------------------------------------------------------------------------------
 import sqlite3
 from HDYLatexParser import HDYLatexParser as texParser
+from HDYLatexParserFromDB import HDYLatexParserFromDB as DBParser
 from HDYQuestionParser import HDYQuestionParser as QParser
 
 def createDBandTable():
@@ -69,14 +70,17 @@ def moveDataFromFiletoDB():
 
     print "Records created successfully";
 
-def movedataFromDBtoFile(strFilename= u"outFromDB.tex"):
-    conn = sqlite3.connect('test.sqlitedb')
-    for row in conn.execute('SELECT * FROM EXAM01'):
-        print(row)
+def movedataFromDBtoFile():
+    dbParser = DBParser('test.sqlitedb')
+    dbParser.saveSqliteDBIntoTexFileByYears()
 
 def main():
+    #PartI:
     #createDBandTable()
     #moveDataFromFiletoDB()
+    #movedataFromDBtoFile()
+
+    #PartII:
     movedataFromDBtoFile()
 
 if __name__ == '__main__':
