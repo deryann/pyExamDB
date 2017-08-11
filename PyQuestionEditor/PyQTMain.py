@@ -107,7 +107,7 @@ class QuestionTagsEditor(QWidget):
         self.showMaximized()
 
         self.setupHotkey()
-        self.bEditedAndNotSave = False
+
 
     def setupHotkey(self):
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'), self.onHotkeySave)
@@ -249,7 +249,7 @@ class QuestionTagsEditor(QWidget):
         else:
             print("[setLatestCurrentTagsDict] un-modified")
         print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
-        self.bEditedAndNotSave = True
+
 
     def prepareIndexSettingLayout(self):
         """
@@ -387,8 +387,7 @@ class QuestionTagsEditor(QWidget):
     def saveUpdatedTagIntoFile(self):
         print("[saveUpdatedTagIntoFile]")
         self.latex.saveFileWithNewTag(self.dicNewTagsBuffer)
-        self.bEditedAndNotSave = False
-        pass
+        self.dicNewTagsBuffer={}
 
     def refreshTagsUI(self):
         self.refreshTagCheckedUIListData()
@@ -555,7 +554,6 @@ class QuestionTagsEditor(QWidget):
                 self.lstCheckboxs.append(chkitem)
                 self.tabCustom.layout().addWidget(chkitem)
 
-
         self.refreshRemoveButtonsUIforQuetionTag()
         
     #TODO:
@@ -692,9 +690,17 @@ class QuestionTagsEditor(QWidget):
         self.latex.saveNewFileWithSelectedTag(strOutPutFileName, lstSelectedTags)
         pass
 
+
+    def isEditedAndNotSave(self):
+        if self.dicNewTagsBuffer == {}:
+            return False
+        else:
+            return True
+
+
     def closeEvent(self, event):
         print ("[closeEvent]")
-        if self.bEditedAndNotSave:
+        if self.isEditedAndNotSave():
             self.runSaveDialogBeforeClosed(event)
 
     def runSaveDialogBeforeClosed(self, closeEvent):
