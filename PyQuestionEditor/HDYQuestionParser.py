@@ -2,6 +2,11 @@
 import os, codecs, re
 
 
+def getListOfTagFromString(strTags):
+    # 找出所有行 \\begin{QTAGS} 與 \\end{QTAGS} 夾住的所有
+    lst = re.findall(u"QTAG{(.*?)}", strTags, re.DOTALL)
+    return lst
+
 ##
 #
 #  針對單一的Question String 做擷取
@@ -136,10 +141,7 @@ class HDYQuestionParser:
         return self.strBuffer.find( u"\\begin{QTAGS}") != -1
 
     def getListOfTag(self):
-        strTags = self.strQTAGS
-        #找出所有行 \\begin{QTAGS} 與 \\end{QTAGS} 夾住的所有
-        lst = re.findall(u"QTAG{(.*?)}", strTags, re.DOTALL)
-        return lst
+        return getListOfTagFromString(self.strQTAGS)
 
     def isWithTag(self, inputTag):
         return inputTag in self.getListOfTag()

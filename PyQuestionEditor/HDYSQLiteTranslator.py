@@ -14,13 +14,40 @@ from HDYLatexParser import HDYLatexParser as texParser
 from HDYLatexParserFromDB import HDYLatexParserFromDB as DBParser
 from HDYQuestionParser import HDYQuestionParser as QParser
 
+def createTagsTable():
+    """
+    開啟相關Tag的資料表
+    :return:
+    """
+    conn = sqlite3.connect('test.sqlitedb')
+
+    print "Opened database successfully";
+
+    conn.execute(''' CREATE TABLE question_tag_relationship
+                            (
+                             relation_id INTEGER PRIMARY KEY AUTOINCREMENT ,
+                             question_id INTEGER NOT NULL,
+                             tag_id INTEGER NOT NULL
+                             );
+                    ''')
+    conn.commit()
+
+    conn.execute(''' CREATE TABLE questiontags
+                            (
+                             tag_id INTEGER PRIMARY KEY AUTOINCREMENT ,
+                             TAG_STR TEXT UNIQUE NOT NULL
+                             );
+                    ''')
+    conn.commit()
+
 def createDBandTable():
     conn = sqlite3.connect('test.sqlitedb')
 
     print "Opened database successfully";
 
     conn.execute(''' CREATE TABLE EXAM01
-                        (EXAMINFO_STR TEXT PRIMARY KEY NOT NULL ,
+                        (question_id INTEGER PRIMARY KEY AUTOINCREMENT ,
+                         EXAMINFO_STR TEXT UNIQUE NOT NULL ,
                          EXAMINFO_YEAR INT NOT NULL,
                          EXAMINFO_EXAM_TYPE TEXT NOT NULL,
                          EXAMINFO_QUESTION_STYLE TEXT NOT NULL,
@@ -74,14 +101,22 @@ def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
     dbParser.saveSqliteDBIntoTexFileByYears()
 
+def refreshDBtagTable():
+    dbParser = DBParser('test.sqlitedb')
+    dbParser.refreshTagTableInDB()
+
+
 def main():
     #PartI:
-    #createDBandTable()
-    #moveDataFromFiletoDB()
-    #movedataFromDBtoFile()
+    createDBandTable()
+    moveDataFromFiletoDB()
 
     #PartII:
-    movedataFromDBtoFile()
+    #movedataFromDBtoFile()
+
+    #PartIII: Try to load tag in exam01 and save it into table('question_tag_relationship')
+    createTagsTable()
+    refreshDBtagTable()
 
 if __name__ == '__main__':
     main()
