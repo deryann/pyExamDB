@@ -58,65 +58,40 @@ def createDBandTable():
                          EXAMANSRATEINFO_PL INT NOT NULL,
                          QBODY TEXT NOT NULL,
                          QFROMS TEXT NOT NULL,
-                         QTAGS TEXT NOT NULL,
                          QANS TEXT NOT NULL,
                          QSOLLIST TEXT NOT NULL,
-                         QEMPTYSPACE TEXT NOT NULL,
-                         FULLQUESTION TEXT NOT NULL
+                         QEMPTYSPACE TEXT NOT NULL
                          );
 
                 ''')
     conn.commit()
 
 def moveDataFromFiletoDB():
-
-
-    conn = sqlite3.connect('test.sqlitedb')
-
-
     lstFileNameList = []
-    #for number in range(91,107):
-    for number in range(91,107):
+    dbParser = DBParser('test.sqlitedb')
+    for number in range(91, 107):
         strNumber = u"Exam01All\\q%03d.tex" % number
         lstFileNameList.append(strNumber)
 
     for strFileName in lstFileNameList:
-        fPt = texParser(strFileName)
-        fPt.read()
-        fPt.getReport()
-        for nIndex in range(fPt.getCountOfQ()):
-
-            Qpt = QParser(fPt.getQuestion(nIndex))
-            print(Qpt.getExamInfoString())
-            strSQL = "INSERT INTO EXAM01 %s" % Qpt.getSQLString()
-            print("==========================================")
-            print(strSQL)
-            print("==========================================")
-            conn.execute(strSQL)
-            conn.commit()
-
-    print "Records created successfully";
+        dbParser.appendTexFile(strFileName)
 
 def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
     dbParser.saveSqliteDBIntoTexFileByYears()
 
-def refreshDBtagTable():
-    dbParser = DBParser('test.sqlitedb')
-    dbParser.refreshTagTableInDB()
 
 
 def main():
     #PartI:
     createDBandTable()
+    createTagsTable()
     moveDataFromFiletoDB()
 
     #PartII:
     #movedataFromDBtoFile()
 
     #PartIII: Try to load tag in exam01 and save it into table('question_tag_relationship')
-    createTagsTable()
-    refreshDBtagTable()
 
 if __name__ == '__main__':
     main()

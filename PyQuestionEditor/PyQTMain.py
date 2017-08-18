@@ -375,7 +375,7 @@ class QuestionTagsEditor(QWidget):
         return lst
 
     def refreshoutputAreaOneQuestion(self):
-        Qpt = QParser(self.latex.getQuestion(int(self.nQIndex)))
+        Qpt = self.latex.getQuestionObject(int(self.nQIndex))
         self.txtOneQuestion.setText(Qpt.getQBODY())
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
@@ -677,8 +677,8 @@ class QuestionTagsEditor(QWidget):
             for j in range(0, nQcount):
                 strNum = str(i) + " - " + str (j)
                 print (strNum)
-                strA =self.latex.getQuestion(i)
-                strB =self.latex.getQuestion(j)
+                strA =self.latex.getQuestionString(i)
+                strB =self.latex.getQuestionString(j)
                 print (difflib.SequenceMatcher(None, strA, strB).ratio())
 
     ##

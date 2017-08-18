@@ -3,6 +3,7 @@
 import os
 import codecs
 from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
+from HDYQuestionParserFromDB import HDYQuestionParserFromDB
 from HDYLatexParser import HDYLatexParser
 import sqlite3
 
@@ -20,7 +21,7 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
     def read(self):
         print("[HDYLatexParserFromDB][read]")
-        strSQL = (u"select EXAMINFO_STR from " + constQuestionsTableName)
+        strSQL = (u"select EXAMINFO_STR, question_id from " + constQuestionsTableName)
         self.mainKey = self.getRowsBySQL(strSQL)
         self.nCountQ = len(self.mainKey)
         print (self.mainKey)
@@ -30,6 +31,10 @@ class HDYLatexParserFromDB(HDYLatexParser):
         row = self.mainKey[nIndex]
         return row[0]
 
+    def getmainkeyid(self, nIndex):
+        row = self.mainKey[nIndex]
+        return row[1]
+
     def getReport(self):
         print("[HDYLatexParserFromDB][getReport]")
         print("[HDYLatexParserFromDB][getReport] Q count = %d" %(self.nCountQ,))
@@ -37,22 +42,21 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
     def getQuestionTagList(self, nQIndex):
         print("[HDYLatexParserFromDB][getQuestionTagList]")
-        self.currQuestion = HDYQuestionParser(self.getQuestion(nQIndex))
+        self.currQuestion = self.getQuestionObject(nQIndex)
         return self.currQuestion.getListOfTag()
 
     def getCountOfQ(self):
         return self.nCountQ
 
-    def getQuestion(self,nIndex):
+    def getQuestionString(self, nIndex):
         strKey = self.getmainkey(nIndex)
-        strSQL = u"select FULLQUESTION from %s where EXAMINFO_STR = '%s' " %(constQuestionsTableName, strKey)
-        rows = self.getRowsBySQL(strSQL)
-        if len (rows) == 1:
-            row = rows[0]
-            return row[0]
-        else:
-            print ("[HDYLatexParserFromDB][getQuestion(%d)] row count %d " %(nIndex,cursor.rowcount))
-            return ""
+        strSQL = u"select * from %s where EXAMINFO_STR = '%s' " %(constQuestionsTableName, strKey)
+        row = self.getRowBySQL(strSQL)#TODO: Tranlate the row data into string
+
+    def getQuestionObject(self, nIndex):
+        qID =self.getmainkeyid(nIndex)
+        qpt = HDYQuestionParserFromDB(qID,self.conn)
+        return qpt
 
     def saveFileWithNewTag(self, dicNewTags):
         return
@@ -147,30 +151,44 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
         return lstReturn
 
+    def getQuestionIDInDB(self,strEXAMINFO_STR):
+        nQID = -1
+        strSQL ="select question_id, EXAMINFO_STR from %s where EXAMINFO_STR='%s' " % (constQuestionsTableName, strEXAMINFO_STR)
+        row =self.getRowBySQL(strSQL)
+        if row is not None:
+            return row[0]
+        else:
+            return -1
 
-    def refreshTagTableInDB(self):
-        """
-        試著將EXAM01的QUESTION主體中的QTAG 整理出來 QUESTIONTAG_RELATION TABLE QUESTIONTAG TABLE
-
-        :return:
-        """
-        strSQL = "select question_id, EXAMINFO_STR, QTAGS from %s " % (constQuestionsTableName,)
-        rows = self.getRowsBySQL(strSQL)
-        count = len(rows)
-        #for i in range(count):
-        for i in range(count):
-            row = rows[i]
-            nQId = row[0]
-            strTAGS = row[2]
-            lstTags = getListOfTagFromString(strTAGS)
-            lstTagsIds = self.translateToTagIDs(lstTags)
-            for nIdTag in lstTagsIds:
-                strInsertSQL = u"""
-                                INSERT INTO %s (question_id, tag_id)
-                                VALUES ( %d, %d );
-                                """ %(constQuestionTagRealtionTableName, nQId, nIdTag)
-                print (strInsertSQL)
-                self.conn.execute(strInsertSQL)
+    def appendTexFile(self,strFileName):
+        fPt = HDYLatexParser(strFileName)
+        fPt.read()
+        fPt.getReport()
+        for nIndex in range(fPt.getCountOfQ()):
+            Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
+            print(Qpt.getEXAMINFO_STR())
+            strSQL = "INSERT INTO EXAM01 %s" % Qpt.getSQLString()
+            print("==========================================")
+            print(strSQL)
+            print("==========================================")
+            self.conn.execute(strSQL)
             self.conn.commit()
+            #  Get question id
+            nQId = self.getQuestionIDInDB(Qpt.getEXAMINFO_STR())
+            if nQId != -1 :
+                lstTags = Qpt.getListOfTag()
+                lstTagsIds = self.translateToTagIDs(lstTags)             # find out tag id or add tag into table and get ID
 
-        pass
+                #Try to add relation between question and tag
+                for nIdTag in lstTagsIds:
+                    strInsertSQL = u"""
+                                    INSERT INTO %s (question_id, tag_id)
+                                    VALUES ( %d, %d );
+                                    """ %(constQuestionTagRealtionTableName, nQId, nIdTag)
+                    print (strInsertSQL)
+                    self.conn.execute(strInsertSQL)
+                self.conn.commit()
+                strInsertSQL = u"INSERT INTO %s (question_id,tag_id) VALUES (%d,%d)"
+            else:
+                print("[DB ERROR] we cannot find the row which just insert")
+        print "Records created successfully";

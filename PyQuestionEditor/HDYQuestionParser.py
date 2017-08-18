@@ -7,6 +7,13 @@ def getListOfTagFromString(strTags):
     lst = re.findall(u"QTAG{(.*?)}", strTags, re.DOTALL)
     return lst
 
+def generateTagTexStringFromList(lstTags):
+    strBuffer = u''
+    for item in lstTags:
+        strTag = u"\\QTAG{%s}" % (item,)
+        strBuffer += strTag
+    return strBuffer
+
 ##
 #
 #  針對單一的Question String 做擷取
@@ -114,9 +121,7 @@ class HDYQuestionParser:
         lstOri = self.getListOfTag()
         lstTags = self.lstNewTags + list(set(lstOri) - set(self.lstNewTags))
         if len(lstTags)!=0:
-            for item in lstTags:
-                strTag = u"\\QTAG{%s}" % (item)
-                strBuffer += strTag
+            generateTagTexStringFromList(lstTags)
         strTAGS = u"        \\begin{QTAGS}%s\\end{QTAGS}" % strBuffer
         strTAGS += os.linesep
         return strTAGS
@@ -175,6 +180,11 @@ class HDYQuestionParser:
                                            self.lstExamInfoParams[2],self.lstExamInfoParams[3])
         return strParams
 
+    def getEXAMINFO_SRING_FOR_PATH(self):
+        strParams = u"%s_%s_%s_%s" % (self.lstExamInfoParams[0],self.lstExamInfoParams[1],
+                                           self.lstExamInfoParams[2],self.lstExamInfoParams[3])
+        return strParams
+
     def getEXAMINFO_YEAR(self):
         return int(self.lstExamInfoParams[0])
 
@@ -206,11 +216,9 @@ class HDYQuestionParser:
                          EXAMANSRATEINFO_PL,
                          QBODY ,
                          QFROMS ,
-                         QTAGS ,
                          QANS ,
                          QSOLLIST ,
-                         QEMPTYSPACE ,
-                         FULLQUESTION
+                         QEMPTYSPACE 
                          )
                          VALUES
                          (
@@ -227,8 +235,7 @@ class HDYQuestionParser:
                          '%s' ,
                          '%s' ,
                          '%s' ,
-                         '%s' ,
-                         '%s' ,
+
                          '%s'
                          )
                     """ % ( self.getEXAMINFO_STR(),
@@ -242,11 +249,9 @@ class HDYQuestionParser:
                             nLst[3],
                             self.correctSQL(self.strQBODY),
                             self.strQFROMS,
-                            self.strQTAGS,
                             self.correctSQL(self.strQANS),
                             self.correctSQL(self.strQSOLLIST),
-                            self.strQEMPTYSPACE,
-                            self.correctSQL(self.getQuestionString())
+                            self.strQEMPTYSPACE
                             )
         print (u"[getSQLString] %s" % (strR,))
         return strR

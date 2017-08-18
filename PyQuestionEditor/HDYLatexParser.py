@@ -231,7 +231,7 @@ class HDYLatexParser:
 
         return strReport
 
-    def getQuestion(self, nIndex):
+    def getQuestionString(self, nIndex):
         if nIndex < len(self.lstQStartLineNum):
             lstQuestionStrings = self.strAllLines[self.lstQStartLineNum[nIndex]:self.lstQEndLineNum[nIndex]+1]
             strBuffer = u""
@@ -240,9 +240,11 @@ class HDYLatexParser:
             return strBuffer
         return None
 
+    def getQuestionObject(self, nIndex):
+        return  HDYQuestionParser(self.getQuestionString(nIndex))
+
     def getQuestionTagList(self, nIndex):
-        strBuffer = self.getQuestion(nIndex)
-        self.currQustion = HDYQuestionParser(strBuffer)
+        self.currQustion = self.getQuestionObject(nIndex)
         return self.currQustion.getListOfTag()
 
     def read(self):
@@ -271,9 +273,7 @@ class HDYLatexParser:
         for tagItem in lstSelectedTags:
             fPtOutput.write(u"\\begin{QUESTIONS} " +os.linesep)
             for i in range(self.getCountOfQ()):
-
-                strBuffer = self.getQuestion(i)
-                qPt = HDYQuestionParser(strBuffer)
+                qPt = self.getQuestionObject(i)
 
                 if qPt.isWithTag(tagItem):
                     for item in self.strAllLines[self.lstQStartLineNum[i]:self.lstQEndLineNum[i]+1]:
@@ -313,8 +313,7 @@ class HDYLatexParser:
                     fPtOutput.write(item)
             else:
                 #If question WITHOUT updated tag.
-                strBuffer = self.getQuestion(i)
-                qPt = HDYQuestionParser(strBuffer)
+                qPt = self.getQuestionObject(i)
                 qPt.setNewTagList(dicNewTags[i])
                 fPtOutput.write(qPt.getQuestionString())
                 fPtOutput.write(os.linesep)
@@ -339,8 +338,7 @@ class HDYLatexParser:
         fPtOutput.write(strStart)
 
         for i in range(self.getCountOfQ()):
-            strBuffer = self.getQuestion(i)
-            qPt = HDYQuestionParser(strBuffer)
+            qPt = self.getQuestionObject(i)
             qPt.setQFROM(strQFrom)
             fPtOutput.write(qPt.getQuestionString())
             if i!=self.getCountOfQ():
@@ -385,8 +383,7 @@ class HDYLatexParser:
         fPtOutput.write(strStart)
 
         for i in range(self.getCountOfQ()):
-            strBuffer = self.getQuestion(i)
-            qPt = HDYQuestionParser(strBuffer)
+            qPt = self.getQuestionObject(i)
             lstInput = []
             lstInput.append(strYear)
             lstInput.append(strExam)
