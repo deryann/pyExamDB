@@ -18,7 +18,6 @@ class HDYLatexParserFromDB(HDYLatexParser):
         self.nCountQ = 0
         self.mainKey = None
 
-
     def read(self):
         print("[HDYLatexParserFromDB][read]")
         strSQL = (u"select EXAMINFO_STR, question_id from " + constQuestionsTableName)
@@ -54,12 +53,53 @@ class HDYLatexParserFromDB(HDYLatexParser):
         row = self.getRowBySQL(strSQL)#TODO: Tranlate the row data into string
 
     def getQuestionObject(self, nIndex):
-        qID =self.getmainkeyid(nIndex)
+        qID = self.getmainkeyid(nIndex)
         qpt = HDYQuestionParserFromDB(qID,self.conn)
         return qpt
 
     def saveFileWithNewTag(self, dicNewTags):
-        return
+        print("[HDYLatexParserFromDB][saveFileWithNewTag]")
+        self.backupCurrentFile()
+        for index in dicNewTags.keys():
+            nQID = self.getmainkeyid(index)
+            lst = dicNewTags[index]
+            self.updateTagsToDB(index, lst)
+
+    def updateTagsToDB(self, index, lstInput):
+        """
+        index 將 lstInput 內的Tag 更新到資料庫裡去
+        :param index: 要更動的第幾題
+        :param lstInput: 要的Tags全貌
+        :return:
+        """
+
+        qpt = self.getQuestionObject(index)
+        nQID = self.getmainkeyid(index)
+        lstOriTag = qpt.getListOfTag()
+        # 先整理出有多少要刪除，有多少要新增
+        lstShouldDeleteRelationTag = list(set(lstOriTag) - set(lstInput))
+        lstShouldAddRelationTag = list( set(lstInput) - set(lstOriTag) )
+        # 將其Tags IDs 全部找出
+        lstDeleteTagIDs = self.translateToTagIDs(lstShouldDeleteRelationTag)
+        lstAddTagIDs = self.translateToTagIDs(lstShouldAddRelationTag)
+        # 進行刪除SQL指令執行
+        for idDelete in lstDeleteTagIDs:
+            strDeleteSQL = u"DELETE FROM %s WHERE question_id=%d AND tag_id=%d" % (constQuestionTagRealtionTableName, nQID, idDelete)
+            self.executeSQL(strDeleteSQL)
+        # 進行新增指令執行
+        for idInsert in lstAddTagIDs:
+            strInsertSQL = u"""INSERT INTO %s (question_id, tag_id)
+                                                VALUES ( %d, %d );
+                                                """ % (constQuestionTagRealtionTableName, nQID, idInsert)
+            self.executeSQL(strInsertSQL)
+        self.commitDB()
+
+    def executeSQL(self,strSQL):
+        print (strSQL)
+        self.executeSQL(strSQL)
+
+    def commitDB(self):
+        self.conn.commit()
 
     def setExamInfoForAllQuestions(self, strYear, strExam, strStyle, strStartNum):
         print("[HDYLatexParserFromDB][setExamInfoForAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
@@ -127,8 +167,8 @@ class HDYLatexParserFromDB(HDYLatexParser):
         #insert tag
         strInsertSQL = u"""INSERT INTO %s (TAG_STR)
                                 VALUES ( '%s' );""" % (constTagTableName, strTag)
-        self.conn.execute(strInsertSQL)
-        self.conn.commit()
+        self.executeSQL(strInsertSQL)
+        self.commitDB()
         #reget id
         strSQL = "select tag_id from %s where TAG_STR = '%s'" % (constTagTableName, strTag)
         row = self.getRowBySQL(strSQL)
@@ -168,10 +208,7 @@ class HDYLatexParserFromDB(HDYLatexParser):
             Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
             print(Qpt.getEXAMINFO_STR())
             strSQL = "INSERT INTO EXAM01 %s" % Qpt.getSQLString()
-            print("==========================================")
-            print(strSQL)
-            print("==========================================")
-            self.conn.execute(strSQL)
+            self.executeSQL(strSQL)
             self.conn.commit()
             #  Get question id
             nQId = self.getQuestionIDInDB(Qpt.getEXAMINFO_STR())
@@ -185,8 +222,7 @@ class HDYLatexParserFromDB(HDYLatexParser):
                                     INSERT INTO %s (question_id, tag_id)
                                     VALUES ( %d, %d );
                                     """ %(constQuestionTagRealtionTableName, nQId, nIdTag)
-                    print (strInsertSQL)
-                    self.conn.execute(strInsertSQL)
+                    self.executeSQL(strInsertSQL)
                 self.conn.commit()
                 strInsertSQL = u"INSERT INTO %s (question_id,tag_id) VALUES (%d,%d)"
             else:
