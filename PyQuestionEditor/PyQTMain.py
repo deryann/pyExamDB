@@ -206,17 +206,17 @@ class QuestionTagsEditor(QWidget):
             return
 
         for item in lst :
-            strButtonTitle = u"x %s" % (item)
+            strButtonTitle = u"x %s" % (item,)
             btn=QPushButton(strButtonTitle, self)
             btn.strCurrTag = item
-            btn.clicked.connect(lambda: self.onbtnRemoveTagClicked( btn.strCurrTag))
+            btn.clicked.connect(self.onbtnRemoveTagClicked)
             self.layoutBtnTagsList.addWidget(btn)
             
-    def onbtnRemoveTagClicked(self, strRemoveTag):
-        strMessage = "[onbtnRemoveTagClicked] %s" % (strRemoveTag)
+    def onbtnRemoveTagClicked(self):
+        sender = self.sender()
+        strMessage = "[onbtnRemoveTagClicked2] %s" % (sender.strCurrTag,)
         print (strMessage)
-
-        self.setLatestCurrentTagsDict(strRemoveTag, Qt.Unchecked)
+        self.setLatestCurrentTagsDict(sender.strCurrTag, Qt.Unchecked)
 
     def getLatestCurrentTags(self):
         if self.dicNewTagsBuffer.has_key(self.nQIndex):
@@ -354,6 +354,7 @@ class QuestionTagsEditor(QWidget):
             self.latex = HDYLatexParser(strFileName)
         elif isSQLiteDBMode(strFileName):
             self.latex = HDYLatexParserFromDB(strFileName)
+            #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
 
 
     def onedtIndexChaned(self, strText):
@@ -375,6 +376,8 @@ class QuestionTagsEditor(QWidget):
         return lst
 
     def refreshoutputAreaOneQuestion(self):
+        if not self.nQIndex in range(0, self.latex.getCountOfQ() ):
+            return
         Qpt = self.latex.getQuestionObject(int(self.nQIndex))
         self.txtOneQuestion.setText(Qpt.getQBODY())
         self.txtAns.setText(Qpt.getQANS())
@@ -661,6 +664,10 @@ class QuestionTagsEditor(QWidget):
         self.txtOneQuestion.clear()
         self.txtAns.clear()
         self.txtSol.clear()
+        self.lblExamQuestionStyle.clear()
+        self.lblExamQuestionNum.clear()
+        self.lblExamName.clear()
+        self.lblExamYear.clear()
         self.refreshoutputAreaOneQuestion()
         self.edtCount.setText(str(self.latex.getCountOfQ()))
         self.edtCount.setReadOnly(True)

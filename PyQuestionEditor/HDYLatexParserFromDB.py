@@ -12,16 +12,28 @@ constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
 
 class HDYLatexParserFromDB(HDYLatexParser):
-    def __init__(self,strInputFileName= u'test.sqlitedb'):
+    def __init__(self,strInputFileName= u'test.sqlitedb', **args):
         HDYLatexParser.__init__(self, strInputFileName)
         self.conn = sqlite3.connect(strInputFileName)
         self.nCountQ = 0
         self.mainKey = None
 
+        self.strMainSQL = u"select EXAMINFO_STR, question_id from " + constQuestionsTableName
+        self.parserArgAsNewMainSQL(args)
+
+    def parserArgAsNewMainSQL(self,args):
+        if args.has_key(u'list_tag_str'):
+            lstTagID = self.translateToTagIDs(args[u'list_tag_str'])
+            strTagListSQL=(str(lstTagID).replace("[","(")).replace("]",")")
+            strSQL = u"""SELECT a.EXAMINFO_STR, a.question_id FROM %s as b LEFT JOIN %s as a ON b.question_id=a.question_id
+where b.tag_id IN %s
+            """ % (constQuestionTagRealtionTableName, constQuestionsTableName,strTagListSQL)
+            self.strMainSQL = strSQL
+
+
     def read(self):
         print("[HDYLatexParserFromDB][read]")
-        strSQL = (u"select EXAMINFO_STR, question_id from " + constQuestionsTableName)
-        self.mainKey = self.getRowsBySQL(strSQL)
+        self.mainKey = self.getRowsBySQL(self.strMainSQL)
         self.nCountQ = len(self.mainKey)
         print (self.mainKey)
         return u"This is Db Mode"
@@ -96,7 +108,7 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
     def executeSQL(self,strSQL):
         print (strSQL)
-        self.executeSQL(strSQL)
+        self.conn.execute(strSQL)
 
     def commitDB(self):
         self.conn.commit()
