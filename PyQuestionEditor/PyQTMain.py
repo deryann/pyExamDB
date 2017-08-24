@@ -164,15 +164,15 @@ class QuestionTagsEditor(QWidget):
         self.txtSol =QTextBrowser(self)
         self.reNewComboQuestionUI()
 
-        self.comboExamYear.setFixedWidth(100)
-        self.comboExam.setFixedWidth(100)
-        self.comboExamQuestionStyle.setFixedWidth(100)
-        self.comboExamQuestionNum.setFixedWidth(100)
+        self.lblExamYear.setFixedWidth(100)
+        self.lblExamName.setFixedWidth(100)
+        self.lblExamQuestionStyle.setFixedWidth(100)
+        self.lblExamQuestionNum.setFixedWidth(100)
         self.txtAns.setFixedWidth(100)
-        self.layoutShowQuestionMetaData.addWidget(self.comboExamYear)
-        self.layoutShowQuestionMetaData.addWidget(self.comboExam)
-        self.layoutShowQuestionMetaData.addWidget(self.comboExamQuestionStyle)
-        self.layoutShowQuestionMetaData.addWidget(self.comboExamQuestionNum)
+        self.layoutShowQuestionMetaData.addWidget(self.lblExamYear)
+        self.layoutShowQuestionMetaData.addWidget(self.lblExamName)
+        self.layoutShowQuestionMetaData.addWidget(self.lblExamQuestionStyle)
+        self.layoutShowQuestionMetaData.addWidget(self.lblExamQuestionNum)
         self.layoutShowQuestionMetaData.addWidget(self.txtAns)
         self.layoutShowQuestionUp.addWidget(self.txtOneQuestion)
         self.layoutShowQuestionUp.addLayout(self.layoutShowQuestionMetaData)
@@ -324,10 +324,10 @@ class QuestionTagsEditor(QWidget):
 
 
     def reNewComboQuestionUI(self):
-        self.comboExam = QComboBox(self)
-        self.comboExamYear =QComboBox(self)
-        self.comboExamQuestionStyle =QComboBox(self)
-        self.comboExamQuestionNum =QComboBox(self)
+        self.lblExamName = QLabel(self)
+        self.lblExamYear =QLabel(self)
+        self.lblExamQuestionStyle =QLabel(self)
+        self.lblExamQuestionNum =QLabel(self)
 
     def onbtnbtnGroupTagClicked(self):
         print("onbtnbtnGroupTagClicked")
@@ -380,6 +380,10 @@ class QuestionTagsEditor(QWidget):
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
 
+        self.lblExamYear.setText(u"年份："+unicode(Qpt.getExamYear()))
+        self.lblExamName.setText(u"試題："+Qpt.getExamName())
+        self.lblExamQuestionStyle.setText(u"題型："+Qpt.getExamQuestionStyle())
+        self.lblExamQuestionNum.setText(u"題號："+Qpt.getExamQuestionNum())
         self.reNewCustomTagCheckItem()
 
         self.refreshTagsUI()
@@ -717,8 +721,13 @@ class QuestionTagsEditor(QWidget):
             closeEvent.ignore()
         pass
 
-app=QApplication(sys.argv)
-QuestionEditor=QuestionTagsEditor()
+def main():
+    app=QApplication(sys.argv)
+    QuestionEditor=QuestionTagsEditor()
 
-QuestionEditor.show()
-sys.exit(app.exec_())
+    QuestionEditor.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

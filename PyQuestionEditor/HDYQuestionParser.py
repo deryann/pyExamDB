@@ -87,6 +87,18 @@ class HDYQuestionParser:
             strReturn = u"        \\begin{ExamInfo}%s%s%s%s        \\end{ExamInfo}%s" %( strParams, os.linesep, self.strExamInfoBODY, os.linesep,os.linesep)
         return strReturn
 
+    def getExamName(self):
+        return self.lstExamInfoParams[1]
+
+    def getExamYear(self):
+        return self.lstExamInfoParams[0]
+
+    def getExamQuestionStyle(self):
+        return self.lstExamInfoParams[2]
+
+    def getExamQuestionNum(self):
+        return self.lstExamInfoParams[3]
+
     def getExamAnsRateInfoString(self):
         strParams =""
 
