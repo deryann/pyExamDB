@@ -353,9 +353,9 @@ class QuestionTagsEditor(QWidget):
         if isTexFileMode(strFileName):
             self.latex = HDYLatexParser(strFileName)
         elif isSQLiteDBMode(strFileName):
-            self.latex = HDYLatexParserFromDB(strFileName)
+            #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-
+            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C1空間向量"])
 
     def onedtIndexChaned(self, strText):
         try:

@@ -6,7 +6,7 @@ from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
 from HDYQuestionParserFromDB import HDYQuestionParserFromDB
 from HDYLatexParser import HDYLatexParser
 import sqlite3
-
+from datetime import datetime
 constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
@@ -212,7 +212,44 @@ where b.tag_id IN %s
         else:
             return -1
 
+    def importTexFile(self, strFileName):
+        #先整理一個大表
+        print(u"[importTexFile][%s]" %(strFileName,))
+        dicUpdateQuestionidMapUpdateDic={}
+        fPt = HDYLatexParser(strFileName)
+        fPt.read()
+        fPt.getReport()
+        nCount =0
+        for nIndex in range(fPt.getCountOfQ()):
+            Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
+            print(Qpt.getEXAMINFO_STR())
+            nQId = self.getQuestionIDInDB(Qpt.getEXAMINFO_STR())
+            if nQId != -1:
+                lst = Qpt.getListOfQSOLs()
+                if len(lst)!=0:
+                    print ("QID %d : have %d Sols"%( nQId, len(lst)))
+                    dicUpdateQuestionidMapUpdateDic[nQId] = lst
+                    nCount += len(lst)
+            for solitem in lst:
+                strInsertSQL = u"""
+                                INSERT INTO %s (question_id, SOL_STR,SOL_AUTHOR,SOL_USEFUL,SOL_DATETIME)
+                                VALUES ( %d, '%s', '%s',%d, '%s');
+                                """ % (u"questionsols", nQId, self.correctSQL(solitem), u'HDY',0, datetime.now())
+                self.executeSQL(strInsertSQL)
+            self.commitDB()
+        return len(dicUpdateQuestionidMapUpdateDic.keys()), nCount
+
+
+
+
+
+
     def appendTexFile(self,strFileName):
+        """
+        將檔案裡資料無條件加入 DB
+        :param strFileName:
+        :return:
+        """
         fPt = HDYLatexParser(strFileName)
         fPt.read()
         fPt.getReport()
@@ -240,3 +277,7 @@ where b.tag_id IN %s
             else:
                 print("[DB ERROR] we cannot find the row which just insert")
         print "Records created successfully";
+
+    def correctSQL(self,strInput):
+        strOutput = strInput.replace("'", "''")
+        return strOutput

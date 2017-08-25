@@ -3,8 +3,13 @@ import os, codecs, re
 
 
 def getListOfTagFromString(strTags):
-    # 找出所有行 \\begin{QTAGS} 與 \\end{QTAGS} 夾住的所有
+    # 找出所有行 QTAG{} 夾住的所有TAGS
     lst = re.findall(u"QTAG{(.*?)}", strTags, re.DOTALL)
+    return lst
+
+def getListOfSOLFromString(strSOLs):
+    # 找出所有行 \\begin{QSOL} 與 \\end{QSOL} 夾住的所有 QSOL
+    lst = re.findall(u"\\\\begin\\{QSOL\\}(.*?)\\\\end\\{QSOL\\}", strSOLs, re.DOTALL)
     return lst
 
 def generateTagTexStringFromList(lstTags):
@@ -60,6 +65,10 @@ class HDYQuestionParser:
 
     def getQSOLLISTstring(self):
         return self.strQSOLLIST
+
+    def getListOfQSOLs(self):
+        return getListOfSOLFromString(self.strQSOLLIST)
+
 
     def getEnvString(self, strEnvName, strEnvContent):
         if strEnvContent =='':

@@ -45,6 +45,34 @@ def runSavePNG(qpt):
     pass
 
 
+def runSavePNG2(qpt):
+    """
+    For QSOL
+    :param qpt:
+    :return:
+    """
+    lstQSOL = qpt.getListOfQSOLs()
+    lstQSOLID = qpt.getListOfQSOLsID()
+    nQSOL = len(lstQSOL)
+    for k in range(nQSOL):
+        strQSOL =lstQSOL[k]
+        nQSOLID =lstQSOLID[k]
+
+        lst = getListOfTikzFromString(strQSOL)
+        if len(lst)!=0:
+            nIndex = 0
+            for item in lst:
+                strExamInfo = qpt.getEXAMINFO_SRING_FOR_PATH()
+                nQID = qpt.question_id
+                strOutFileName = u"DBWebPics\SOLID_%d_pic_%d.png" % (nQSOLID, nIndex)
+                strTikz = strTikzTemplate %(item,)
+                pngMaker = PNGMaker(strTikz, strOutFileName)
+                pngMaker.runPNGMaker()
+                nIndex+=1
+                print (strOutFileName+u"OK!!"+os.linesep)
+    pass
+
+
 def main():
     dbLatex = HDYLatexParserFromDB(constdefaultname)
     dbLatex.read()
@@ -68,5 +96,18 @@ def main():
 
     pass
 
+def main2():
+    """
+    ONLY for QSOL
+    :return:
+    """
+    dbLatex = HDYLatexParserFromDB(constdefaultname)
+    dbLatex.read()
+    nCount = dbLatex.nCountQ
+    for i in range(nCount):
+        qPt = dbLatex.getQuestionObject(i)
+        runSavePNG2(qPt)
+    pass
+
 if __name__ == '__main__':
-    main()
+    main2()

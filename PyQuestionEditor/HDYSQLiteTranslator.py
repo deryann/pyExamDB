@@ -66,6 +66,25 @@ def createDBandTable():
                 ''')
     conn.commit()
 
+def createSOLsTable():
+    conn = sqlite3.connect('test.sqlitedb')
+
+    print "Opened database successfully";
+
+
+    conn.execute(''' CREATE TABLE if not exists questionsols
+                            (
+                             sol_id INTEGER PRIMARY KEY AUTOINCREMENT ,
+                             question_id INTEGER NOT NULL,
+                             SOL_STR TEXT UNIQUE NOT NULL,
+                             SOL_AUTHOR TEXT,
+                             SOL_USEFUL INTEGER NOT NULL,
+                             SOL_DATETIME TEXT NOT NULL
+                             );
+                    ''')
+    conn.commit()
+
+
 def moveDataFromFiletoDB():
     lstFileNameList = []
     dbParser = DBParser('test.sqlitedb')
@@ -80,6 +99,21 @@ def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
     dbParser.saveSqliteDBIntoTexFileByYears()
 
+def importdataFromFile():
+    dbParser = DBParser('test.sqlitedb')
+    lstFileNameList = []
+    nCount = 0
+    nSolCount =0
+    for number in range(91, 107):
+        strNumber = u"Exam01All\\q%03d.tex" % number
+        lstFileNameList.append(strNumber)
+
+    for strFileName in lstFileNameList:
+        nQuestion, nSOL = dbParser.importTexFile(strFileName)
+        nCount += nQuestion
+        nSolCount += nSOL
+    print (u"There are %d QSOLLIST,%d SOL DBs"%(nCount,nSolCount))
+
 
 
 def main():
@@ -93,5 +127,13 @@ def main():
 
     #PartIII: Try to load tag in exam01 and save it into table('question_tag_relationship')
 
+def main2():
+    """
+    Try to import sols some into SOL table
+    :return:
+    """
+    createSOLsTable()
+    importdataFromFile()
+
 if __name__ == '__main__':
-    main()
+    main2()

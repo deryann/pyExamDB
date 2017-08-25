@@ -10,6 +10,8 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
     def __init__(self, question_id, conn):
         self.conn = conn
         self.question_id = question_id #question_id in DB
+        self.lstSols = []
+        self.lstSolsID = []
         HDYQuestionParser.__init__(self, None)
 
 
@@ -24,6 +26,8 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
 
         return dict(itertools.izip(field_names, row))
 
+    def getListOfQSOLsID(self):
+        return getListOfSOLFromString(self.strQSOLLIST)
 
     def getRowsBySQL(self, strSQL):
         """
@@ -55,6 +59,7 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
                         Left JOIN questiontags as b 
                         ON a.tag_id = b.tag_id 
                         where a.question_id = %d""" % (self.question_id,)
+
         rows =self.getRowsBySQL(strSQL)
         for row in rows:
             self.lstOriginalTags.append(row[0])
@@ -70,6 +75,22 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
     def loadExamAnsRateInfo(self):
         return [int(self.dicData['EXAMANSRATEINFO_P']), int(self.dicData['EXAMANSRATEINFO_PH']), int(self.dicData['EXAMANSRATEINFO_PM']), int(self.dicData['EXAMANSRATEINFO_PL'] )]
 
+
+    def loadSols(self):
+        strSQL = u"""select sol_id,SOL_STR FROM  questionsols  
+                                where question_id = %d""" % (self.question_id,)
+        rows = self.getRowsBySQL(strSQL)
+        strBuffer = u''
+        strTemplete="\\begin{QSOL}%s\\end{QSOL}"+os.linesep
+        self.lstSols=[]
+        for row in rows:
+            strBuffer+= strTemplete %(row[1])
+            self.lstSols.append(row[1])
+            self.lstSolsID.append(row[0])
+
+        self.strQSOLLIST = strBuffer
+
+
     def prepareData(self):
         self.dicData = self.loadDicByQuestionIDFromDB()
         self.nQID = self.dicData["QUESTION_ID"]
@@ -77,7 +98,7 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
         self.strQFROMS  = self.dicData["QFROMS"]
 
         self.strQANS  = self.dicData["QANS"]
-        self.strQSOLLIST  = self.dicData["QSOLLIST"]
+        self.loadSols()
         self.strQEMPTYSPACE= self.dicData["QEMPTYSPACE"]
         self.lstNewTags =[]
         self.lstOriginalTags=[]
@@ -88,3 +109,9 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
         self.strExamInfoBODY = ""
         self.strExamAnsRateInfoBODY = ""
         pass
+
+    def getListOfQSOLs(self):
+        return self.lstSols
+
+    def getListOfQSOLsID(self):
+        return self.lstSolsID
