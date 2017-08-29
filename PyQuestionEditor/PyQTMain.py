@@ -136,6 +136,9 @@ class QuestionTagsEditor(QWidget):
 
         self.listwidgetForSuggestedTags = QListWidget(self)
         self.listwidgetForSuggestedTags.itemChanged.connect(self.onSuggestedItemChanged)
+        self.listwidgetForSecTags = QListWidget(self)
+        self.listwidgetForSecTags.itemChanged.connect(self.onSuggestedItemChanged)
+        self.layoutTagsPanel.addWidget(self.listwidgetForSecTags)
         self.layoutTagsPanel.addWidget(self.listwidgetForSuggestedTags)
 
         #增加檔案操作的按鈕
@@ -355,7 +358,7 @@ class QuestionTagsEditor(QWidget):
         elif isSQLiteDBMode(strFileName):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C1空間向量"])
+            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B1C2多項式函數"])
 
     def onedtIndexChaned(self, strText):
         try:
@@ -416,6 +419,17 @@ class QuestionTagsEditor(QWidget):
             if item in lstSec:
                 lstSuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'lst'))
                 lst = lst + lstSuggest
+        return lst
+
+    def getSecTags(self):
+        lst = []
+        lstSuggest = []
+        self.readSuggestDict()
+        import ast
+        lstSec = self.configSuggestionTag.sections()
+        lstCurr = self.getLatestCurrentTags()
+        for item in lstCurr:
+            if item in lstSec:
                 lstSuggest = ast.literal_eval(self.configSuggestionTag.get(item, u'seclist'))
                 lst = lst + lstSuggest
         return lst
@@ -427,16 +441,20 @@ class QuestionTagsEditor(QWidget):
         elif widgetItem.checkState() == QtCore.Qt.Checked:
             self.setLatestCurrentTagsDict( widgetItem.strTagName, True)
 
+    def cleanSuggestedTagsAndSectionTags(self):
+        lstListWidget = [self.listwidgetForSuggestedTags,self.listwidgetForSecTags]
+        for listw in lstListWidget:
+            for k in range(listw.count()):
+                itemWantRemoved = listw.item(k)
+                self.lstCheckboxs.remove(itemWantRemoved)
+            listw.clear()
+
 
     def refreshSuggestedTagsLayout(self):
         print("[refreshSuggestedTagsLayout]")
         lst = self.getSuggestedTags()
-
-        for k in range(self.listwidgetForSuggestedTags.count()):
-            itemWantRemoved = self.listwidgetForSuggestedTags.item(k)
-            self.lstCheckboxs.remove(itemWantRemoved)
-
-        self.listwidgetForSuggestedTags.clear()
+        lstsec =self.getSecTags()
+        self.cleanSuggestedTagsAndSectionTags()
 
         for item in lst:
             chkitem = QListWidgetItem(item)
@@ -445,6 +463,15 @@ class QuestionTagsEditor(QWidget):
             chkitem.setCheckState(QtCore.Qt.Unchecked)
             self.listwidgetForSuggestedTags.addItem(chkitem)
             self.lstCheckboxs.append(chkitem)
+
+        for item in lstsec :
+            chkitem = QListWidgetItem(item)
+            chkitem.strTagName = item
+            chkitem.setFlags(chkitem.flags() | QtCore.Qt.ItemIsUserCheckable)
+            chkitem.setCheckState(QtCore.Qt.Unchecked)
+            self.listwidgetForSecTags.addItem(chkitem)
+            self.lstCheckboxs.append(chkitem)
+
         pass
 
     def refreshTagCheckedUIListData(self):
