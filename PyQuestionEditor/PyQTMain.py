@@ -48,12 +48,18 @@ class QLineEditWithDirModel(QLineEdit):
         self.setCompleter(self.completer)
 
 
+def isSameSet(listA,listB):
+    A = set(listA)
+    B = set(listB)
+    return A==B
+
 ##
 # UI 呈現的程式碼
 #
 class QuestionTagsEditor(QWidget):
     def __init__(self):
-        QWidget.__init__(self, windowTitle=u"Latex Questions Editor .")
+        self.strWindowTitle = u"Latex Question Tags Editor ."
+        QWidget.__init__(self, windowTitle=self.strWindowTitle)
 
         self.setLayout(QVBoxLayout())
 
@@ -246,13 +252,24 @@ class QuestionTagsEditor(QWidget):
                 lstnew.append(strTagName)
 
         if self.isTagsListDifferent(lst,lstnew):
-            self.dicNewTagsBuffer[self.nQIndex] = lstnew
+            lstOri = self.latex.getQuestionTagList(self.nQIndex)
+            if isSameSet(lstnew, lstOri):
+                self.dicNewTagsBuffer.pop(self.nQIndex)
+            else:
+                self.dicNewTagsBuffer[self.nQIndex] = lstnew
             print("[setLatestCurrentTagsDict] modified")
             self.refreshTagsUI()
         else:
             print("[setLatestCurrentTagsDict] un-modified")
         print ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
 
+        self.updateWindowtitle()
+
+    def updateWindowtitle(self):
+        if self.isEditedAndNotSave():
+            self.setWindowTitle(self.strWindowTitle+u' '+ u'*')
+        else:
+            self.setWindowTitle(self.strWindowTitle + u' ')
 
     def prepareIndexSettingLayout(self):
         """
@@ -358,7 +375,7 @@ class QuestionTagsEditor(QWidget):
         elif isSQLiteDBMode(strFileName):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B1C2多項式函數"])
+            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B1C3指對數函數"])
 
     def onedtIndexChaned(self, strText):
         try:
@@ -472,8 +489,6 @@ class QuestionTagsEditor(QWidget):
             self.listwidgetForSecTags.addItem(chkitem)
             self.lstCheckboxs.append(chkitem)
 
-        pass
-
     def refreshTagCheckedUIListData(self):
         lstTags = self.getLatestTagsList()
         if lstTags == None:
@@ -489,6 +504,11 @@ class QuestionTagsEditor(QWidget):
                     item.setCheckState(QtCore.Qt.Checked)
                 else:
                     item.setCheckState(QtCore.Qt.Unchecked)
+
+                Qpt = self.latex.getQuestionObject(int(self.nQIndex))
+                strQBODY = Qpt.getQBODY()
+                if strQBODY.find(item.strTagName) !=-1:
+                    item.setBackground(Qt.red)
             pass
 
     def setCurrentIndex(self, nIndex):
