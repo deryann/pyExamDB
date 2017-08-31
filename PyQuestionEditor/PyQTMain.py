@@ -117,9 +117,9 @@ class QuestionTagsEditor(QWidget):
 
     def setupHotkey(self):
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'), self.onHotkeySave)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Right), self), QtCore.SIGNAL('activated()'),
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F8), self), QtCore.SIGNAL('activated()'),
                      self.onbtnNextClicked)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Left), self), QtCore.SIGNAL('activated()'),
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), QtCore.SIGNAL('activated()'),
                      self.onbtnPrevClicked)
 
     def onHotkeySave(self):
@@ -375,7 +375,7 @@ class QuestionTagsEditor(QWidget):
         elif isSQLiteDBMode(strFileName):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B1C3指對數函數"])
+            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
 
     def onedtIndexChaned(self, strText):
         try:
@@ -415,6 +415,7 @@ class QuestionTagsEditor(QWidget):
         print("[saveUpdatedTagIntoFile]")
         self.latex.saveFileWithNewTag(self.dicNewTagsBuffer)
         self.dicNewTagsBuffer={}
+        self.updateWindowtitle()
 
     def refreshTagsUI(self):
         self.refreshTagCheckedUIListData()
@@ -489,6 +490,19 @@ class QuestionTagsEditor(QWidget):
             self.listwidgetForSecTags.addItem(chkitem)
             self.lstCheckboxs.append(chkitem)
 
+    def isAutoRelativeTag(self, strTag):
+
+        Qpt = self.latex.getQuestionObject(int(self.nQIndex))
+        strQBODY = Qpt.getQBODY()
+        if strQBODY.find(strTag) !=-1:
+            return True
+
+        if strTag[0:1]==u'B' and len(strTag)>6:
+            strTest = strTag[6:]
+            if strQBODY.find(strTest) !=-1:
+                return True
+        return False
+
     def refreshTagCheckedUIListData(self):
         lstTags = self.getLatestTagsList()
         if lstTags == None:
@@ -499,15 +513,14 @@ class QuestionTagsEditor(QWidget):
         for item in self.lstCheckboxs:
             if isinstance(item, QCheckBox ):
                 item.setChecked(item.strTagName in lstTags)
+
             elif isinstance(item, QListWidgetItem):
                 if item.strTagName in lstTags:
                     item.setCheckState(QtCore.Qt.Checked)
                 else:
                     item.setCheckState(QtCore.Qt.Unchecked)
 
-                Qpt = self.latex.getQuestionObject(int(self.nQIndex))
-                strQBODY = Qpt.getQBODY()
-                if strQBODY.find(item.strTagName) !=-1:
+                if self.isAutoRelativeTag(item.strTagName):
                     item.setBackground(Qt.red)
             pass
 
