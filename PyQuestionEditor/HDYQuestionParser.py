@@ -142,7 +142,7 @@ class HDYQuestionParser:
         lstOri = self.getListOfTag()
         lstTags = self.lstNewTags + list(set(lstOri) - set(self.lstNewTags))
         if len(lstTags)!=0:
-            generateTagTexStringFromList(lstTags)
+            strBuffer = generateTagTexStringFromList(lstTags)
         strTAGS = u"        \\begin{QTAGS}%s\\end{QTAGS}" % strBuffer
         strTAGS += os.linesep
         return strTAGS

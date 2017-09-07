@@ -138,10 +138,19 @@ where b.tag_id IN %s
                 shutil.copyfile(strFileName, strBachUpFileName)
 
             with codecs.open(strFileName, "w", "utf-8") as fpt:
-                strSQL = u"select FULLQUESTION from %s where  EXAMINFO_YEAR=%d ORDER BY EXAMINFO_QUESTION_STYLE, EXAMINFO_QUESTION_NUMBER" % (constQuestionsTableName, number)
+                strSQL = u"""select EXAMINFO_STR, question_id from %s 
+                             where  EXAMINFO_YEAR=%d 
+                             ORDER BY CASE
+                                WHEN EXAMINFO_QUESTION_STYLE = '單選' then 1
+                                WHEN EXAMINFO_QUESTION_STYLE = '多選' then 2
+                                WHEN EXAMINFO_QUESTION_STYLE = '填充' then 3
+                                ELSE 10
+                                END
+                                , LENGTH(EXAMINFO_QUESTION_NUMBER), EXAMINFO_QUESTION_NUMBER
+
+                """ % (constQuestionsTableName, number)
                 """
                 TODO: 
-                待解問題一:單選多選選填的排序情形
                 待解問題二：TagList 似乎有次序亂掉的情形，要注意一下如何讓Tag的存入情形與次序唯一
                 select FULLQUESTION from EXAM01 where  EXAMINFO_YEAR=106 ORDER BY EXAMINFO_QUESTION_STYLE, EXAMINFO_QUESTION_NUMBER
                 """
@@ -149,7 +158,10 @@ where b.tag_id IN %s
                 count  = len(rows)
                 for i in range(count):
                     row = rows[i]
-                    fpt.write(row[0])
+                    qID = row[1]
+                    qpt = HDYQuestionParserFromDB(qID, self.conn)
+                    qpt.prepareData()
+                    fpt.write(qpt.getQuestionString())
                     fpt.write(os.linesep)
 
         print "Records created successfully";
