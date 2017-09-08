@@ -1,6 +1,3 @@
-% !TEX encoding = UTF-8 Unicode
-% !TEX TS-program = xelatex 
-\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{104}{學測}{單選}{1}
         \end{ExamInfo}
@@ -20,7 +17,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{B2C1-1數列}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{特殊數列}\QTAG{B2C1-1數列}\end{QTAGS}
         \begin{QANS}
             (3)
         \end{QANS}
@@ -28,6 +25,7 @@
             \begin{QSOL}
 				觀察前後向的差可得 ${{a}_{t+1}}={{a}_{t}}+{{t}^{2}}$
 			\end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -49,7 +47,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{B2C1-1數列}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{B2C1-2級數}\QTAG{等比級數}\end{QTAGS}
         \begin{QANS}
             (4)
         \end{QANS}
@@ -96,27 +94,18 @@
         \end{ExamAnsRateInfo}
         \begin{QBODY}
             一線性規劃問題的可行解區域為坐標平面上的正八邊形 ABCDEFGH 及其內部，如右圖。已知目標函數$ax+by+3$（其中 a, b 為實數）的最大值只發生在 B 點。請問當目標函數改為$3-bx-ay$ 時，最大值會發生在下列哪一點？\\
-			\definecolor{light-gray}{gray}{0.75}
-
-			%先設定好單位的大小 才有辦法產生出正確的 pspicture size
-			\psset{xunit=0.6cm,yunit=0.6cm,algebraic=true,dimen=middle,dotstyle=o,dotsize=3pt 0,linewidth=0.8pt,arrowsize=3pt 2,arrowinset=0.25}
-
-			\begin{pspicture*}(-1,-1)(9,9)
-			\psaxes[labelFontSize=\scriptsize,xAxis=true,yAxis=true,Dx=1.,Dy=1.,ticksize=-2pt 0,subticks=1,labels=none,ticks=none]{->}(0,0)(-1,-1)(8,8)[$x$,0][$y$,90]
-			%labelFontSize=\scriptsize
-
-			\pspolygon*[linecolor=light-gray](2,0)(4.828,0)(6.828,2)(6.828,4.828)(4.828,6.828)(2,6.828)(0,4.828)(0,2)
-			\pspolygon[linecolor=black](2,0)(4.828,0)(6.828,2)(6.828,4.828)(4.828,6.828)(2,6.828)(0,4.828)(0,2)
-			\rput[t](2,-0.1){$H$}
-			\rput[t](4.828,-0.1){$A$}
-			\rput[l](6.928,2){$B$}
-			\rput[l](6.928,4.828){$C$}
-			\rput[b](4.828,6.928){$D$}
-			\rput[b](2,6.928){$E$}
-			\rput[r](-0.1,4.828){$F$}
-			\rput[r](-0.1,2){$G$}
-			\end{pspicture*}
-			%%
+			\begin{tikzpicture}[line width=1.5pt, scale=1.2]\small
+\tikzstyle{vnode}=[draw, circle, inner sep=1pt,fill];
+        % 繪製坐標軸
+        \tikzstyle{axes}=[->,line width=2pt];
+          \draw[axes] (-1,0) -- (4,0) node[right] {$x$};
+          \draw[axes] (0,-1) -- (0,4) node[above] {$y$};
+          \foreach \n/\x/\y/\a in{A/2.14/0/270, B/3.14/1/0, C/3.14/2.14/0, D/2.14/3.14/90,  
+          E/1/3.14/90, F/0/2.14/180,  G/0/1/180,  H/1/0/270}{
+                  \coordinate (v\n) at (\x,\y);
+                  \node[vnode] (V\n) at (v\n) [label=\a:$\n$] {};}
+        \draw[fill=gray!50!white] (vA) -- (vB) -- (vC) -- (vD) -- (vE) -- (vF) -- (vG) -- (vH) -- (vA);
+\end{tikzpicture}
 			\\
 			\begin{QOPSINONELINE}
 			\QOP $A$	\QOP $B$	\QOP $C$	\QOP $D$ \QOP $E$
@@ -124,7 +113,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B3C2直線與圓}\QTAG{B3C2-2線性規劃}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B3C2-2線性規劃}\QTAG{B3C2直線與圓}\end{QTAGS}
         \begin{QANS}
             (1)
         \end{QANS}
@@ -133,8 +122,6 @@
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
-\end{QUESTIONS}
-\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{104}{學測}{多選}{5}
         \end{ExamInfo}
@@ -167,7 +154,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C4數據分析}\QTAG{B2C4-2二維數據分析}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B2C4-2二維數據分析}\QTAG{圖表判讀}\QTAG{B2C4數據分析}\QTAG{相關係數}\end{QTAGS}
         \begin{QANS}
             (2)(4)(5)
         \end{QANS}
@@ -193,7 +180,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B1C2多項式函數}\QTAG{B1C2-3多項式方程式}\end{QTAGS}
+        \begin{QTAGS}\QTAG{虛根定理}\QTAG{因式定理}\QTAG{餘式定理}\QTAG{B1C2多項式函數}\QTAG{B1C2-3多項式方程式}\QTAG{二次多項式}\QTAG{複數}\end{QTAGS}
         \begin{QANS}
             (1)(4)(5)
         \end{QANS}
@@ -219,7 +206,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B1C3指對數函數}\QTAG{B1C3-2指數函數}\end{QTAGS}
+        \begin{QTAGS}\QTAG{圖形}\QTAG{B1C3-2指數函數}\QTAG{B1C3指對數函數}\end{QTAGS}
         \begin{QANS}
             (1)(2)(4)
         \end{QANS}
@@ -259,6 +246,7 @@
 				%\end{scriptsize}
 				\end{pspicture*}
 			\end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -280,7 +268,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B4C4二次曲線}\QTAG{B4C4-3雙曲線}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B4C4-3雙曲線}\QTAG{B4C4二次曲線}\end{QTAGS}
         \begin{QANS}
             (1)(2)(4)(5)
         \end{QANS}
@@ -303,40 +291,21 @@
 				\QOP (內積) $\lvec{MB}\,\cdot \lvec{MD}\,=0$
 				\QOP $\lvec{BD}\,=\left( 8\cos \theta +\cos \left( \theta +90{}^\circ  \right),\sin \theta +\cos \left( \theta +90{}^\circ  \right) \right)$
 			\end{QOPS}
+			\begin{tikzpicture}[line width=2pt, scale=1.5]
+\node[label=270:$M$, draw, fill, inner sep=2pt, circle] (vM) at (0,0){}; 
+\foreach \n/\a in {A/0, B/45, C/90, D/135, E/180} 
+        {\node[label=\a:$\n$, draw, fill, inner sep=2pt, circle] (v\n) at (\a:2) {}; 
+}
+\foreach \x/\y in {A/B, B/C, C/D, D/E, E/A}{
+        \draw (v\x) to (v\y);
+}
+\draw (2,0) arc[start angle=0, end angle=180, radius=2cm];
+\end{tikzpicture}
 			
-			%先設定好單位的大小 才有辦法產生出正確的 pspicture size
-			\psset{xunit=1cm,yunit=1cm,algebraic=true,dimen=middle,dotstyle=o,dotsize=3pt 0,linewidth=0.8pt,arrowsize=3pt 2,arrowinset=0.25}
-			\def\CRadiusOffset{3.3}
-			\def\CRadius{3}
-			% 設定整張圖片的大小
-			\begin{pspicture*}(-4,-1)(4,4) 
-
-			%設定軸
-			\psaxes[labelFontSize=\scriptsize, xAxis=false,yAxis=false,Dx=1.,Dy=1.,ticksize=-2pt]{->}(0,0)(-4,-1)(4,4) %[$x$,0][$y$,90]
-			\pswedge[fillstyle=solid]{\CRadius}{15}{195}
-
-			%可畫方程式
-
-
-			%設定文字圖標等
-
-			\psdots[dotstyle=*](0,0)
-			\rput[t](0,-0.2){$M$}
-			\psdots[dotstyle=*](\CRadius;15)
-			\rput(\CRadiusOffset;15){$A$}
-			\psdots[dotstyle=*](\CRadius;60)
-			\rput(\CRadiusOffset;60){$B$}
-			\psdots[dotstyle=*](\CRadius;105)
-			\rput(\CRadiusOffset;105){$C$}
-			\psdots[dotstyle=*](\CRadius;150)
-			\rput(\CRadiusOffset;150){$D$}
-			\psdots[dotstyle=*](\CRadius;195)
-			\rput(\CRadiusOffset;195){$E$}
-			\end{pspicture*}
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B3C3平面向量}\QTAG{B3C3-2平面向量的內積}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B3C3-2平面向量的內積}\QTAG{B3C3平面向量}\QTAG{夾角}\end{QTAGS}
         \begin{QANS}
             (2)(4)
         \end{QANS}
@@ -363,19 +332,18 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C2排列組合}\QTAG{B2C2-1簡單的邏輯與集合}\end{QTAGS}
+        \begin{QTAGS}\QTAG{集合}\QTAG{B2C2-1簡單的邏輯與集合}\QTAG{B2C2排列組合}\end{QTAGS}
         \begin{QANS}
             (2)(3)(4)
         \end{QANS}
         \begin{QSOLLIST}
             \begin{QSOL}
 			\end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
-\end{QUESTIONS}
-\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{104}{學測}{填充}{A}
         \end{ExamInfo}
@@ -402,7 +370,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B3C1三角}\QTAG{B3C1-5三角測量}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B3C1-5三角測量}\QTAG{B3C1三角}\end{QTAGS}
         \begin{QANS}
             $62$
         \end{QANS}
@@ -440,7 +408,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C2排列組合}\QTAG{B2C2-3組合}\end{QTAGS}
+        \begin{QTAGS}\QTAG{重複組合}\QTAG{B2C2排列組合}\QTAG{B2C2-3組合}\end{QTAGS}
         \begin{QANS}
             $70$
         \end{QANS}
@@ -459,7 +427,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B4C2空間中的平面與直線}\QTAG{B4C2-2空間直線方程式}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B4C2-2空間直線方程式}\QTAG{B4C2空間中的平面與直線}\QTAG{距離}\end{QTAGS}
         \begin{QANS}
             $6 \sqrt{2} + 2\sqrt{6}$
         \end{QANS}
@@ -489,6 +457,7 @@
 			再代入$x-y+z=0$ 可得三角形三頂點：$\left( 2,4,2 \right)$、$\left( 0,2,2 \right)$、$\left( 2,0,-2 \right)$
 			計算三角形周長 $\sqrt{{{2}^{2}}+{{2}^{2}}}+\sqrt{{{\left( -2 \right)}^{2}}+{{2}^{2}}+{{4}^{2}}}+\sqrt{{{4}^{2}}+{{4}^{2}}}=2\sqrt{2}+2\sqrt{6}+4\sqrt{2}=6\sqrt{2}+2\sqrt{6}$
 			\end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -503,7 +472,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B3C3平面向量}\QTAG{B3C3-1平面向量的表示法}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B3C3-1平面向量的表示法}\QTAG{B3C3平面向量}\QTAG{參數式}\end{QTAGS}
         \begin{QANS}
             $(9,1)$
         \end{QANS}
@@ -520,8 +489,7 @@
 				\end{aligned} \right.\Rightarrow \left( a,\ b \right)=\left( 9,\ 1 \right)$
 
 			\end{QSOL}
-        
-			\begin{QSOL}
+\begin{QSOL}
 				 幾何意義：可觀察得 $x+2y=0$ 與 $3x-5y=0$ 交於 $\left( 0,\ 0 \right)$
 				  由題意『從 ${{L}_{1}}$ 上的一點 ${{Q}_{1}}$ 偵測得向量 $\lvec{{Q}_{1}P}\,=\left( -7,9 \right)$』
 				  $\Rightarrow $可得 $P$ 在與 ${{L}_{1}}$ 平行且過 $\left( -7,9 \right)$的直線上， $P\in x+2y=11$
@@ -532,6 +500,7 @@
 				 & 3x-5y=22 \\ 
 				\end{aligned} \right.\Rightarrow P\left( 9,\ 1 \right)$
 			\end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -546,7 +515,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{B2C1-1數列}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B2C1數列級數}\QTAG{B2C1-1數列}\QTAG{複利}\end{QTAGS}
         \begin{QANS}
             $8181$
         \end{QANS}
@@ -569,7 +538,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B4C3矩陣}\QTAG{B4C3-3矩陣的應用}\end{QTAGS}
+        \begin{QTAGS}\QTAG{馬可夫鍊}\QTAG{B4C3矩陣}\QTAG{B4C3-3矩陣的應用}\end{QTAGS}
         \begin{QANS}
             $44$
         \end{QANS}
@@ -604,7 +573,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B4C1空間向量}\QTAG{B4C1-1空間概念}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B4C1-1空間概念}\QTAG{B4C1空間向量}\end{QTAGS}
         \begin{QANS}
             $\dfrac{16\sqrt{5}}{3}$
         \end{QANS}
@@ -632,7 +601,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B4C1空間向量}\QTAG{B4C1-1空間概念}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B4C1-1空間概念}\QTAG{B4C1空間向量}\end{QTAGS}
         \begin{QANS}
             $\dfrac{25}{29}$
         \end{QANS}
@@ -677,7 +646,7 @@
         \end{QBODY}
         \begin{QFROMS}
         \end{QFROMS}
-        \begin{QTAGS}\QTAG{B3C1三角}\QTAG{B3C1-5三角測量}\end{QTAGS}
+        \begin{QTAGS}\QTAG{B3C1-5三角測量}\QTAG{B3C1三角}\end{QTAGS}
         \begin{QANS}
             $6.1$
         \end{QANS}
@@ -686,4 +655,3 @@
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
-\end{QUESTIONS}
