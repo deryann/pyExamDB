@@ -7,9 +7,18 @@ from HDYQuestionParserFromDB import HDYQuestionParserFromDB
 from HDYLatexParser import HDYLatexParser
 import sqlite3
 from datetime import datetime
+import re
+
 constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
+constlstStyle = [u'單選', u'多選', u'填充']
+constLatexHeader =u"""% !TEX encoding = UTF-8 Unicode
+% !TEX TS-program = xelatex
+"""
+constLatexTailer =u""
+constLatexStyleHeader = u"\\begin{QUESTIONS}"+os.linesep
+constLatexStyleTailer= u"\\end{QUESTIONS}"+os.linesep
 
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
@@ -121,14 +130,12 @@ where b.tag_id IN %s
         print("[HDYLatexParserFromDB][setFromTagToAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
         pass
 
-    def saveSqliteDBIntoTexFileByYears(self):
+    def saveSqliteDBIntoTexFileByYears(self, nStart, nEnd):
         conn = sqlite3.connect(self.strFileName)
 
         lstFileNameList = []
-        # for number in range(91,107):
-        #for number in range(91, 107):
-        for number in range(106, 107):
-            strFileName = u"Exam01All\\2q%03d.tex" % number
+        for number in range(nStart, nEnd+1):
+            strFileName = u"Exam01All\\q%03d.tex" % number
 
             if os.path.isfile(strFileName):
                 #backup it
@@ -138,32 +145,24 @@ where b.tag_id IN %s
                 shutil.copyfile(strFileName, strBachUpFileName)
 
             with codecs.open(strFileName, "w", "utf-8") as fpt:
-                strSQL = u"""select EXAMINFO_STR, question_id from %s 
-                             where  EXAMINFO_YEAR=%d 
-                             ORDER BY CASE
-                                WHEN EXAMINFO_QUESTION_STYLE = '單選' then 1
-                                WHEN EXAMINFO_QUESTION_STYLE = '多選' then 2
-                                WHEN EXAMINFO_QUESTION_STYLE = '填充' then 3
-                                ELSE 10
-                                END
-                                , LENGTH(EXAMINFO_QUESTION_NUMBER), EXAMINFO_QUESTION_NUMBER
-
-                """ % (constQuestionsTableName, number)
-                """
-                TODO: 
-                待解問題二：TagList 似乎有次序亂掉的情形，要注意一下如何讓Tag的存入情形與次序唯一
-                select FULLQUESTION from EXAM01 where  EXAMINFO_YEAR=106 ORDER BY EXAMINFO_QUESTION_STYLE, EXAMINFO_QUESTION_NUMBER
-                """
-                rows = self.getRowsBySQL(strSQL)
-                count  = len(rows)
-                for i in range(count):
-                    row = rows[i]
-                    qID = row[1]
-                    qpt = HDYQuestionParserFromDB(qID, self.conn)
-                    qpt.prepareData()
-                    fpt.write(qpt.getQuestionString())
-                    fpt.write(os.linesep)
-
+                fpt.write(constLatexHeader)
+                for strStyle in [u'單選', u'多選', u'填充']:
+                    fpt.write(constLatexStyleHeader)
+                    strSQL = u"""select EXAMINFO_STR, question_id from %s 
+                                 where  EXAMINFO_YEAR=%d and EXAMINFO_QUESTION_STYLE = '%s'
+                                 ORDER BY LENGTH(EXAMINFO_QUESTION_NUMBER), EXAMINFO_QUESTION_NUMBER
+                                """ % (constQuestionsTableName, number, strStyle )
+                    rows = self.getRowsBySQL(strSQL)
+                    count  = len(rows)
+                    for i in range(count):
+                        row = rows[i]
+                        qID = row[1]
+                        qpt = HDYQuestionParserFromDB(qID, self.conn)
+                        qpt.prepareData()
+                        fpt.write(qpt.getQuestionString())
+                        fpt.write(os.linesep)
+                    fpt.write(constLatexStyleTailer)
+                fpt.write(constLatexTailer)
         print "Records created successfully";
         pass
 
@@ -224,6 +223,12 @@ where b.tag_id IN %s
         else:
             return -1
 
+    def existedSol(self, nQID, strSol):
+        strSQL = u"""SELECT sol_id from questionsols where question_id=%d and SOL_STR ='%s'
+        """ % (nQID, self.correctSQL(strSol))
+        row=self.getRowBySQL(strSQL)
+        return row != None
+
     def importTexFile(self, strFileName):
         #先整理一個大表
         print(u"[importTexFile][%s]" %(strFileName,))
@@ -242,7 +247,14 @@ where b.tag_id IN %s
                     print ("QID %d : have %d Sols"%( nQId, len(lst)))
                     dicUpdateQuestionidMapUpdateDic[nQId] = lst
                     nCount += len(lst)
+            #check 該解法是不是已經在 Database 裡面
+            lstNeedToInsert=[]
             for solitem in lst:
+                if not self.existedSol(nQId, solitem):
+                    lstNeedToInsert.append(solitem)
+                else:
+                    print("There is this soltion!")
+            for solitem in lstNeedToInsert:
                 strInsertSQL = u"""
                                 INSERT INTO %s (question_id, SOL_STR,SOL_AUTHOR,SOL_USEFUL,SOL_DATETIME)
                                 VALUES ( %d, '%s', '%s',%d, '%s');
@@ -250,11 +262,6 @@ where b.tag_id IN %s
                 self.executeSQL(strInsertSQL)
             self.commitDB()
         return len(dicUpdateQuestionidMapUpdateDic.keys()), nCount
-
-
-
-
-
 
     def appendTexFile(self,strFileName):
         """
@@ -293,3 +300,26 @@ where b.tag_id IN %s
     def correctSQL(self,strInput):
         strOutput = strInput.replace("'", "''")
         return strOutput
+
+    def tagWeightGiver(self):
+        """
+        取出冊作千位數 章當百位數 節當十位數 作為Weight
+        :return:
+        """
+        strSQL = u" SELECT TAG_STR from questiontags where TAG_STR LIKE 'B%C%'"
+        rows = self.getRowsBySQL(strSQL)
+        count = len(rows)
+        for i in range(count):
+            row = rows[i]
+            strTag = row[0]
+            lst = re.findall(u"\d+", strTag)
+            nTotalW = 0
+            if len(lst)==3:
+                nTotalW = int (lst[0]) * 1000+ int(lst[1]) *100 + int(lst[2])*10
+            elif len(lst) == 2:
+                nTotalW = int(lst[0]) * 1000 + int(lst[1]) * 100
+
+            strUpdateSQL = u"""UPDATE questiontags SET TAG_SORTED_W = %d  
+                                WHERE TAG_STR='%s'""" % (nTotalW, strTag)
+            self.executeSQL(strUpdateSQL)
+        self.commitDB()

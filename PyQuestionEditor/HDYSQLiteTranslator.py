@@ -1,6 +1,6 @@
 #coding=utf-8
 #-------------------------------------------------------------------------------
-# Name:        ? tex ??????? SQLite DB
+# Name:        Script to Translate between texfile and SQLite.
 # Purpose:
 #
 # Author:      user
@@ -97,7 +97,7 @@ def moveDataFromFiletoDB():
 
 def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
-    dbParser.saveSqliteDBIntoTexFileByYears()
+    dbParser.saveSqliteDBIntoTexFileByYears(91,106)
 
 def importdataFromFile():
     dbParser = DBParser('test.sqlitedb')
@@ -135,6 +135,16 @@ def main2():
     createSOLsTable()
     importdataFromFile()
 
+def tagWeightGiver():
+    """
+    Try to Give weight for tag in DB for sorted.
+    :return:
+    """
+    dbParser = DBParser('test.sqlitedb')
+    dbParser.tagWeightGiver()
+
 if __name__ == '__main__':
     #main2()
     movedataFromDBtoFile()
+    #tagWeightGiver()
+    #importdataFromFile()

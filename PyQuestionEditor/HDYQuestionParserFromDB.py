@@ -6,6 +6,8 @@ constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
 
+
+
 class HDYQuestionParserFromDB(HDYQuestionParser):
     def __init__(self, question_id, conn):
         self.conn = conn
@@ -58,7 +60,9 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
         strSQL = u"""select b.TAG_STR from question_tag_relationship as a 
                         Left JOIN questiontags as b 
                         ON a.tag_id = b.tag_id 
-                        where a.question_id = %d""" % (self.question_id,)
+                        where a.question_id = %d 
+                        ORDER BY b.TAG_SORTED_W
+                        """ % (self.question_id,)
 
         rows =self.getRowsBySQL(strSQL)
         for row in rows:
