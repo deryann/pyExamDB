@@ -172,6 +172,7 @@ class QuestionTagsEditor(QWidget):
         self.layoutShowQuestionUp = QHBoxLayout(self)
         self.layoutShowQuestionMetaData = QGridLayout(self)
         self.txtOneQuestion = HDYTextEdit(self)
+        self.txtOneQuestion.setColorMappingKeyWordList({Qt.yellow:getMathTermList()})
 
         self.txtAns =QLineEdit("Ans" ,self)
         self.txtSol =QTextBrowser(self)

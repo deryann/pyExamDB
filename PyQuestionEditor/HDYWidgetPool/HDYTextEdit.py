@@ -10,6 +10,7 @@ from PyQt4.QtCore import QObject, SIGNAL
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from QDbReport.toollib import getJiebaCutList
 
 class HDYTextEdit(QTextEdit):
     def __init__(self, *args):
@@ -60,5 +61,23 @@ class HDYTextEdit(QTextEdit):
                         break
                     cursor.setCharFormat(fmt)
                     curCursor = cursor
+        #比較Jieba 的結果
+        lstString = getJiebaCutList(qstr)
+        self.append(os.linesep)
+        self.append(u"==========================================")
+        self.append(os.linesep)
+        fm = self.currentCharFormat()
+
+        for item in lstString:
+            lst = self.dicColorMapKeyWordList[Qt.yellow]
+            self.moveCursor(QTextCursor.End)
+            curCursor = self.textCursor()
+            if item in lst:
+                doc = self.document()
+                fmt = QTextCharFormat()
+                fmt.setBackground(Qt.yellow)
+                curCursor.insertText(item, fmt)
+            else:
+                curCursor.insertText(item, fm)
 
 
