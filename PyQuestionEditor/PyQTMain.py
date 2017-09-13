@@ -28,6 +28,7 @@ from HDYLatexParser import isSQLiteDBMode, isTexFileMode
 from HDYLatexParserFromDB import HDYLatexParserFromDB
 from HDYQuestionParser import HDYQuestionParser as QParser
 
+from QDbML.toollib import getMathTermList
 
 
 #Tex file mode test filename

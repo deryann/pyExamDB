@@ -70,6 +70,10 @@ class HDYTextEdit(QTextEdit):
 
         for item in lstString:
             lst = self.dicColorMapKeyWordList[Qt.yellow]
+
+            self.moveCursor(QTextCursor.End)
+            curCursor = self.textCursor()
+            curCursor.insertText(u"/")
             self.moveCursor(QTextCursor.End)
             curCursor = self.textCursor()
             if item in lst:
