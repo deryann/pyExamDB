@@ -19,10 +19,17 @@ from PyQt4.QtCore import QObject, SIGNAL
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+#Widget input
+from HDYWidgetPool.HDYTextEdit import HDYTextEdit
+
+#Data Model input
 from HDYLatexParser import HDYLatexParser
 from HDYLatexParser import isSQLiteDBMode, isTexFileMode
 from HDYLatexParserFromDB import HDYLatexParserFromDB
 from HDYQuestionParser import HDYQuestionParser as QParser
+
+
+
 #Tex file mode test filename
 #DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
 #SQLiteDb mode filename
@@ -164,10 +171,7 @@ class QuestionTagsEditor(QWidget):
         self.layoutShowQuestion = QVBoxLayout(self)
         self.layoutShowQuestionUp = QHBoxLayout(self)
         self.layoutShowQuestionMetaData = QGridLayout(self)
-        self.txtOneQuestion = QTextBrowser(self)
-        self.txtOneQuestion.setFont(QFont ("Consolas", 14)) #設定字型
-        #self.txtOneQuestion.setFixedHeight(300)
-
+        self.txtOneQuestion = HDYTextEdit(self)
 
         self.txtAns =QLineEdit("Ans" ,self)
         self.txtSol =QTextBrowser(self)
