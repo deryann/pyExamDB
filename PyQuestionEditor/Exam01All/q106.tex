@@ -1,3 +1,6 @@
+% !TEX encoding = UTF-8 Unicode
+% !TEX TS-program = xelatex
+\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{106}{學測}{單選}{1}
         \end{ExamInfo}
@@ -21,6 +24,11 @@
             (1)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                設老師人數:學生人數為 $m:n$\\
+                則全校師生玩過寶可夢的比例為：$\FR{m r_1 + n r_2}{m+n} = \FR{m}{m+n} r_1 +\FR{n}{m+n} r_2$\\
+                若是得到師生人數比例即可求全校師生玩過寶可夢的比率。
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -47,6 +55,11 @@
             (3)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                由題意可得 $(((b)^2)^2)^2 = b^8 = 81^3 \Rightarrow b^8 = 3^12 \Rightarrow b=3^{\FR{12}{8}} = 3^{\FR{3}{2}} = \sqrt{27} $ \\
+                由 $5=\sqrt{25}$ 可估計得 $b \approx 5.3$ \\
+                故選 (3)
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -57,7 +70,7 @@
         \begin{ExamAnsRateInfo}{38}{71}{34}{9}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-            設$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為坐標平面上一雙曲線，且其通過第一象限的漸近線為$\ell $。考慮動點$(t,{{t}^{2}})$，從時間$t=0$時出發。當$t>0$時，請選出正確的選項。
+            設$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為坐標平面上一雙曲線，且其通過第一象限的漸近線為$\ell $。考慮動點$(t,{{t}^{2}})$，從時間$t=0$時出發。當$t>0$時，請選出正確的選項。(題意補充 $a>0,b>0$)
 			\begin{QOPS}
 			\QOP 此動點不會碰到$\Gamma $，也不會碰到$\ell $
 			\QOP 此動點會碰到$\Gamma $，但不會碰到$\ell $
@@ -73,6 +86,15 @@
             (5)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                \begin{QSTEPS}
+                    \QSTEP{$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為一個上下型、中心在原點的雙曲線 }
+                    \QSTEP{動點 $(t,{{t}^{2}}), t>0$ 的圖形為 $y=x^2, x>0$ 的拋物線右半部}
+                    \QSTEP{作圖如下：%TODO:詳解圖
+                    }
+                    \QSTEP{故選(5)}
+                \end{QSTEPS}
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -152,6 +174,24 @@
             (4)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                \begin{QSTEPS}
+                    %TODO:圖
+                    \QSTEP{建立坐標系可得 $A(1,0,0), B(1,1,0), C(0,1,0), D(0,1,1)$}
+                    \QSTEP{令開始移動 $t$秒後\\
+                           由$A$到$B$的質點動點坐標為$(1,t,0)$\\
+                           由$C$到$D$的質點動點坐標為$(0,1,t)$}
+                    \QSTEP{此兩質點的距離 \\
+                        $\begin{aligned}
+                        d &= \sqrt{1^2 + (t-1)^2+(0-t)^2} \\
+                          &= \sqrt{2t^2-2t+2}\\
+                          &= \sqrt{2(t-\frac{1}{2})^2 + \frac{3}{2}}
+                        \end{aligned} $\\
+                        根號內為$t$的二次式
+                        當 $t=\frac{1}{2}$ 時，有最小值，故選(4)
+                         }
+                \end{QSTEPS}
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -164,6 +204,39 @@
         \begin{QBODY}
             下圖是某城市在2016年的各月最低溫（橫軸$x$）與最高溫（縱軸$y$）的散佈圖。
             今以溫差（最高溫減最低溫）為橫軸且最高溫為縱軸重新繪製一散佈圖。試依此選出正確的選項。
+            \begin{tikzpicture}[scale=0.15]
+            \draw[color=gray, step=5] (-15,0) grid (25,35);
+            \foreach \myy/\myx in 
+            {
+                5/-12,
+                4/-9,
+                6/-8,
+                9/-3,
+                9/1,
+                12/3,
+                18/7,
+                21/10,
+                22/15,
+                24/17,
+                27/19,
+                27/20
+            }
+            {
+                \draw[ultra thick,fill] (\myx,\myy) circle (2pt);
+                
+            };	    
+            \foreach \itemx in {-15,-10,-5,...,25}
+            {
+                \node[below] at (\itemx, 0){$\scriptsize \itemx$};
+            }
+            
+            \foreach \itemy in {0,5,10,...,35}
+            {
+                \node[left] at (-15,\itemy){$\scriptsize \itemy$};
+            }
+            
+            \end{tikzpicture}
+            
 			\begin{QOPS}
 				\QOP 最高溫與溫差為正相關，且它們的相關性比最高溫與最低溫的相關性強
 				\QOP 最高溫與溫差為正相關，且它們的相關性比最高溫與最低溫的相關性弱
@@ -179,6 +252,100 @@
             (4)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                今以溫差（最高溫減最低溫）為橫軸且最高溫為縱軸重新繪製一散佈圖如下：
+                \begin{tikzpicture}[scale=0.15]
+                    \draw[color=gray, step=5] (-15,0) grid (25,35);
+                    \foreach \myy/\myx in 
+                    {
+                        5/-12,
+                        4/-9,
+                        6/-8,
+                        9/-3,
+                        9/1,
+                        12/3,
+                        18/7,
+                        21/10,
+                        22/15,
+                        24/17,
+                        27/19,
+                        27/20
+                    }
+                    {
+                        \draw[ultra thick,fill] (\myy-\myx,\myy) circle (2pt);
+                        
+                    };	    
+                    \foreach \itemx in {-15,-10,-5,...,25}
+                    {
+                        \node[below] at (\itemx, 0){$\scriptsize \itemx$};
+                    }
+                    
+                    \foreach \itemy in {0,5,10,...,35}
+                    {
+                        \node[left] at (-15,\itemy){$\scriptsize \itemy$};
+                    }
+                \end{tikzpicture}
+                
+                由散佈圖判斷可得：負相關，相關性比起原題目中的散布圖較弱。
+            \end{QSOL}
+        
+            \begin{QSOL}
+                在原圖上標示溫差的直線方程式$y-x=k$，$k=5,10,15,20$如下圖，\\
+                \begin{tikzpicture}[scale=0.15]
+                    \draw[color=gray, step=5] (-15,0) grid (25,35);
+                    \foreach \myy/\myx in 
+                    {
+                        5/-12,
+                        4/-9,
+                        6/-8,
+                        9/-3,
+                        9/1,
+                        12/3,
+                        18/7,
+                        21/10,
+                        22/15,
+                        24/17,
+                        27/19,
+                        27/20
+                    }
+                    {
+                        \draw[ultra thick,fill] (\myx,\myy) circle (2pt);
+                        
+                    };	    
+                    \foreach \itemx in {-15,-10,-5,...,25}
+                    {
+                        \node[below] at (\itemx, 0){$\scriptsize \itemx$};
+                    };
+                    
+                    \foreach \itemy in {0,5,10,...,35}
+                    {
+                        \node[left] at (-15,\itemy){$\scriptsize \itemy$};
+                    };
+                    
+                    \foreach \startx/\starty/\endx/\endy/\myword in 
+                    {-15/5/15/35/$y-x=20$,
+                        -15/0/20/35/$y-x=15$,
+                        -10/0/25/35/$y-x=10$,
+                        -5/0/25/30/$y-x=5$
+                    }
+                    {    
+                        \draw[color=red] (\startx,\starty) -- (\endx,\endy);
+                        \node[label={[label distance=0.2cm,text depth=0ex,rotate=45]right:\myword}] at (\endx,\endy) {};
+                    }
+                \end{tikzpicture}
+                
+                注意其$y$ 坐標與 $y-x$值得對應關係，\\
+                其集中分散程度較原本的散佈圖弱，且當 $y$ 坐標越大，$y-x$對應值越小，為負相關
+                \\
+                故選(4)
+                
+            \end{QSOL}
+        
+            \begin{QSOL}
+                觀察原圖的相關係數，相當接近$1$，迴歸直線約為$y=0.7x$
+                經過線性變換後 $r(y-x,y)\approx r(-0.3x,0.7x) <0$ 應為負相關\\
+                利用 $0.7x$來估算 $y$ ，再次疊代誤差應會過大，故相關性較原有相關性弱。選 (4)
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -205,6 +372,14 @@
             (1)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QOP}
+                \begin{QSTEPS}
+                    \QSTEP{注意$\cos x{}^\circ \le \cos x$左右兩側一個使用度度量的三角函數，一個使用弳度量的三角函數}
+                    \QSTEP{$\frac{\pi }{2}\le x\le \frac{3\pi }{2} \Rightarrow (\frac{\pi }{2})^\circ \le x^\circ \le (\frac{3\pi }{2})^\circ \Rightarrow 1\circ\le x^\circ \le 5^\circ\Rightarrow  \cos x^\circ > 0$}
+                    \QSTEP{$ \frac{\pi }{2}\le x\le \frac{3\pi }{2} \Rightarrow \cos x \le 0$}
+                    \QSTEP{$\cos x{}^\circ \le \cos x$ 左側恆正，右側負或$0$，故$x$ 為 $0$個實數解}
+                \end{QSTEPS}
+            \end{QOP}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -234,17 +409,41 @@
             (2)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                \begin{QSTEPS}
+                    \QSTEP{共有五天，卻只有四種餐點，必定有一種餐點吃兩天，其餘各吃一天。\\
+                        令牛肉麵、大滷麵、咖哩飯及排骨飯分別為$A,B,C,D$， 方法數討論如下：                    
+                        \begin{SOLCASES}
+                            \SOLCASE{$A$餐兩天：麵食類為 $AAB$ 可排列，但其間隔處必排$CD$(可排列)\\以滿足麵食不得相鄰的條件 \\
+                            方法數：$\FR{3!}{2!} \times 2! = 6$}
+                            \SOLCASE{$B$餐兩天：麵食類為 $ABB$ 方法同 $A$ 餐兩天
+                                方法數：$\FR{3!}{2!} \times 2!=6$}
+                            \SOLCASE{$C$餐兩天：麵食類為$AB$，飯食類為$CCD$，可先取全部排列後，扣除$AB$相鄰與$CC$相鄰\\
+                                全部 $-$ ($AB$相鄰)$\cup$ ($CC$ 相鄰) \\
+                                $=\FR{5!}{2!} - \FR{4!}{2!}\time 2! - 4! + 3!\times 2!$\\
+                                $= 24$
+                            }
+                            \SOLCASE{$D$餐兩天：麵食類為$AB$，飯食類為$CDD$，計算方式與$C$餐兩天同\\
+                                方法數$24$
+                            }
+                        \end{SOLCASES}                    
+                    }
+                    \QSTEP{合計：$6+6+24+24=60$}
+                \end{QSTEPS}
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
+\end{QUESTIONS}
+\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{106}{學測}{多選}{8}
         \end{ExamInfo}
         \begin{ExamAnsRateInfo}{24}{35}{20}{17}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-            設$m,n$為小於或等於4的相異正整數且$a,b$為非零實數。已知函數$f(x)=a{{x}^{m}}$與函數$g(x)=b{{x}^{n}}$的圖形恰有3個相異交點，請選出可能的選項。
+            設$m,n$為小於或等於$4$的相異正整數且$a,b$為非零實數。已知函數$f(x)=a{{x}^{m}}$與函數$g(x)=b{{x}^{n}}$的圖形恰有$3$個相異交點，請選出可能的選項。
 			\begin{QOPS}
 			\QOP $m,n$皆為偶數且$a,b$同號 
 			\QOP $m,n$皆為偶數且$a,b$異號
@@ -260,6 +459,23 @@
             (1)(3)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                %依選項討論逐一畫圖
+            \end{QSOL}
+            \begin{QSOL}
+                \begin{QSTEPS}
+                    \QSTEP{在不失一般性的條件下，令 $m>=n$}
+                    \QSTEP{兩個函數的圖形交點，即為方程組 $\left\lbrace\begin{array}{l}  
+                        y=f(x)=ax^m\\
+                        y=g(x)=bx^n
+                        \end{array}\right.$ 的解\\
+                    兩式相減可得 $ax^m-bx^n = 0 \Rightarrow x^n(ax^{m-n}-b)=0 \Rightarrow x =0 或 x^{m-n}=\FR{b}{a}$\\}
+                    \QSTEP{已知函數$f(x)=a{{x}^{m}}$與函數$g(x)=b{{x}^{n}}$的圖形恰有$3$個相異交點，表示方程組有$3$組相異實根 $\Rightarrow x^{m-n}=\FR{b}{a}$有兩個相異實根 }
+                    \QSTEP{由 $m-n \in \left\lbrace0,1,2,3 \right\rbrace$考慮以下四個單項函數圖形，僅有$m-n=2$ 與 $a,b$同號才有兩個相異實根，故選(1)(3)
+                    %TODO:補圖，單項函數 x^0,~ x^3 的圖形
+                 }
+                \end{QSTEPS}
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -286,6 +502,16 @@
             (5)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                \begin{QSTEPS}
+                    \QSTEP{設圓心 $C(x,y), O(0,0), A(2,6)$}
+                    \QSTEP{$O$在圓的內部，$A$ 在圓的外部 $\Rightarrow \overline{CO} >\overline{CA}$\\
+                    $\Rightarrow \sqrt{x^2+y^2} > \sqrt{(x-2)^2 + (y-6)^2} \Rightarrow 0>-4x-12y+40\\ \Rightarrow x+3y>10$
+                    則圓心落在此半平面上 %TODO:畫半平面的圖形
+                    }
+                    \QSTEP{如圖，計算出$x+3y=10$與$x$軸交點與$y$軸交點，判斷得(5)正確。}
+                \end{QSTEPS}
+            \end{QSOL}            
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -319,6 +545,35 @@
             (2)(3)(4)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                觀察題目所給的 $L_1,L_2,L_3$ 盡可能找出其通過的點以及方向向量\\
+                $L_1:$ 方向向量可取為 $\lvec{v_1} = (2,2,1)$ ，過點 $P_1:(1,-1,0)$\\
+                $L_2:$ 方向向量可取為 $\lvec{v_2} = (1,-2,2)\times(1,1,-4)=(6,6,3)$\\
+                $L_3:$ 方向向量可取為 $\lvec{v_3} = (-1,-1, 4)$，過點 $P_3:(0,-2,4)$\\
+                
+                兩直線關係共有：重合、平行、交一點、歪斜。\\
+                若是兩直線重合、平行、交一點，則有一平面同時包含兩直線。\\
+                若是兩直線歪斜，則沒有一平面同時包含此兩直線。\\
+                \begin{QOPSSOLLIST}
+                    \QOPSSOL{$\lvec{v_1} \cdot \lvec{v_2} = (2,2,1) \cdot (6,6,3) \ne 0 \Rightarrow $ ${{L}_{1}}$與${{L}_{2}}$的方向向量沒有垂直，該選項錯誤。 }
+                    \QOPSSOL{$\lvec{v_1} \cdot \lvec{v_3} = (2,2,1) \cdot (-1,-1,4) = 0 \Rightarrow $
+                    ${{L}_{1}}$與${{L}_{3}}$的方向向量互相垂直，該選項正確。}
+                    \QOPSSOL{因為 $\lvec{v_1} \parallel \lvec{v_2} \Rightarrow {L_1} \parallel {L_2} $或兩直線重合 $\Rightarrow$  有一個平面同時包含${{L}_{1}}$與${{L}_{2}}$，該選項正確。}
+                    \QOPSSOL{因為 ${{L}_{1}}$與${{L}_{3}}$的方向向量互相垂直，尚須確認 $L_1$ 與$L_3$ 是相交一點還是歪斜。
+                            將 $L_3$ 之參數式代入 $L_1$ 可得 $\FR{-t-1}{2} = \FR{-2-t+1}{2} = \FR{4+4t}{1}$ 可解得 $t = -1$，恰一組解\\
+                            $L_1$ 與 $L_3$ 為相交一點，有一個平面同時包含${{L}_{1}}$與${{L}_{3}}$，該選項正確。}
+                    \QOPSSOL{因為 ${{L}_{2}}$與${{L}_{3}}$的方向向量互相垂直，尚須確認 $L_2$ 與$L_3$ 是相交一點還是歪斜 \\
+                            將 $L_3$ 之參數式代入 $L_2$ 可得 $\left\lbrace\begin{array}{l}  
+                                                                            -t+4+2t+8+8t=-4  \\
+                                                                            -t-2-t-16-16t=5  \\
+                                                                            
+                                                                        \end{array}\right.\Rightarrow \left\lbrace\begin{array}{l}  
+                                                                           t=-\frac{16}{9}  \\
+                                                                           t=-\frac{23}{18}  \\
+                                                                        \end{array}\right.$ (兩個$t$值不同) $\Rightarrow L_2, L_3$ 歪斜 ，沒有一個平面同時包含${{L}_{2}}$與${{L}_{3}}$，該選項錯誤。
+                                                            }
+                \end{QOPSSOLLIST}
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -355,11 +610,11 @@
 				\node[label=45:$E$] at (E){};
 			\end{tikzpicture}
 			\begin{QOPS}
-			\QOP $\overline{AD}=2\sqrt[{}]{2}$
-			\QOP $\angle DAB=45{}^\circ $
-			\QOP $\overline{BD}=2\sqrt[{}]{6}$
-			\QOP $\angle ABD=45{}^\circ $
-			\QOP $BCD$的面積為$2\sqrt[{}]{2}$
+    			\QOP $\overline{AD}=2\sqrt[{}]{2}$
+    			\QOP $\angle DAB=45{}^\circ $
+    			\QOP $\overline{BD}=2\sqrt[{}]{6}$
+    			\QOP $\angle ABD=45{}^\circ $
+    			\QOP $BCD$的面積為$2\sqrt[{}]{2}$
 			\end{QOPS}
         \end{QBODY}
         \begin{QFROMS}
@@ -369,6 +624,29 @@
             (1)(4)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}
+                \begin{QOPSSOLLIST}
+                    連接 $\overline{DA},\overline{DB}$
+                    \QOPSSOL{ $\triangle ADE$ 為等腰直角三角形 ，又 $\overline{DE}=2 \Rightarrow \overline{AD} = 2\sqrt{2}$ }
+                    \QOPSSOL{ $\angle DAB = \angle EAB - \angle EAD = 105^\circ - 45^\circ = 60^\circ $}
+                    \QOPSSOL{ 在$\triangle ABD$ 中使用餘弦定理：\\
+                                $\begin{aligned}
+                                \overline{BD} & = \sqrt{\overline{AD}^2 + \overline{AB}^2 - 2\cdot \overline{AD} \cdot \overline{AB} \cos 60^\circ}\\
+                                              & = \sqrt{(2\sqrt{2})^2 + (\sqrt{6} + \sqrt{2})^2 - 2 \cdot 2\sqrt{2} \cdot (\sqrt{6} + \sqrt{2})\cdot \frac{1}{2}}\\
+                                              & =2\sqrt{3} 
+                                \end{aligned}$
+                             }
+                    \QOPSSOL{在$\triangle ABD$ 中使用正弦定理：\\
+                                $\FR{\overline{DB}}{\sin \angle DAB} = \FR{\overline{DA}}{\sin \angle DBA}
+                                 \Rightarrow \FR{2\sqrt{3}}{\frac{\sqrt{3}}{2}} = \FR{2\sqrt{2}}{\sin \angle ABD} 
+                                 \Rightarrow \sin \angle ABD = \FR{\sqrt{2}}{2}
+                                 \Rightarrow \angle ABD = 45\circ \vee 135\circ$ (但 $135^\circ$ 顯然不合)}
+                    \QOPSSOL{已知 $\triangle BCD$ 中三邊長為 $4,2,2\sqrt{3}$，為 $2:1:\sqrt{3}$ 之$30^\circ - 60^\circ -90^\circ$ 三角形\\
+                             其面積為：$\frac{1}{2} \times 2 \times 2\sqrt{3} = 2\sqrt{3}$
+                    }
+                \end{QOPSSOLLIST}
+                故選(1)(4)
+            \end{QSOL}
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -449,6 +727,8 @@
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
+\end{QUESTIONS}
+\begin{QUESTIONS}
     \begin{QUESTION}
         \begin{ExamInfo}{106}{學測}{填充}{A}
         \end{ExamInfo}
@@ -591,3 +871,4 @@
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
     \end{QUESTION}
+\end{QUESTIONS}
