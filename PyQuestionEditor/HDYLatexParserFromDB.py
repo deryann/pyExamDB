@@ -186,6 +186,25 @@ where b.tag_id IN %s
         row = cursor.fetchone()
         return row
 
+    def getDictTagIDMapQuestionCount(self):
+        strSQL = u"""SELECT question_tag_relationship.tag_id, count(question_tag_relationship.tag_id) as tag_total FROM question_tag_relationship 
+                    LEFT JOIN questiontags ON question_tag_relationship.tag_id = questiontags.tag_id 
+                    GROUP BY question_tag_relationship.tag_id"""
+        return self.getDictForTwoCol(strSQL)
+
+    def getDictForTwoCol(self, strSQL):
+        """
+        將兩個col 的取出一個變為Key 一個變為 value 的結構
+        :param strSQL:
+        :return:
+        """
+        dicR = {}
+
+        rows = self.getRowsBySQL(strSQL)
+        for row in rows:
+            dicR[row[0]] = row[1]
+        return dicR
+
     def handleNoTagInDB(self, strTag):
         #insert tag
         strInsertSQL = u"""INSERT INTO %s (TAG_STR)
