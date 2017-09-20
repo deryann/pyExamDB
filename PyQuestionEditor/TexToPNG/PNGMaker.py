@@ -1,6 +1,9 @@
 #coding=utf-8
 import os, timeit,sys
 import codecs
+import hashlib
+from PIL import Image as PILImage
+from PIL import PngImagePlugin
 
 constTempWorkFileMainWord = u"TempToPNG"
 constTempWorkFileMainWordC = u'"TempToPNG"'
@@ -99,18 +102,40 @@ class PNGMaker :
     def __init__(self, strTexString, strOutputFilePath):
         self.strTexString = strTexString
         self.strOutputFilePath = strOutputFilePath
+        self.tikzSize = str(len(self.strTexString))
 
-    def runPNGMaker(self):
-        print("Runing....Please wait")
+        hash_object = hashlib.sha256(self.strTexString.encode('utf-8'))
+        hex_dig = hash_object.hexdigest()
+        self.tikzHash = unicode(hex_dig)
+
+    def runPNGMaker(self, bCheckHash=True):
+        os.chdir(constWorkPath)
+        if bCheckHash:
+            print("RunPNGMaker Checking....")
+            if os.path.isfile(self.strOutputFilePath):
+                pic = PILImage.open(self.strOutputFilePath)
+                dicMetaData = pic.text
+                if dicMetaData.has_key("TikzHash") and dicMetaData.has_key("TikzSize"):
+                    if dicMetaData['TikzSize']==self.tikzSize and self.tikzHash ==dicMetaData["TikzHash"]:
+                        print(self.strOutputFilePath+" NOT NEED UPDATED!!")
+                        return
+        print("RunPNGMaker Starting....Please wait")
         timer_start = timeit.default_timer()
         #Write a temp tex file
-        os.chdir(constWorkPath)
+
         with codecs.open(constTempWorkTexFile, "w", "utf-8") as fpt:
             strTemplate = constTempWorkTexTemplate
             strContent = strTemplate.replace("%{{TikzStatment}}", self.strTexString)
             fpt.write(strContent)
 
         runTempTexToPNG(constTempWorkTexFile, self.strOutputFilePath)
+
+        #加上text tag
+        pic = PILImage.open(self.strOutputFilePath)
+        metaData = PngImagePlugin.PngInfo()
+        metaData.add_text("TikzHash", self.tikzHash, 0)
+        metaData.add_text("TikzSize", self.tikzSize, 0)
+        pic.save(self.strOutputFilePath, "PNG", pnginfo=metaData)
 
         timer_end = timeit.default_timer()
         print("Time usage:", timer_end - timer_start, " sec(s)")

@@ -3,6 +3,7 @@
 import os
 import codecs
 import re
+import timeit
 from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
 from HDYQuestionParserFromDB import HDYQuestionParserFromDB
 from HDYLatexParser import HDYLatexParser
@@ -29,18 +30,23 @@ def getListOfTikzFromString(strInput):
 
 
 def runSavePNG(qpt):
+    """
+    找出所有含有tikz圖形的，將其編輯利用latex 編輯成圖形
+    :param qpt:
+    :return:
+    """
     strQBODY = qpt.getQBODY()
     lst = getListOfTikzFromString(strQBODY)
+    nQID = qpt.question_id
+
     if len(lst)!=0:
         nIndex = 0
         for item in lst:
             strExamInfo = qpt.getEXAMINFO_SRING_FOR_PATH()
-            nQID = qpt.question_id
             strOutFileName = u"DBWebPics\QID_%d_pic_%d.png" % (nQID, nIndex)
             strTikz = strTikzTemplate %(item,)
             pngMaker = PNGMaker(strTikz, strOutFileName)
             pngMaker.runPNGMaker()
-
             nIndex+=1
     pass
 
@@ -69,14 +75,13 @@ def runSavePNG2(qpt):
                 pngMaker = PNGMaker(strTikz, strOutFileName)
                 pngMaker.runPNGMaker()
                 nIndex+=1
-                print (strOutFileName+u"OK!!"+os.linesep)
+                print (strOutFileName+u" OK!!"+os.linesep)
     pass
 
 
-def main():
+def runPNGForEachQBODY():
     dbLatex = HDYLatexParserFromDB(constdefaultname)
     dbLatex.read()
-
     nCountTikz = 0
     with codecs.open(constLogFile,"w", "utf-8") as fpt:
         nCount = dbLatex.nCountQ
@@ -96,7 +101,7 @@ def main():
 
     pass
 
-def main2():
+def runPNGForEachQSOL():
     """
     ONLY for QSOL
     :return:
@@ -109,5 +114,26 @@ def main2():
         runSavePNG2(qPt)
     pass
 
+def exportAllYearContentFromDB():
+    dbLatex = HDYLatexParserFromDB(constdefaultname)
+    dbLatex.read()
+    nCount = dbLatex.nCountQ
+    for i in range(nCount):
+        qPt = dbLatex.getQuestionObject(i)
+
+def runAllPictures():
+    #run all pictures
+    print("Run For AllQuestion Runing....Please wait...")
+    timer_start = timeit.default_timer()
+
+    runPNGForEachQBODY()
+    runPNGForEachQSOL()
+
+    timer_end = timeit.default_timer()
+    print("This program Time usage:", timer_end - timer_start, " sec(s)")
+
+
+
+
 if __name__ == '__main__':
-    main2()
+    runAllPictures()
