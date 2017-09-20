@@ -248,6 +248,35 @@ where b.tag_id IN %s
         row=self.getRowBySQL(strSQL)
         return row != None
 
+    def getSolSTR(self, nSolID):
+        strSQL = u"""SELECT SOL_STR from questionsols where sol_id=%d 
+        """ % (nSolID, )
+        row=self.getRowBySQL(strSQL)
+        return row[0]
+
+    def getSOLID(self, strSol):
+        lst = re.findall(u"\\[SOLID\\=(.*?)\\]", strSol, re.DOTALL)
+        if len(lst)!=1:
+            return -1
+        else:
+            return int(lst[0])
+
+    def cleanSolString(self, strSol):
+        if len(strSol)==0: return strSol
+        if strSol[0] != u'[':
+            return strSol
+
+        for k in range(1,len(strSol) ):
+            if strSol[k] == ']':
+                return strSol[k+1:]
+
+        return strSol
+
+    def shouldUpdateSol(self, nSOLID, solitem):
+        strSolInDB = self.getSolSTR(nSOLID)
+        strCompareString = self.cleanSolString(solitem)
+        return strSolInDB.strip() != strCompareString.strip()
+
     def importTexFile(self, strFileName):
         #先整理一個大表
         print(u"[importTexFile][%s]" %(strFileName,))
@@ -256,6 +285,7 @@ where b.tag_id IN %s
         fPt.read()
         fPt.getReport()
         nCount =0
+        lst = []
         for nIndex in range(fPt.getCountOfQ()):
             Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
             print(Qpt.getEXAMINFO_STR())
@@ -266,20 +296,38 @@ where b.tag_id IN %s
                     print ("QID %d : have %d Sols"%( nQId, len(lst)))
                     dicUpdateQuestionidMapUpdateDic[nQId] = lst
                     nCount += len(lst)
-            #check 該解法是不是已經在 Database 裡面
+
+            #check 該解法是不是已經在 Database 裡面 需要Insert 還是Update
             lstNeedToInsert=[]
+            dicNeedToUpdate={}
+
             for solitem in lst:
-                if not self.existedSol(nQId, solitem):
-                    lstNeedToInsert.append(solitem)
+                nSOLID = self.getSOLID(solitem)
+
+                if nSOLID==-1:
+                    if not self.existedSol(nQId, solitem):
+                        lstNeedToInsert.append(solitem)
                 else:
-                    print("There is this soltion!")
+                    if self.shouldUpdateSol(nSOLID, solitem):
+                        dicNeedToUpdate[nSOLID] = self.cleanSolString(solitem)
+                    else:
+                        pass
+            #Insert 該 Insert
             for solitem in lstNeedToInsert:
                 strInsertSQL = u"""
                                 INSERT INTO %s (question_id, SOL_STR,SOL_AUTHOR,SOL_USEFUL,SOL_DATETIME)
                                 VALUES ( %d, '%s', '%s',%d, '%s');
                                 """ % (u"questionsols", nQId, self.correctSQL(solitem), u'HDY',0, datetime.now())
                 self.executeSQL(strInsertSQL)
-            self.commitDB()
+            #Update 那些有SOLID 的
+            for solid in dicNeedToUpdate.keys():
+                strUpdateSQL = u"""UPDATE %s SET SOL_STR='%s', SOL_DATETIME='%s' WHERE sol_id = %d 
+                """ % (u"questionsols", self.correctSQL(dicNeedToUpdate[solid]), datetime.now(), solid)
+                self.executeSQL(strUpdateSQL)
+
+            if len(lstNeedToInsert)!= 0 or len(dicNeedToUpdate.keys())!= 0:
+                self.commitDB()
+
         return len(dicUpdateQuestionidMapUpdateDic.keys()), nCount
 
     def appendTexFile(self,strFileName):

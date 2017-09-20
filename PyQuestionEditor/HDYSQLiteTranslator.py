@@ -99,7 +99,7 @@ def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
     dbParser.saveSqliteDBIntoTexFileByYears(91,106)
 
-def importdataFromFile():
+def importSolsDataFromFile():
     dbParser = DBParser('test.sqlitedb')
     lstFileNameList = []
     nCount = 0
@@ -133,7 +133,7 @@ def main2():
     :return:
     """
     createSOLsTable()
-    importdataFromFile()
+    importSolsDataFromFile()
 
 def tagWeightGiver():
     """
@@ -145,6 +145,7 @@ def tagWeightGiver():
 
 if __name__ == '__main__':
     #main2()
-    movedataFromDBtoFile()
+
     #tagWeightGiver()
-    #importdataFromFile()
+    importSolsDataFromFile()
+    #movedataFromDBtoFile()

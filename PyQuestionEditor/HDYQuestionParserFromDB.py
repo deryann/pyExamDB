@@ -85,10 +85,10 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
                                 where question_id = %d""" % (self.question_id,)
         rows = self.getRowsBySQL(strSQL)
         strBuffer = u''
-        strTemplete="\\begin{QSOL}%s\\end{QSOL}"+os.linesep
+        strTemplete="\\begin{QSOL}[SOLID=%d]%s\\end{QSOL}"+os.linesep
         self.lstSols=[]
         for row in rows:
-            strBuffer+= strTemplete %(row[1])
+            strBuffer+= strTemplete %(row[0], row[1])
             self.lstSols.append(row[1])
             self.lstSolsID.append(row[0])
 
