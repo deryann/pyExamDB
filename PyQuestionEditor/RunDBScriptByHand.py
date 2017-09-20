@@ -1,15 +1,8 @@
 #coding=utf-8
 
-import os
-import codecs
-import re
 import timeit
-from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
-from HDYQuestionParserFromDB import HDYQuestionParserFromDB
-from HDYLatexParser import HDYLatexParser
 from HDYLatexParserFromDB import HDYLatexParserFromDB
-from TexToPNG.PNGMaker import PNGMaker
-import sqlite3
+
 
 constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
@@ -19,6 +12,10 @@ constdefaultname = u"test.sqlitedb"
 
 
 def add99BookTagIntoDB():
+    """
+    強迫新增這些 Tags Book 到DB檔案內
+    :return:
+    """
     dbLatex = HDYLatexParserFromDB(constdefaultname)
     dbLatex.read()
     n99ID = 130
@@ -31,6 +28,10 @@ def add99BookTagIntoDB():
     dbLatex.commitDB()
 
 def add99RootTagIntoDB():
+    """
+    強迫新增 Tag Book 到DB檔案內
+    :return:
+    """
     dbLatex = HDYLatexParserFromDB(constdefaultname)
     dbLatex.read()
     strTag = u'99課綱'
@@ -48,9 +49,15 @@ def load99TreeIntoJason():
     dbLatex.read()
     strR = getNodeString(130, dbLatex)
     print(strR)
-    pass
 
-def getNodeString(nCurrentID,dbLatex, PARENT_TAG_STR = None):
+def getNodeString(nCurrentID, dbLatex, PARENT_TAG_STR = None):
+    """
+    由資料庫當中讀出 D3 tree diagram 可用的json node 結構
+    :param nCurrentID: 由此ID 以下
+    :param dbLatex: 可以使用的 Latex DB file object
+    :param PARENT_TAG_STR: Parent node
+    :return:
+    """
     strR = u''
     strSQL = u'''SELECT tag_id, TAG_STR, parent_id, group_id from %s  WHERE tag_id = %d''' %(constTagTableName, nCurrentID)
     row = dbLatex.getRowBySQL(strSQL)
