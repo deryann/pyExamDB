@@ -16,7 +16,7 @@ constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
 
 constdefaultname = u"test.sqlitedb"
-constLogFile = u"tikzcounting.log"
+constLogFile = u"HDYlogger.log"
 
 strTikzTemplate = u"""\\begin{tikzpicture}%s
 \\end{tikzpicture}
@@ -132,8 +132,26 @@ def runAllPictures():
     timer_end = timeit.default_timer()
     print("This program Time usage:", timer_end - timer_start, " sec(s)")
 
+def checkAllQuestioForMathJax():
+    timer_start = timeit.default_timer()
+    dbLatex = HDYLatexParserFromDB(constdefaultname)
+    dbLatex.read()
+    nCount = dbLatex.nCountQ
+    for i in range(nCount):
+        qPt = dbLatex.getQuestionObject(i)
+        checkWordForMathJax(qPt)
 
+    timer_end = timeit.default_timer()
+    print("This program Time usage:", timer_end - timer_start, " sec(s)")
 
+def checkWordForMathJax(qPt):
+    strQBODY = qPt.getQBODY()
+    if strQBODY.find('>')!=-1 or strQBODY.find('<')!=-1:
+        strReturn  = (u"QID:%d %s") % (qPt.question_id, qPt.getQBODY())
+        with codecs.open(constLogFile, "a", "utf-8") as fpt:
+            fpt.write(strReturn)
+            fpt.write(os.linesep)
 
 if __name__ == '__main__':
-    runAllPictures()
+    #runAllPictures()
+    checkAllQuestioForMathJax()
