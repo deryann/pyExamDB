@@ -24,11 +24,12 @@
             (1)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=21]
                 設老師人數:學生人數為 $m:n$\\
                 則全校師生玩過寶可夢的比例為：$\FR{m r_1 + n r_2}{m+n} = \FR{m}{m+n} r_1 +\FR{n}{m+n} r_2$\\
                 若是得到師生人數比例即可求全校師生玩過寶可夢的比率。
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -55,11 +56,12 @@
             (3)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=22]
                 由題意可得 $(((b)^2)^2)^2 = b^8 = 81^3 \Rightarrow b^8 = 3^12 \Rightarrow b=3^{\FR{12}{8}} = 3^{\FR{3}{2}} = \sqrt{27} $ \\
                 由 $5=\sqrt{25}$ 可估計得 $b \approx 5.3$ \\
                 故選 (3)
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -70,7 +72,7 @@
         \begin{ExamAnsRateInfo}{38}{71}{34}{9}
         \end{ExamAnsRateInfo}
         \begin{QBODY}
-            設$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為坐標平面上一雙曲線，且其通過第一象限的漸近線為$\ell $。考慮動點$(t,{{t}^{2}})$，從時間$t=0$時出發。當$t>0$時，請選出正確的選項。(題意補充 $a>0,b>0$)
+            設$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為坐標平面上一雙曲線，且其通過第一象限的漸近線為$\ell $。考慮動點$(t,{{t}^{2}})$，從時間$t=0$時出發。當$t>0$時，請選出正確的選項。
 			\begin{QOPS}
 			\QOP 此動點不會碰到$\Gamma $，也不會碰到$\ell $
 			\QOP 此動點會碰到$\Gamma $，但不會碰到$\ell $
@@ -86,7 +88,7 @@
             (5)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=23]
                 \begin{QSTEPS}
                     \QSTEP{$\Gamma :\frac{{{y}^{2}}}{{{a}^{2}}}-\frac{{{x}^{2}}}{{{b}^{2}}}=1$為一個上下型、中心在原點的雙曲線 }
                     \QSTEP{動點 $(t,{{t}^{2}}), t>0$ 的圖形為 $y=x^2, x>0$ 的拋物線右半部}
@@ -95,6 +97,7 @@
                     \QSTEP{故選(5)}
                 \end{QSTEPS}
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -174,7 +177,7 @@
             (4)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=24]
                 \begin{QSTEPS}
                     %TODO:圖
                     \QSTEP{建立坐標系可得 $A(1,0,0), B(1,1,0), C(0,1,0), D(0,1,1)$}
@@ -192,6 +195,7 @@
                          }
                 \end{QSTEPS}
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -252,8 +256,9 @@
             (4)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
-                今以溫差（最高溫減最低溫）為橫軸且最高溫為縱軸重新繪製一散佈圖如下：
+            \begin{QSOL}[SOLID=25]
+                今以溫差（最高溫減最低溫）為橫軸且最高溫為縱軸重新繪製一散佈圖如下：\\
+
                 \begin{tikzpicture}[scale=0.15]
                     \draw[color=gray, step=5] (-15,0) grid (25,35);
                     \foreach \myy/\myx in 
@@ -288,8 +293,7 @@
                 
                 由散佈圖判斷可得：負相關，相關性比起原題目中的散布圖較弱。
             \end{QSOL}
-        
-            \begin{QSOL}
+\begin{QSOL}[SOLID=26]
                 在原圖上標示溫差的直線方程式$y-x=k$，$k=5,10,15,20$如下圖，\\
                 \begin{tikzpicture}[scale=0.15]
                     \draw[color=gray, step=5] (-15,0) grid (25,35);
@@ -340,12 +344,12 @@
                 故選(4)
                 
             \end{QSOL}
-        
-            \begin{QSOL}
+\begin{QSOL}[SOLID=27]
                 觀察原圖的相關係數，相當接近$1$，迴歸直線約為$y=0.7x$
                 經過線性變換後 $r(y-x,y)\approx r(-0.3x,0.7x) <0$ 應為負相關\\
                 利用 $0.7x$來估算 $y$ ，再次疊代誤差應會過大，故相關性較原有相關性弱。選 (4)
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -372,6 +376,7 @@
             (1)
         \end{QANS}
         \begin{QSOLLIST}
+            \begin{QSOL}[SOLID=39]
             \begin{QOP}
                 \begin{QSTEPS}
                     \QSTEP{注意$\cos x{}^\circ \le \cos x$左右兩側一個使用度度量的三角函數，一個使用弳度量的三角函數}
@@ -380,6 +385,8 @@
                     \QSTEP{$\cos x{}^\circ \le \cos x$ 左側恆正，右側負或$0$，故$x$ 為 $0$個實數解}
                 \end{QSTEPS}
             \end{QOP}
+            \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -409,7 +416,7 @@
             (2)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=28]
                 \begin{QSTEPS}
                     \QSTEP{共有五天，卻只有四種餐點，必定有一種餐點吃兩天，其餘各吃一天。\\
                         令牛肉麵、大滷麵、咖哩飯及排骨飯分別為$A,B,C,D$， 方法數討論如下：                    
@@ -431,6 +438,7 @@
                     \QSTEP{合計：$6+6+24+24=60$}
                 \end{QSTEPS}
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -459,10 +467,10 @@
             (1)(3)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=29]
                 %依選項討論逐一畫圖
             \end{QSOL}
-            \begin{QSOL}
+\begin{QSOL}[SOLID=30]
                 \begin{QSTEPS}
                     \QSTEP{在不失一般性的條件下，令 $m>=n$}
                     \QSTEP{兩個函數的圖形交點，即為方程組 $\left\lbrace\begin{array}{l}  
@@ -476,6 +484,7 @@
                  }
                 \end{QSTEPS}
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -502,7 +511,7 @@
             (5)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=31]
                 \begin{QSTEPS}
                     \QSTEP{設圓心 $C(x,y), O(0,0), A(2,6)$}
                     \QSTEP{$O$在圓的內部，$A$ 在圓的外部 $\Rightarrow \overline{CO} >\overline{CA}$\\
@@ -511,7 +520,8 @@
                     }
                     \QSTEP{如圖，計算出$x+3y=10$與$x$軸交點與$y$軸交點，判斷得(5)正確。}
                 \end{QSTEPS}
-            \end{QSOL}            
+            \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -545,7 +555,7 @@
             (2)(3)(4)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=32]
                 觀察題目所給的 $L_1,L_2,L_3$ 盡可能找出其通過的點以及方向向量\\
                 $L_1:$ 方向向量可取為 $\lvec{v_1} = (2,2,1)$ ，過點 $P_1:(1,-1,0)$\\
                 $L_2:$ 方向向量可取為 $\lvec{v_2} = (1,-2,2)\times(1,1,-4)=(6,6,3)$\\
@@ -574,6 +584,7 @@
                                                             }
                 \end{QOPSSOLLIST}
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -624,7 +635,7 @@
             (1)(4)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=33]
                 \begin{QOPSSOLLIST}
                     連接 $\overline{DA},\overline{DB}$
                     \QOPSSOL{ $\triangle ADE$ 為等腰直角三角形 ，又 $\overline{DE}=2 \Rightarrow \overline{AD} = 2\sqrt{2}$ }
@@ -647,6 +658,7 @@
                 \end{QOPSSOLLIST}
                 故選(1)(4)
             \end{QSOL}
+
         \end{QSOLLIST}
         \begin{QEMPTYSPACE}
         \end{QEMPTYSPACE}
@@ -673,7 +685,7 @@
             (2)(5)
         \end{QANS}
         \begin{QSOLLIST}
-            \begin{QSOL}
+            \begin{QSOL}[SOLID=34]
 				\begin{QSTEPS}
 					\QSTEP{ 令全班為集合$U$，國文、數學、英文，及格的集合分別為 $C,M,E$ \\
 							可得：$n(C) = 45, n(M) = 34 , n(E) = 39$}
