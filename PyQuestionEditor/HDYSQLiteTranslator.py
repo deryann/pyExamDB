@@ -101,6 +101,7 @@ def movedataFromDBtoFile():
 
 def importSolsDataFromFile():
     dbParser = DBParser('test.sqlitedb')
+    dbParser.read()
     lstFileNameList = []
     nCount = 0
     nSolCount =0
@@ -109,7 +110,7 @@ def importSolsDataFromFile():
         lstFileNameList.append(strNumber)
 
     for strFileName in lstFileNameList:
-        nQuestion, nSOL = dbParser.importTexFile(strFileName)
+        nQuestion, nSOL = dbParser.importTexFile(strFileName, bSimulate=False)
         nCount += nQuestion
         nSolCount += nSOL
     print (u"There are %d QSOLLIST,%d SOL DBs"%(nCount,nSolCount))
@@ -147,5 +148,5 @@ if __name__ == '__main__':
     #main2()
 
     #tagWeightGiver()
-    importSolsDataFromFile()
-    #movedataFromDBtoFile()
+    #importSolsDataFromFile()
+    movedataFromDBtoFile()

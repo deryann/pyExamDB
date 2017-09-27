@@ -75,8 +75,12 @@ where b.tag_id IN %s
 
     def getQuestionObject(self, nIndex):
         qID = self.getmainkeyid(nIndex)
-        qpt = HDYQuestionParserFromDB(qID,self.conn)
+        print(u"qID = %d" %(qID,))
+        qpt = self.getQuestionObjectByQID(qID)
         return qpt
+
+    def getQuestionObjectByQID(self, qID):
+        return HDYQuestionParserFromDB(qID, self.conn)
 
     def saveFileWithNewTag(self, dicNewTags):
         print("[HDYLatexParserFromDB][saveFileWithNewTag]")
@@ -277,7 +281,7 @@ where b.tag_id IN %s
         strCompareString = self.cleanSolString(solitem)
         return strSolInDB.strip() != strCompareString.strip()
 
-    def importTexFile(self, strFileName):
+    def importTexFile(self, strFileName, bSimulate = False):
         #先整理一個大表
         print(u"[importTexFile][%s]" %(strFileName,))
         dicUpdateQuestionidMapUpdateDic={}
@@ -286,48 +290,80 @@ where b.tag_id IN %s
         fPt.getReport()
         nCount =0
         lst = []
+        dicNeedToUpdateQBODY = {}
+        dicNeedToUpdateQANS = {}
         for nIndex in range(fPt.getCountOfQ()):
-            Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
-            print(Qpt.getEXAMINFO_STR())
-            nQId = self.getQuestionIDInDB(Qpt.getEXAMINFO_STR())
+            qptInFile = HDYQuestionParser(fPt.getQuestionString(nIndex))
+            print(qptInFile.getEXAMINFO_STR())
+            nQId = self.getQuestionIDInDB(qptInFile.getEXAMINFO_STR())
             if nQId != -1:
-                lst = Qpt.getListOfQSOLs()
+                #Check QBODY ANS 需不需要更正
+                qptInDB = self.getQuestionObjectByQID(nQId)
+                if qptInFile.getQBODY()!=qptInDB.getQBODY():
+                    dicNeedToUpdateQBODY[nQId]=qptInFile.getQBODY()
+                if qptInFile.getQANS()!=qptInDB.getQANS():
+                    dicNeedToUpdateQANS[nQId] = qptInFile.getQANS()
+
+                #找出詳解的部分
+                lst = qptInFile.getListOfQSOLs()
                 if len(lst)!=0:
                     print ("QID %d : have %d Sols"%( nQId, len(lst)))
                     dicUpdateQuestionidMapUpdateDic[nQId] = lst
                     nCount += len(lst)
 
             #check 該解法是不是已經在 Database 裡面 需要Insert 還是Update
-            lstNeedToInsert=[]
-            dicNeedToUpdate={}
+            lstNeedToInsertSol=[]
+            dicNeedToUpdateSol={}
 
             for solitem in lst:
                 nSOLID = self.getSOLID(solitem)
 
                 if nSOLID==-1:
                     if not self.existedSol(nQId, solitem):
-                        lstNeedToInsert.append(solitem)
+                        lstNeedToInsertSol.append(solitem)
                 else:
                     if self.shouldUpdateSol(nSOLID, solitem):
-                        dicNeedToUpdate[nSOLID] = self.cleanSolString(solitem)
+                        dicNeedToUpdateSol[nSOLID] = self.cleanSolString(solitem)
                     else:
                         pass
-            #Insert 該 Insert
-            for solitem in lstNeedToInsert:
-                strInsertSQL = u"""
-                                INSERT INTO %s (question_id, SOL_STR,SOL_AUTHOR,SOL_USEFUL,SOL_DATETIME)
-                                VALUES ( %d, '%s', '%s',%d, '%s');
-                                """ % (u"questionsols", nQId, self.correctSQL(solitem), u'HDY',0, datetime.now())
-                self.executeSQL(strInsertSQL)
-            #Update 那些有SOLID 的
-            for solid in dicNeedToUpdate.keys():
-                strUpdateSQL = u"""UPDATE %s SET SOL_STR='%s', SOL_DATETIME='%s' WHERE sol_id = %d 
-                """ % (u"questionsols", self.correctSQL(dicNeedToUpdate[solid]), datetime.now(), solid)
+            if bSimulate:
+                print(u"=======Simulate======")
+                print(u"lstNeedToInsertSol = " + unicode(lstNeedToInsertSol))
+                print(u"dicNeedToUpdateSol = " + unicode(dicNeedToUpdateSol))
+                print(u"=====================")
+            else:
+                #Insert 該 Insert
+                for solitem in lstNeedToInsertSol:
+                    strInsertSQL = u"""
+                                    INSERT INTO %s (question_id, SOL_STR,SOL_AUTHOR,SOL_USEFUL,SOL_DATETIME)
+                                    VALUES ( %d, '%s', '%s',%d, '%s');
+                                    """ % (u"questionsols", nQId, self.correctSQL(solitem), u'HDY',0, datetime.now())
+                    self.executeSQL(strInsertSQL)
+                #Update 那些有SOLID 的
+                for solid in dicNeedToUpdateSol.keys():
+                    strUpdateSQL = u"""UPDATE %s SET SOL_STR='%s', SOL_DATETIME='%s' WHERE sol_id = %d 
+                    """ % (u"questionsols", self.correctSQL(dicNeedToUpdateSol[solid]), datetime.now(), solid)
+                    self.executeSQL(strUpdateSQL)
+
+                if len(lstNeedToInsertSol)!= 0 or len(dicNeedToUpdateSol.keys())!= 0:
+                    self.commitDB()
+        #Update QBODY
+        if bSimulate:
+                print(u"=======Simulate======")
+                print(u"dicNeedToUpdateQBODY = "+ unicode(dicNeedToUpdateQBODY))
+                print(u"=====================")
+        else:
+            for qid in dicNeedToUpdateQBODY.keys():
+                strUpdateSQL = u"""UPDATE %s SET QBODY='%s' WHERE question_id = %d 
+                """ % (constQuestionsTableName, self.correctSQL(dicNeedToUpdateQBODY[qid]), qid)
                 self.executeSQL(strUpdateSQL)
 
-            if len(lstNeedToInsert)!= 0 or len(dicNeedToUpdate.keys())!= 0:
-                self.commitDB()
+            for qid in dicNeedToUpdateQANS.keys():
+                strUpdateSQL = u"""UPDATE %s SET QANS='%s' WHERE question_id = %d 
+                """ % (constQuestionsTableName, self.correctSQL(dicNeedToUpdateQANS[qid]), qid)
+                self.executeSQL(strUpdateSQL)
 
+            self.commitDB()
         return len(dicUpdateQuestionidMapUpdateDic.keys()), nCount
 
     def appendTexFile(self,strFileName):
