@@ -45,7 +45,7 @@ def generateTexFileTemplate():
 
 def generateTexFileTemplateByCSVFile():
     """
-    另用已經有的csv資料寫出Tex file
+    另用已經有的 csv 資料寫出Tex file
     """
     import pandas as pd
     strFileName= u"E:\\NCTUG2\\Code\\pyExamDBF5\\PyQuestionEditor\\exam_xc.csv"
@@ -58,10 +58,31 @@ def generateTexFileTemplateByCSVFile():
     latexPt = HDYLatexParser(None)
     latexPt.newTemplateByCsvInput(exam)
 
+def generate83to90():
+
+    dicTable = {
+        83: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"10"],[u"選填",u"11", u"20"]],
+        84: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"11"],[u"選填",u"12", u"20"]],
+        85: [[u"單選", u"1", u"8"] ,[u"多選",u"9", u"14"],[u"選填",u"15", u"20"]],
+        86: [[u"單選", u"1", u"8"] ,[u"多選",u"9", u"12"],[u"選填",u"13", u"20"]],
+        87: [[u"單選", u"1", u"4"] ,[u"多選",u"5", u"10"],[u"選填",u"11", u"20"]],
+        88: [[u"單選", u"1", u"3"] ,[u"多選",u"4", u"10"],[u"選填",u"11", u"20"]],
+        89: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"10"],[u"選填",u"11", u"20"]],
+        90: [[u"單選", u"1", u"3"] ,[u"多選",u"4", u"10"],[u"選填",u"11", u"20"]]}
+
+    for nYear in dicTable.keys():
+        strYear = unicode(nYear)
+        strExam = u"學測"
+        strOutputFileName = u"q%03d.tex" %(nYear,)
+        lstQstyle = dicTable[nYear]
+        latexPt = HDYLatexParser(None)
+        latexPt.newTemplate(strYear, strExam, lstQstyle, strOutputFileName)
+        pass
+    pass
 
 def main():
-    generateTexFileTemplateByCSVFile()
-
+    #generateTexFileTemplateByCSVFile()
+    generate83to90()
     pass
 
 if __name__ == '__main__':
