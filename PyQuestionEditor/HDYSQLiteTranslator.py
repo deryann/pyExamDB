@@ -95,6 +95,17 @@ def moveDataFromFiletoDB():
     for strFileName in lstFileNameList:
         dbParser.appendTexFile(strFileName)
 
+def moveDataFromFiletoDBv2():
+    lstFileNameList = []
+    dbParser = DBParser('test.sqlitedb')
+    for number in range(83, 91):
+        strNumber = u"Exam01All\\q%03d.tex" % number
+        lstFileNameList.append(strNumber)
+
+    for strFileName in lstFileNameList:
+        dbParser.appendTexFile(strFileName)
+
+
 def movedataFromDBtoFile():
     dbParser = DBParser('test.sqlitedb')
     dbParser.saveSqliteDBIntoTexFileByYears(91,106)
@@ -149,4 +160,5 @@ if __name__ == '__main__':
 
     #tagWeightGiver()
     #importSolsDataFromFile()
-    movedataFromDBtoFile()
+    #movedataFromDBtoFile()
+    moveDataFromFiletoDBv2()

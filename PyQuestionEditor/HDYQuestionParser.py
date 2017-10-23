@@ -110,10 +110,12 @@ class HDYQuestionParser:
 
     def getExamAnsRateInfoString(self):
         strParams =""
-
-        for item in self.lstExamAnsRateInfoParams:
-            strParam = "{%s}" % item
-            strParams+=strParam
+        if self.lstExamAnsRateInfoParams is None or len(self.lstExamAnsRateInfoParams)==0:
+            strParams = u"{}{}{}{}"
+        else:
+            for item in self.lstExamAnsRateInfoParams:
+                strParam = "{%s}" % item
+                strParams+=strParam
 
         if self.strExamInfoBODY == "":
             strReturn = u"        \\begin{ExamAnsRateInfo}%s%s        \\end{ExamAnsRateInfo}%s" %( strParams, os.linesep,os.linesep)
@@ -212,12 +214,25 @@ class HDYQuestionParser:
     def getnLstExamAnsRateInfoParams(self):
         nLst=[]
         for i in self.lstExamAnsRateInfoParams:
-            nLst.append(int(i))
+            if i.isdigit():
+                nLst.append(int(i))
+            else:
+                #若是無法做數字上的轉譯，應為空值
+                pass
         return nLst
 
     def correctSQL(self,strInput):
         strOutput = strInput.replace("'", "''")
         return strOutput
+
+    def getSQLValuesExamAnsRateInfoParams(self):
+        nLst = self.getnLstExamAnsRateInfoParams()
+        strR = u''
+        if len(nLst) == 4:
+            strR = "%d,%d,%d,%d" % (nLst[0], nLst[1], nLst[2], nLst[3])
+        else:
+            strR = "null,null,null,null"
+        return strR
 
 
     def getSQLString(self):
@@ -248,10 +263,7 @@ class HDYQuestionParser:
                          '%s',
                          '%s',
                          '%s',
-                         %d,
-                         %d,
-                         %d,
-                         %d,
+                          %s,
                          '%s' ,
                          '%s' ,
                          '%s' ,
@@ -264,10 +276,7 @@ class HDYQuestionParser:
                             self.lstExamInfoParams[1],
                             self.lstExamInfoParams[2],
                             self.lstExamInfoParams[3],
-                            nLst[0],
-                            nLst[1],
-                            nLst[2],
-                            nLst[3],
+                            self.getSQLValuesExamAnsRateInfoParams(),
                             self.correctSQL(self.strQBODY),
                             self.strQFROMS,
                             self.correctSQL(self.strQANS),
