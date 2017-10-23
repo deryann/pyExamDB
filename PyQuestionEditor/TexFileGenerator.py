@@ -59,7 +59,10 @@ def generateTexFileTemplateByCSVFile():
     latexPt.newTemplateByCsvInput(exam)
 
 def generate83to90():
-
+    """
+    利用所有題型的起始編號跟終了編號，生成空殼 tex 檔案
+    :return:
+    """
     dicTable = {
         83: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"10"],[u"選填",u"11", u"20"]],
         84: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"11"],[u"選填",u"12", u"20"]],
