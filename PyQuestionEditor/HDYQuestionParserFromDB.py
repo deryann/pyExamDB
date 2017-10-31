@@ -77,6 +77,8 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
         return [int(self.dicData['EXAMINFO_YEAR']),self.dicData['EXAMINFO_EXAM_TYPE'],self.dicData['EXAMINFO_QUESTION_STYLE'], self.dicData['EXAMINFO_QUESTION_NUMBER']]
 
     def loadExamAnsRateInfo(self):
+        if (self.dicData['EXAMANSRATEINFO_P'] is None ) or (self.dicData['EXAMANSRATEINFO_PH'] is None ) or (self.dicData['EXAMANSRATEINFO_PM'] is None) or (self.dicData['EXAMANSRATEINFO_PL'] is None):
+            return [None,None,None,None]
         return [int(self.dicData['EXAMANSRATEINFO_P']), int(self.dicData['EXAMANSRATEINFO_PH']), int(self.dicData['EXAMANSRATEINFO_PM']), int(self.dicData['EXAMANSRATEINFO_PL'] )]
 
 

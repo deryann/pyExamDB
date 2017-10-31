@@ -116,7 +116,7 @@ def importSolsDataFromFile():
     lstFileNameList = []
     nCount = 0
     nSolCount =0
-    for number in range(91, 107):
+    for number in range(83, 107):
         strNumber = u"Exam01All\\q%03d.tex" % number
         lstFileNameList.append(strNumber)
 
@@ -161,4 +161,5 @@ if __name__ == '__main__':
     #tagWeightGiver()
     #importSolsDataFromFile()
     #movedataFromDBtoFile()
-    moveDataFromFiletoDBv2()
+    #moveDataFromFiletoDBv2()
+    importSolsDataFromFile()
