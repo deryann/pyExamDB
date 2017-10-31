@@ -34,7 +34,9 @@ class HDYTextEdit(QTextEdit):
         :param qstr:
         :return:
         '''
+        bShowJieba = True
         QTextEdit.setText(self, qstr)
+
         for key in self.dicKeyWordMapColor.keys():
             fmt = QTextCharFormat()
             fmt.setBackground(self.dicKeyWordMapColor[key])
@@ -47,12 +49,14 @@ class HDYTextEdit(QTextEdit):
                 cursor.setCharFormat(fmt)
                 curCursor=cursor
 
+        #另用顏色與KeyWord的Mapping 將其著色
+
         for key in self.dicColorMapKeyWordList.keys():
             cr = key
             lst = self.dicColorMapKeyWordList[cr]
+            fmt = QTextCharFormat()
+            fmt.setBackground(cr)
             for keyword in lst:
-                fmt = QTextCharFormat()
-                fmt.setBackground(cr)
                 doc = self.document()
                 curCursor = QTextCursor(doc)
                 while True:
@@ -61,27 +65,27 @@ class HDYTextEdit(QTextEdit):
                         break
                     cursor.setCharFormat(fmt)
                     curCursor = cursor
-        #比較Jieba 的結果
-        lstString = getJiebaCutList(qstr)
-        self.append(os.linesep)
-        self.append(u"==========================================")
-        self.append(os.linesep)
-        fm = self.currentCharFormat()
 
-        for item in lstString:
-            lst = self.dicColorMapKeyWordList[Qt.yellow]
-
+        if bShowJieba :
             self.moveCursor(QTextCursor.End)
             curCursor = self.textCursor()
-            curCursor.insertText(u"/")
-            self.moveCursor(QTextCursor.End)
-            curCursor = self.textCursor()
-            if item in lst:
-                doc = self.document()
+
+            fm = self.currentCharFormat()
+            # 增加分隔線
+            curCursor.insertText(os.linesep, fm)
+            curCursor.insertText(u"========================================", fm)
+            curCursor.insertText(os.linesep, fm)
+
+            #增加比較Jieba 的結果
+            lstString = getJiebaCutList(qstr, True)
+
+            lstcolorSwitch = [Qt.yellow, Qt.white]
+            nColorSwitchIndex = 0
+            for item in lstString:
+                self.moveCursor(QTextCursor.End)
+                curCursor = self.textCursor()
+                nColorSwitchIndex=(nColorSwitchIndex+1) % len(lstcolorSwitch)
                 fmt = QTextCharFormat()
-                fmt.setBackground(Qt.yellow)
+                fmt.setBackground(lstcolorSwitch[nColorSwitchIndex])
                 curCursor.insertText(item, fmt)
-            else:
-                curCursor.insertText(item, fm)
-
-
+            self.setCurrentCharFormat(fm)

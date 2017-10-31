@@ -4,10 +4,10 @@
 # Name:        Questions Tags editor
 # Purpose:
 #
-# Author:      USER
+# Author:      deryann
 #
 # Created:     08/08/2015
-# Copyright:   (c) USER 2015
+# Copyright:   (c) deryann 2015
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 
@@ -173,7 +173,7 @@ class QuestionTagsEditor(QWidget):
         self.layoutShowQuestionUp = QHBoxLayout(self)
         self.layoutShowQuestionMetaData = QGridLayout(self)
         self.txtOneQuestion = HDYTextEdit(self)
-        self.txtOneQuestion.setColorMappingKeyWordList({Qt.yellow:getMathTermList()})
+        self.txtOneQuestion.setColorMappingKeyWordList({Qt.blue:getMathTermList()})
 
         self.txtAns =QLineEdit("Ans" ,self)
         self.txtSol =QTextBrowser(self)
