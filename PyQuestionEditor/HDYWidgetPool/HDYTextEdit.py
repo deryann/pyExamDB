@@ -1,13 +1,6 @@
 #coding=utf-8
 # -*- coding: utf-8 -*-
-import sys, os, re, codecs
-import difflib
-import sys, os, re, codecs
-import difflib
-from PyQt4.Qt import Qt
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QObject, SIGNAL
-
+import os
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from QDbReport.toollib import getJiebaCutList
