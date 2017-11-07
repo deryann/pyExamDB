@@ -19,6 +19,7 @@ constLatexHeader =u"""% !TEX encoding = UTF-8 Unicode
 constLatexTailer =u""
 constLatexStyleHeader = u"\\begin{QUESTIONS}"+os.linesep
 constLatexStyleTailer= u"\\end{QUESTIONS}"+os.linesep
+bShowSQLLogPrint = False
 
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
@@ -75,7 +76,6 @@ where b.tag_id IN %s
 
     def getQuestionObject(self, nIndex):
         qID = self.getmainkeyid(nIndex)
-        print(u"qID = %d" %(qID,))
         qpt = self.getQuestionObjectByQID(qID)
         return qpt
 
@@ -120,7 +120,7 @@ where b.tag_id IN %s
         self.commitDB()
 
     def executeSQL(self,strSQL):
-        print (strSQL)
+        self.logprint(strSQL)
         self.conn.execute(strSQL)
 
     def commitDB(self):
@@ -177,15 +177,15 @@ where b.tag_id IN %s
         :return:
         """
         cursor = self.conn.cursor()
-        print (strSQL)
+        self.logprint(strSQL)
         cursor.execute(strSQL)
         rows = cursor.fetchall()
-        print (u"There are %d rows in query!" % len(rows))
+        self.logprint(u"There are %d rows in query!" % len(rows))
         return rows
 
     def getRowBySQL(self,strSQL):
         cursor = self.conn.cursor()
-        print (strSQL)
+        self.logprint(strSQL)
         cursor.execute(strSQL)
         row = cursor.fetchone()
         return row
@@ -426,3 +426,7 @@ where b.tag_id IN %s
                                 WHERE TAG_STR='%s'""" % (nTotalW, strTag)
             self.executeSQL(strUpdateSQL)
         self.commitDB()
+
+    def logprint(self, trlog):
+        if bShowSQLLogPrint:
+            print(strlog)

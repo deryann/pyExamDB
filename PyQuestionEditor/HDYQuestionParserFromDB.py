@@ -6,6 +6,8 @@ constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
 
+bShowSQLLogPrint = False
+
 
 
 class HDYQuestionParserFromDB(HDYQuestionParser):
@@ -20,7 +22,7 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
     def loadDicByQuestionIDFromDB(self):
         strSQL = u"select * from %s where question_id = %d " %(constQuestionsTableName, self.question_id)
         cursor = self.conn.cursor()
-        print (strSQL)
+        self.logprint (strSQL)
         cursor.execute(strSQL)
         row = cursor.fetchone()
         import itertools
@@ -38,15 +40,15 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
         :return:
         """
         cursor = self.conn.cursor()
-        print (strSQL)
+        self.logprint(strSQL)
         cursor.execute(strSQL)
         rows = cursor.fetchall()
-        print (u"There are %d rows in query!" % len(rows))
+        self.logprint(u"There are %d rows in query!" % len(rows))
         return rows
 
     def getRowBySQL(self,strSQL):
         cursor = self.conn.cursor()
-        print (strSQL)
+        self.logprint(strSQL)
         cursor.execute(strSQL)
         row = cursor.fetchone()
         return row
@@ -121,3 +123,7 @@ class HDYQuestionParserFromDB(HDYQuestionParser):
 
     def getListOfQSOLsID(self):
         return self.lstSolsID
+
+    def logprint(self, trlog):
+        if bShowSQLLogPrint:
+            print(strlog)
