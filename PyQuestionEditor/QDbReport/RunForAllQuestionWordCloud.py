@@ -1,9 +1,10 @@
 #coding=utf-8
-import operator
+
 import os
 import codecs
 import re
 from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
+from LatexTextTool import *
 
 
 import jieba.analyse
@@ -13,12 +14,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
-from HDYQuestionParserFromDB import HDYQuestionParserFromDB
-from HDYLatexParser import HDYLatexParser
 from HDYLatexParserFromDB import HDYLatexParserFromDB
-from TexToPNG.PNGMaker import PNGMaker
 
-import sqlite3
+
 constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
 constTagTableName = u"questiontags"
@@ -42,45 +40,21 @@ def hdy_color_func(word, font_size, position, orientation, random_state=None,
     #return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)
     return "rgb(%d, %d, %d)" % (random.randint(0, 255),random.randint(0, 255),random.randint(0, 255))
 
-def skipAllMathMode(strInput):
-    lst = strInput.split(u'$')
-    nSplit =len(lst)
-    strR = u''
-    #TODO: Handle /$ case
-
-    for i in range(nSplit):
-        if (i%2)==0:
-            #It is in text mode
-            strR +=(u' ' + lst[i])
-            pass
-        elif (i%2)==1:
-            #It is in math mode
-            #strR += (u"$" + lst[i]+ u"$")
-            pass
-
-    return strR
-
 def doJieba(strfilename, content):
     with codecs.open(strfilename, "w", "utf-8") as fptcutfile:
         words = jieba.cut(content, cut_all=False)
         lstWords = []
         for item in words:
-            if not item.isspace():
+            if not item.isspace():  #如果不是空白行字元才加入
                 lstWords.append(item)
         fptcutfile.write(os.linesep.join(lstWords))
 
-        #d = {x: lstWords.count(x) for x in lstWords}
-        #print(d)
-
-        #sorted_d = sorted(d.items(), key=operator.itemgetter(1))
-        #for item in sorted_d:
-        #    fptcutfile.write(u"word: %s count %d %s" % (unicode(item[0]), item[1], os.linesep,))
-
-
 def mainReport():
-    with codecs.open(constLogFile,"w", "utf-8") as fpt:
+    mpl.rcParams['font.sans-serif'] = ['FangSong']
+    with codecs.open(constLogFile,"w", "utf-8") as fptLogger:
+        #Get All Data
         if not os.path.isfile(constAllQBODY):
-            with codecs.open(constAllQBODY,"w", "utf-8") as fptdata:
+            with codecs.open(constAllQBODY,"w", "utf-8") as fAllTextContext:
                 dbLatex = HDYLatexParserFromDB(constdefaultname)
                 dbLatex.read()
                 nCount = dbLatex.nCountQ
@@ -88,16 +62,16 @@ def mainReport():
                     qPt = dbLatex.getQuestionObject(i)
 
                     strQBODY =qPt.getQBODY()
-                    fptdata.write(strQBODY+os.linesep)
+                    fAllTextContext.write(strQBODY+os.linesep)
                     strlog = (u"NO %d QBODY done !" + os.linesep) % (i, )
-                    fpt.write(strlog)
+                    fptLogger.write(strlog)
 
-        lstReplaceToEmpty = [u"\\begin{QOPS}", u"\\end{QOPS}", u"\\QOP",
-                             ]
+        lstReplaceToEmpty = [u"\\begin{QOPS}", u"\\end{QOPS}", u"\\QOP", ]
+
         #Preprocess AllBodyData
-        with codecs.open(constAllQBODY,"r", "utf-8") as fptdata:
+        with codecs.open(constAllQBODY,"r", "utf-8") as fAllTextContext:
             if not os.path.isfile(constAllQBODYAfterPreProcess):
-                content = fptdata.read()
+                content = fAllTextContext.read()
 
                 #skip all math mode
                 content = skipAllMathMode(content)
@@ -111,27 +85,26 @@ def mainReport():
                     stritem = u"\\begin{tikzpicture}"+item+u"\\end{tikzpicture}"
                     content = content.replace(stritem, u'')
 
-
                 with codecs.open(constAllQBODYAfterPreProcess, "w", "utf-8") as fptout:
                     fptout.write(content)
 
-        #Load Data to Word cloud.
-        with codecs.open(constAllQBODYAfterPreProcess, "r", "utf-8") as fptdata:
-            mpl.rcParams['font.sans-serif'] = ['FangSong']
+        #Gernerate words Data.
+        with codecs.open(constAllQBODYAfterPreProcess, "r", "utf-8") as fAllTextContext:
+
             jieba.set_dictionary('dict.txt.big')
-            content = fptdata.read()
+            content = fAllTextContext.read()
             #Type I
             doJieba(constCutResultFileName, content)
-            jieba.load_userdict(constDicMath)
 
-            # Type II()Better
+            # Type II (Better load user dictionary)
+            jieba.load_userdict(constDicMath)
             doJieba(constCutResultFileName2, content)
 
             # tags extraction based on TF-IDF algorithm
-            tags = jieba.analyse.extract_tags(content, topK=100, withWeight=False)
+            tags = jieba.analyse.extract_tags(content, topK=500, withWeight=False)
             text = os.linesep.join(tags)
             text = unicode(text)
-            fpt.write(text)
+            fptLogger.write(text)
 
     #read the mask
     d = path.dirname(__file__)
