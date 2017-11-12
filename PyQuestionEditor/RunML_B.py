@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-import os
-import numpy as np
 import codecs
-import re
 import operator
-from LatexTextTool import *
+import os
+import re
+import pickle
 
 import jieba
+import numpy as np
+
 from HDYLatexParserFromDB import HDYLatexParserFromDB
-from sklearn.naive_bayes import MultinomialNB, GaussianNB, BernoulliNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.model_selection import train_test_split
 
 constdefaultname = u"test.sqlitedb"
 constLogFile = u"KeyWordlogger.log"
@@ -38,9 +40,11 @@ constListChap =  [u"不是99課綱",
                       u"B5C2三角函數II",
                       u"B6C1函數與極限",
                       u"B6C2多項式函數的微積分",
-                      u""
+                      u"未分類"
                       ]
 
+lstStopWordFromFile = []
+constKeyWordCacheFileNameOutputFilePath = u"KeywordCache.pickle"
 
 def prepareData():
     pass
@@ -89,9 +93,13 @@ def margeWordListIntoCountDict(dicCount, lstWord):
             dicCount[item]=1
 
 def preProcess(strContent):
+    """
+    將字串做一些斷詞前的前處理
+    :param strContent: 輸入的字串
+    :return:
+    """
     lst = re.findall(u"\\\\begin{tikzpicture}(.*?)\\\\end{tikzpicture}", strContent, re.DOTALL)
     content = strContent
-    #content = skipAllMathMode(strContent)
 
     lstReplaceToEmpty = [u"\\begin{QOPS}", u"\\end{QOPS}", u"\\QOP", ]
 
@@ -104,52 +112,106 @@ def preProcess(strContent):
     return content
 
 def selectTop(sorted_d, nKeyWordCount = 500):
+    """
+    選擇個數由大到小的前 (nKeyWord) 個，並且只保留字串部分，丟棄個數部分
+    :param sorted_d: A list of truple ("字串", 個數) 排序方式由"個數"由小到大
+    :param nKeyWordCount:
+    :return:
+    """
     lstTruple = sorted_d[-nKeyWordCount:]
     lstR = list(map(lambda x: x[0], lstTruple))
     return lstR
 
+def isDataKeyWordFromCacheFile():
+    return os.path.isfile(constKeyWordCacheFileNameOutputFilePath)
+
+def loadDataKeyWordFromCacheFile():
+    itemlist=[]
+    with open(constKeyWordCacheFileNameOutputFilePath, 'rb') as fp:
+        itemlist = pickle.load(fp)
+    return itemlist
+
 def getDataKeyWord():
-    dbLatex = HDYLatexParserFromDB(constdefaultname)
-    dbLatex.read()
-    initJiebaModule()
-    sorted_d = {}
-    with codecs.open(constLogFile,"w", "utf-8") as fpt:
-        nCount = dbLatex.nCountQ
-        dicWordCount = {}
-        for i in range(nCount):
-            qPt = dbLatex.getQuestionObject(i)
-            strQBODY =qPt.getQBODY()
-            strContent = preProcess(strQBODY)
-            margeWordListIntoCountDict (dicWordCount, cutString(strContent))
+    """
+    產生想要的 KeyWord Table
+    :return: A list of truple ("字串", 個數) 排序方式由"個數"由小到大
+    """
+    if isDataKeyWordFromCacheFile():
+        print("[getDataKeyWord] load by Cache File.")
+        sorted_d = loadDataKeyWordFromCacheFile()
+    else:
+        print("[getDataKeyWord] load by runing.")
+        dbLatex = HDYLatexParserFromDB(constdefaultname)
+        dbLatex.read()
+        initJiebaModule()
+        sorted_d = {}
+        with codecs.open(constLogFile,"w", "utf-8") as fpt:
+            nCount = dbLatex.nCountQ
+            dicWordCount = {}
+            for i in range(nCount):
+                qPt = dbLatex.getQuestionObject(i)
+                strQBODY =qPt.getQBODY()
+                strContent = preProcess(strQBODY)
+                margeWordListIntoCountDict (dicWordCount, cutString(strContent))
 
-        sorted_d = sorted(dicWordCount.items(), key=operator.itemgetter(1))
-        sorted_d = filter(filterStopWord, sorted_d)
+            sorted_d = sorted(dicWordCount.items(), key=operator.itemgetter(1))
+            sorted_d = filter(filterStopWord, sorted_d)
 
-        for item in sorted_d:
-            fpt.write(u"%s %d %s" % (unicode(item[0]), item[1], os.linesep,))
+            for item in sorted_d:
+                fpt.write(u"%s %d %s" % (unicode(item[0]), item[1], os.linesep,))
 
+
+        with open(constKeyWordCacheFileNameOutputFilePath, 'wb') as fp:
+            pickle.dump(sorted_d, fp)
 
     return sorted_d
 
-def getKeyWordVector(strQBODY, lstKeyWord):
-    lstV = []
-    for item in lstKeyWord:
-        if strQBODY.find(item) != -1:
-            lstV.append(1)
-        else:
-            lstV.append(0)
-    return lstV
 
-def getMainClassType(qPt):
-    nRet = len(constListChap)
-    for index in range(len(constListChap)):
-        if constListChap[index] in qPt.getListOfTag():
-            nRet = index
-            break
+def getMainClassType(qPt, dicParam = {} ):
+    """
+    對題目做出主要類型的編號
+    :param qPt:
+    :param dicParam:
+    :return:
+    """
+    nRet = 0
+    if dicParam.has_key(u"checkClass"):
+        nRet = 0
+        return get2MainClass(qPt, dicParam[u"checkClass"])
+    else:
+        nRet = len(constListChap) - 1
+        for index in range(len(constListChap)):
+            if constListChap[index] in qPt.getListOfTag():
+                nRet = index
+                break
+    return nRet
+
+def get2MainClass(qPt, strWantClassWord):
+    """
+    測試想要的 tag 有或者是沒有
+    :param qPt:
+    :param strWantClassWord:
+    :return:
+    """
+    nRet = 0
+    if strWantClassWord in qPt.getListOfTag():
+        nRet = 1
     return nRet
 
 
-def getXYDataFromDB(lstKeyWord):
+def getMType(qPt, dicParams={}):
+    """
+    對題目做出主要類型的編號
+    :param qPt:
+    :return:
+    """
+    nRet = 0
+
+    if u"B1C1數與式" in qPt.getListOfTag():
+        nRet = 1
+    return nRet
+
+def getXYDataFromDB(lstKeyWord, funClassType=getMainClassType, dicParams = {}):
     lstYears = range(91,107)
 
     dbLatex = HDYLatexParserFromDB(constdefaultname)
@@ -175,20 +237,16 @@ def getXYDataFromDB(lstKeyWord):
 
             for item in lstKeyWord:
                 if strQBODY.find(item) != -1:
-                    Xdata[nRowIndex,nColIndex] =1
+                    Xdata[nRowIndex, nColIndex] =1
                 nColIndex+=1
 
-            Ydata[nRowIndex] = getMainClassType(qPt)
+            Ydata[nRowIndex] = funClassType(qPt, dicParams)
             nRowIndex += 1
-    printAInfo(Xdata)
-    printAInfo(Ydata)
+    return Xdata, Ydata
 
-    from sklearn.naive_bayes import BernoulliNB
-    clf = BernoulliNB()
+def trainingByalg(Xdata, Ydata, clf = BernoulliNB()):
     clf.fit(Xdata, Ydata)
     y_p = clf.predict(Xdata)
-    printAInfo(y_p)
-    compareResult (Ydata, y_p)
     score = clf.score(Xdata, Ydata)
     return score
 
@@ -198,41 +256,79 @@ def printAInfo(nparray):
     print(nparray)
 
 def compareResult(Ydata, y_p):
+    """
+    比較Ydata 跟 預測的 y_p 每個Level 的 Error Rate
+    :param Ydata:
+    :param y_p:
+    :return:
+    """
     nSame = 0
     nDifferent = 0
     nTotal = Ydata.shape[0]
+    aClassErrorCount = np.zeros(len(constListChap))
+    aClassTotalCount = np.zeros(len(constListChap))
+
     for index in range(nTotal):
+        nClass = int(Ydata[index])
+        aClassTotalCount[nClass]+=1
         if Ydata[index] == y_p[index]:
             nSame+=1
         else:
+            aClassErrorCount[nClass] += 1
             nDifferent+=1
 
     fResult = nSame/ (nTotal*(1.0))
+
     print (u"score= %f" %( fResult,))
-
-def main():
-    X = np.random.randint(2, size=(6, 100))
-    Y = np.array([1, 2, 3, 4, 4, 5])
-    from sklearn.naive_bayes import BernoulliNB
-    clf = BernoulliNB()
-    clf.fit(X, Y)
-    #BernoulliNB(alpha=1.0, binarize=0.0, class_prior=None, fit_prior=True)
-    print(clf.predict(X[2:3]))
-    print(clf.predict_proba(X[2:3]))
+    for index in range(len(constListChap)):
+        fClassErrorRate = aClassErrorCount[index] / aClassTotalCount[index]*1.0
+        print (u"Class %d %s Error Rate = %.02f (%d/%d)" % (index, constListChap[index], fClassErrorRate, aClassErrorCount[index],
+                                                             aClassTotalCount[index]))
 
 
-lstStopWordFromFile= loadStopWordTable()
-
-if __name__ == '__main__':
-    #main()
-    lstKeyWordCount = [100,200,300,400,500,600,700,800,900,1000]
+def showComparsionWithKeyWordNumber():
+    lstKeyWordCount = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
     dicScore = {}
     allKeyWord = getDataKeyWord()
     for nCountKeyWord in lstKeyWordCount:
-        f = getXYDataFromDB(selectTop(allKeyWord, nCountKeyWord))
-        dicScore[nCountKeyWord]=f
+        Xdata, Ydata = getXYDataFromDB(selectTop(allKeyWord, nCountKeyWord), getMType)
+
+        f = trainingByalg(Xdata, Ydata)
+        dicScore[nCountKeyWord] = f
 
     print(u"Words \t   Score " + os.linesep)
     for nCountKeyWord in lstKeyWordCount:
-        print(u"%d \t %.02f %s" %(nCountKeyWord, dicScore[nCountKeyWord], os.linesep) )
+        print(u"%d \t %.02f %s" % (nCountKeyWord, dicScore[nCountKeyWord], os.linesep))
+
+def show2ClassML():
+    """
+    針對每一個Class 只做"是" "否" 的判別，並且計算其錯誤率
+    :return:
+    """
+    nAllClasscount = len(constListChap)
+    nCountKeyWord=1000
+    dicScore = {}
+    allKeyWord = getDataKeyWord()
+    for index in range(nAllClasscount):
+        item = constListChap[index]
+        Xdata, Ydata = getXYDataFromDB(selectTop(allKeyWord, nCountKeyWord), getMainClassType, dicParams={u"checkClass":item})
+        X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.25, random_state=42)
+
+        clf = BernoulliNB()
+        clf.fit(X_train, y_train)
+        score = clf.score(X_test, y_test)
+
+        dicScore[index] = score
+
+    print(u"Words \t   Score ")
+
+    for index in range(nAllClasscount):
+        print(u"%s \t %.02f" % (constListChap[index], dicScore[index]))
+
+
+
+if __name__ == '__main__':
+    lstStopWordFromFile = loadStopWordTable()
+    show2ClassML()
+
 
