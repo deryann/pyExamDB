@@ -8,6 +8,7 @@ from HDYLatexParser import HDYLatexParser
 import sqlite3
 from datetime import datetime
 import re
+import logging
 
 constQuestionsTableName = u"EXAM01"
 constQuestionTagRealtionTableName = u"question_tag_relationship"
@@ -19,7 +20,6 @@ constLatexHeader =u"""% !TEX encoding = UTF-8 Unicode
 constLatexTailer =u""
 constLatexStyleHeader = u"\\begin{QUESTIONS}"+os.linesep
 constLatexStyleTailer= u"\\end{QUESTIONS}"+os.linesep
-bShowSQLLogPrint = False
 
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
@@ -39,13 +39,19 @@ class HDYLatexParserFromDB(HDYLatexParser):
 where b.tag_id IN %s
             """ % (constQuestionTagRealtionTableName, constQuestionsTableName,strTagListSQL)
             self.strMainSQL = strSQL
-
+        elif args.has_key(u'list_year'):
+            lstYearID = args[u'list_year']
+            strYesrListSQL = (str(lstYearID).replace("[", "(")).replace("]", ")")
+            strSQL = u"""SELECT EXAMINFO_STR, question_id FROM %s where EXAMINFO_YEAR IN %s
+                        """ % (constQuestionsTableName, strYesrListSQL)
+            self.strMainSQL = strSQL
+            pass
 
     def read(self):
-        print("[HDYLatexParserFromDB][read]")
+        logging.debug("[HDYLatexParserFromDB][read]")
         self.mainKey = self.getRowsBySQL(self.strMainSQL)
         self.nCountQ = len(self.mainKey)
-        print (self.mainKey)
+        logging.debug (self.mainKey)
         return u"This is Db Mode"
 
     def getmainkey(self,nIndex):
@@ -57,12 +63,12 @@ where b.tag_id IN %s
         return row[1]
 
     def getReport(self):
-        print("[HDYLatexParserFromDB][getReport]")
-        print("[HDYLatexParserFromDB][getReport] Q count = %d" %(self.nCountQ,))
+        logging.debug("[HDYLatexParserFromDB][getReport]")
+        logging.debug("[HDYLatexParserFromDB][getReport] Q count = %d" %(self.nCountQ,))
 
 
     def getQuestionTagList(self, nQIndex):
-        print("[HDYLatexParserFromDB][getQuestionTagList]")
+        logging.debug("[HDYLatexParserFromDB][getQuestionTagList]")
         self.currQuestion = self.getQuestionObject(nQIndex)
         return self.currQuestion.getListOfTag()
 
@@ -83,7 +89,7 @@ where b.tag_id IN %s
         return HDYQuestionParserFromDB(qID, self.conn)
 
     def saveFileWithNewTag(self, dicNewTags):
-        print("[HDYLatexParserFromDB][saveFileWithNewTag]")
+        logging.debug("[HDYLatexParserFromDB][saveFileWithNewTag]")
         self.backupCurrentFile()
         for index in dicNewTags.keys():
             nQID = self.getmainkeyid(index)
@@ -120,18 +126,18 @@ where b.tag_id IN %s
         self.commitDB()
 
     def executeSQL(self,strSQL):
-        self.logprint(strSQL)
+        logging.info(strSQL)
         self.conn.execute(strSQL)
 
     def commitDB(self):
         self.conn.commit()
 
     def setExamInfoForAllQuestions(self, strYear, strExam, strStyle, strStartNum):
-        print("[HDYLatexParserFromDB][setExamInfoForAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
+        logging.debug("[HDYLatexParserFromDB][setExamInfoForAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
         pass
 
     def setFromTagToAllQuestions(self, strQFrom, strfileName):
-        print("[HDYLatexParserFromDB][setFromTagToAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
+        logging.debug("[HDYLatexParserFromDB][setFromTagToAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
         pass
 
     def saveSqliteDBIntoTexFileByYears(self, nStart, nEnd):
@@ -167,7 +173,7 @@ where b.tag_id IN %s
                         fpt.write(os.linesep)
                     fpt.write(constLatexStyleTailer)
                 fpt.write(constLatexTailer)
-        print "Records created successfully";
+        logging.debug( "Records created successfully")
         pass
 
     def getRowsBySQL(self,strSQL):
@@ -177,15 +183,15 @@ where b.tag_id IN %s
         :return:
         """
         cursor = self.conn.cursor()
-        self.logprint(strSQL)
+        logging.info(strSQL)
         cursor.execute(strSQL)
         rows = cursor.fetchall()
-        self.logprint(u"There are %d rows in query!" % len(rows))
+        logging.info(u"There are %d rows in query!" % len(rows))
         return rows
 
     def getRowBySQL(self,strSQL):
         cursor = self.conn.cursor()
-        self.logprint(strSQL)
+        logging.info(strSQL)
         cursor.execute(strSQL)
         row = cursor.fetchone()
         return row
@@ -283,7 +289,7 @@ where b.tag_id IN %s
 
     def importTexFile(self, strFileName, bSimulate = False):
         #先整理一個大表
-        print(u"[importTexFile][%s]" %(strFileName,))
+        logging.debug(u"[importTexFile][%s]" %(strFileName,))
         dicUpdateQuestionidMapUpdateDic={}
         fPt = HDYLatexParser(strFileName)
         fPt.read()
@@ -294,7 +300,7 @@ where b.tag_id IN %s
         dicNeedToUpdateQANS = {}
         for nIndex in range(fPt.getCountOfQ()):
             qptInFile = HDYQuestionParser(fPt.getQuestionString(nIndex))
-            print(qptInFile.getEXAMINFO_STR())
+            logging.debug(qptInFile.getEXAMINFO_STR())
             nQId = self.getQuestionIDInDB(qptInFile.getEXAMINFO_STR())
             if nQId != -1:
                 #Check QBODY ANS 需不需要更正
@@ -307,7 +313,7 @@ where b.tag_id IN %s
                 #找出詳解的部分
                 lst = qptInFile.getListOfQSOLs()
                 if len(lst)!=0:
-                    print ("QID %d : have %d Sols"%( nQId, len(lst)))
+                    logging.debug ("QID %d : have %d Sols"%( nQId, len(lst)))
                     dicUpdateQuestionidMapUpdateDic[nQId] = lst
                     nCount += len(lst)
 
@@ -327,10 +333,10 @@ where b.tag_id IN %s
                     else:
                         pass
             if bSimulate:
-                print(u"=======Simulate======")
-                print(u"lstNeedToInsertSol = " + unicode(lstNeedToInsertSol))
-                print(u"dicNeedToUpdateSol = " + unicode(dicNeedToUpdateSol))
-                print(u"=====================")
+                logging.debug(u"=======Simulate======")
+                logging.debug(u"lstNeedToInsertSol = " + unicode(lstNeedToInsertSol))
+                logging.debug(u"dicNeedToUpdateSol = " + unicode(dicNeedToUpdateSol))
+                logging.debug(u"=====================")
             else:
                 #Insert 該 Insert
                 for solitem in lstNeedToInsertSol:
@@ -349,9 +355,9 @@ where b.tag_id IN %s
                     self.commitDB()
         #Update QBODY
         if bSimulate:
-                print(u"=======Simulate======")
-                print(u"dicNeedToUpdateQBODY = "+ unicode(dicNeedToUpdateQBODY))
-                print(u"=====================")
+            logging.debug(u"=======Simulate======")
+            logging.debug(u"dicNeedToUpdateQBODY = "+ unicode(dicNeedToUpdateQBODY))
+            logging.debug(u"=====================")
         else:
             for qid in dicNeedToUpdateQBODY.keys():
                 strUpdateSQL = u"""UPDATE %s SET QBODY='%s' WHERE question_id = %d 
@@ -377,7 +383,7 @@ where b.tag_id IN %s
         fPt.getReport()
         for nIndex in range(fPt.getCountOfQ()):
             Qpt = HDYQuestionParser(fPt.getQuestionString(nIndex))
-            print(Qpt.getEXAMINFO_STR())
+            logging.debug(Qpt.getEXAMINFO_STR())
             strSQL = "INSERT INTO EXAM01 %s" % Qpt.getSQLString()
             self.executeSQL(strSQL)
             self.conn.commit()
@@ -397,8 +403,8 @@ where b.tag_id IN %s
                 self.conn.commit()
                 strInsertSQL = u"INSERT INTO %s (question_id,tag_id) VALUES (%d,%d)"
             else:
-                print("[DB ERROR] we cannot find the row which just insert")
-        print "Records created successfully";
+                logging.debug("[DB ERROR] we cannot find the row which just insert")
+        logging.debug("Records created successfully")
 
     def correctSQL(self,strInput):
         strOutput = strInput.replace("'", "''")
@@ -426,7 +432,3 @@ where b.tag_id IN %s
                                 WHERE TAG_STR='%s'""" % (nTotalW, strTag)
             self.executeSQL(strUpdateSQL)
         self.commitDB()
-
-    def logprint(self, trlog):
-        if bShowSQLLogPrint:
-            print(strlog)
