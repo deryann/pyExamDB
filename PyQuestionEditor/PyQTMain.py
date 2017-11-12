@@ -129,6 +129,11 @@ class QuestionTagsEditor(QWidget):
                      self.onbtnNextClicked)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), QtCore.SIGNAL('activated()'),
                      self.onbtnPrevClicked)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_J), self), QtCore.SIGNAL('activated()'),
+                     self.onbtnToogleJieba)
+
+    def onbtnToogleJieba(self):
+        self.txtOneQuestion.toogleVisibleJieba()
 
     def onHotkeySave(self):
         print("[onHotkeySave]")
@@ -381,7 +386,8 @@ class QuestionTagsEditor(QWidget):
         elif isSQLiteDBMode(strFileName):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
+            #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
+            self.latex = HDYLatexParserFromDB(strFileName, list_year=[83])
 
     def onedtIndexChaned(self, strText):
         try:

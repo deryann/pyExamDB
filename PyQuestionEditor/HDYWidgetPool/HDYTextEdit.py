@@ -13,12 +13,18 @@ class HDYTextEdit(QTextEdit):
 #        self.dicKeyWordMapColor={u"平":Qt.yellow} #Test Function
 #        self.dicColorMapKeyWordList = {Qt.blue:[u'三',u'形']} #Test Function
         self.setFont(QFont("Consolas", 14))  # 設定字型
+        self.bVisibleForJieba = False
+        self.strContent = u""
 
     def setDicKeyWordMappingColor(self, dicInput):
         self.dicKeyWordMapColor = dicInput
 
     def setColorMappingKeyWordList(self, dicInput):
         self.dicColorMapKeyWordList = dicInput
+
+    def toogleVisibleJieba(self):
+        self.bVisibleForJieba = not self.bVisibleForJieba
+        self.setText(self.strContent) #refresh
 
     def setText(self, qstr):
         '''
@@ -28,6 +34,7 @@ class HDYTextEdit(QTextEdit):
         :return:
         '''
         bShowJieba = True
+        self.strContent = qstr
         QTextEdit.setText(self, qstr)
 
         for key in self.dicKeyWordMapColor.keys():
@@ -59,7 +66,7 @@ class HDYTextEdit(QTextEdit):
                     cursor.setCharFormat(fmt)
                     curCursor = cursor
 
-        if bShowJieba :
+        if self.bVisibleForJieba :
             self.moveCursor(QTextCursor.End)
             curCursor = self.textCursor()
 
