@@ -44,7 +44,7 @@ class HDYLatexParser:
 
         if isTexFileMode(self.strFileName ):
             self.openFile()
-        print("__init__ OK!!")
+
         pass
 
     def newTemplate(self, strYear, strExam,  lstQstyle, strOutName):
