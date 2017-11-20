@@ -29,7 +29,7 @@ from HDYLatexParserFromDB import HDYLatexParserFromDB
 from HDYQuestionParser import HDYQuestionParser as QParser
 
 from QDbML.toollib import getMathTermList
-
+from RunML_B import *
 
 #Tex file mode test filename
 #DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
@@ -73,6 +73,11 @@ class QuestionTagsEditor(QWidget):
 
         #
         # 建構編輯Tags 的暫存資料結構
+        #self.agentsMLTags = loadClassifierAgent()
+        self.latex = None
+        self.currentQpt = None
+
+        self.suggestor = Tagsuggestor()
         self.dicNewTagsBuffer = {}
         self.bUserAction = True
 
@@ -114,13 +119,14 @@ class QuestionTagsEditor(QWidget):
         self.tabModeOneQuestion.layout().addLayout(self.layoutTagsPanel)
         self.tabModeOneQuestion.layout().addLayout(self.layoutBtnsControlIndex)
 
-        self.latex = None
+
         self.loadFile(DEFAULT_FILE_INPUT_NAME)
 
         self.showData()
         self.showMaximized()
 
         self.setupHotkey()
+
 
 
     def setupHotkey(self):
@@ -282,12 +288,18 @@ class QuestionTagsEditor(QWidget):
         else:
             self.setWindowTitle(self.strWindowTitle + u' ')
 
+    def setUIIndex(self, nIndex):
+        self.nQIndex = nIndex
+        if self.latex is not None:
+            self.currentQpt = self.latex.getQuestionObject(int(self.nQIndex))
+
     def prepareIndexSettingLayout(self):
         """
         實作控制 index 決定按鈕驅動事件
         """
 
-        self.nQIndex = 0
+
+        self.setUIIndex(0)
         self.layoutBtnsControlIndex = QHBoxLayout()
 
         self.btnFirst=QPushButton("|<", self)
@@ -378,6 +390,7 @@ class QuestionTagsEditor(QWidget):
     def loadFile(self, strfileName):
         self.edtFile.setText(strfileName)
         self.getDataModel(strfileName)
+        self.setUIIndex(0)
         self.showData()
 
     def getDataModel(self,strFileName):
@@ -387,7 +400,8 @@ class QuestionTagsEditor(QWidget):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_year=[83])
+            self.latex = HDYLatexParserFromDB(strFileName, list_year=[91])
+            self.latex.read()
 
     def onedtIndexChaned(self, strText):
         try:
@@ -395,7 +409,7 @@ class QuestionTagsEditor(QWidget):
         except:
             nIndex=self.nQIndex
             pass
-        self.nQIndex=nIndex
+        self.setUIIndex(nIndex)
         self.refreshoutputAreaOneQuestion()
         print("onedtIndexChaned")
         pass
@@ -410,7 +424,7 @@ class QuestionTagsEditor(QWidget):
     def refreshoutputAreaOneQuestion(self):
         if not self.nQIndex in range(0, self.latex.getCountOfQ() ):
             return
-        Qpt = self.latex.getQuestionObject(int(self.nQIndex))
+        Qpt = self.currentQpt
         self.txtOneQuestion.setText(Qpt.getQBODY())
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
@@ -504,7 +518,7 @@ class QuestionTagsEditor(QWidget):
 
     def isAutoRelativeTag(self, strTag):
 
-        Qpt = self.latex.getQuestionObject(int(self.nQIndex))
+        Qpt = self.currentQpt
         strQBODY = Qpt.getQBODY()
         if strQBODY.find(strTag) !=-1:
             return True
@@ -517,6 +531,9 @@ class QuestionTagsEditor(QWidget):
 
     def refreshTagCheckedUIListData(self):
         lstTags = self.getLatestTagsList()
+        Qpt = self.currentQpt
+        lstMLSuggestionTag = self.suggestor.getSuggestionTags(Qpt)
+
         if lstTags == None:
             return
 
@@ -525,6 +542,11 @@ class QuestionTagsEditor(QWidget):
         for item in self.lstCheckboxs:
             if isinstance(item, QCheckBox ):
                 item.setChecked(item.strTagName in lstTags)
+
+                if item.strTagName in lstMLSuggestionTag:
+                    item.setStyleSheet("color: red")
+                else:
+                    item.setStyleSheet("color: black")
 
             elif isinstance(item, QListWidgetItem):
                 if item.strTagName in lstTags:
@@ -538,7 +560,7 @@ class QuestionTagsEditor(QWidget):
 
     def setCurrentIndex(self, nIndex):
         if nIndex < self.latex.getCountOfQ() and nIndex >= 0:
-            self.nQIndex = nIndex
+            self.setUIIndex(nIndex)
             #事實上，秀出來的Index 是由 1 開始的
             self.edtIndex.setText(str(self.nQIndex+1))
 

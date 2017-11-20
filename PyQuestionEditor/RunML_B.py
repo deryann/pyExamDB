@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import codecs
 import operator
-import os
+import os,sys
 import re
 import pickle
+import timeit
 
 import jieba
 import numpy as np
@@ -11,6 +12,16 @@ import numpy as np
 from HDYLatexParserFromDB import HDYLatexParserFromDB
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.metrics import f1_score, recall_score, precision_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import export_graphviz
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
 constdefaultname = u"test.sqlitedb"
 constLogFile = u"KeyWordlogger.log"
@@ -36,15 +47,17 @@ constListChap =  [u"不是99課綱",
                       u"B4C2空間中的平面與直線",
                       u"B4C3矩陣",
                       u"B4C4二次曲線",
-                      u"B5C1機率與統計",
-                      u"B5C2三角函數II",
-                      u"B6C1函數與極限",
-                      u"B6C2多項式函數的微積分",
-                      u"未分類"
+                      # u"B5C1機率與統計",
+                      # u"B5C2三角函數II",
+                      # u"B6C1函數與極限",
+                      # u"B6C2多項式函數的微積分",
+                      # u"未分類"
                       ]
-
+constWorkPath = u"E:\\NCTUG2\\Code\\pyExamDBDevUI\\PyQuestionEditor"
 lstStopWordFromFile = []
 constKeyWordCacheFileNameOutputFilePath = u"KeywordCache.pickle"
+constXDataKeyWord = u"XDataKeyWord.pickle"
+constClassifierAgents = u"ClassifierAgents.pickle"
 
 def prepareData():
     pass
@@ -131,16 +144,16 @@ def loadDataKeyWordFromCacheFile():
         itemlist = pickle.load(fp)
     return itemlist
 
-def getDataKeyWord():
+def getListOfAllKeyWord():
     """
     產生想要的 KeyWord Table
     :return: A list of truple ("字串", 個數) 排序方式由"個數"由小到大
     """
     if isDataKeyWordFromCacheFile():
-        print("[getDataKeyWord] load by Cache File.")
+        print("[getListOfAllKeyWord] load by Cache File.")
         sorted_d = loadDataKeyWordFromCacheFile()
     else:
-        print("[getDataKeyWord] load by runing.")
+        print("[getListOfAllKeyWord] load by runing.")
         dbLatex = HDYLatexParserFromDB(constdefaultname)
         dbLatex.read()
         initJiebaModule()
@@ -244,6 +257,30 @@ def getXYDataFromDB(lstKeyWord, funClassType=getMainClassType, dicParams = {}):
             nRowIndex += 1
     return Xdata, Ydata
 
+def getCurrentXDataKeyWord():
+    with open(constXDataKeyWord, "rb") as fp:
+        lstKeyWord = pickle.load(fp)
+    return lstKeyWord
+
+def getOneXData(qPt, nCountKeyword, allKeyWords=None):
+    """
+    從問題當中，找出 Xdata 向量
+    :param qPt:
+    :return:
+    """
+    if allKeyWords is None:
+        allKeyWords = getListOfAllKeyWord()
+    lstKeyWord = selectTop(allKeyWords, nCountKeyword)
+    Xdata = np.zeros((1, len(lstKeyWord)))
+    strQBODY = qPt.getQBODY()
+    nColIndex=0
+    for item in lstKeyWord:
+        if strQBODY.find(item) != -1:
+            Xdata[0, nColIndex] = 1
+        nColIndex += 1
+    return Xdata
+
+
 def trainingByalg(Xdata, Ydata, clf = BernoulliNB()):
     clf.fit(Xdata, Ydata)
     y_p = clf.predict(Xdata)
@@ -287,11 +324,13 @@ def compareResult(Ydata, y_p):
 
 
 def showComparsionWithKeyWordNumber():
-    lstKeyWordCount = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
+    lstKeyWordCount = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,2000,3000]
     dicScore = {}
-    allKeyWord = getDataKeyWord()
+    allKeyWord = getListOfAllKeyWord()
+
     for nCountKeyWord in lstKeyWordCount:
-        Xdata, Ydata = getXYDataFromDB(selectTop(allKeyWord, nCountKeyWord), getMType)
+        currentKeyWord = selectTop(allKeyWord, nCountKeyWord)
+        Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMType)
 
         f = trainingByalg(Xdata, Ydata)
         dicScore[nCountKeyWord] = f
@@ -308,10 +347,11 @@ def show2ClassML():
     nAllClasscount = len(constListChap)
     nCountKeyWord=1000
     dicScore = {}
-    allKeyWord = getDataKeyWord()
+    allKeyWord = getListOfAllKeyWord()
+    currentKeyWord = selectTop(allKeyWord, nCountKeyWord)
     for index in range(nAllClasscount):
         item = constListChap[index]
-        Xdata, Ydata = getXYDataFromDB(selectTop(allKeyWord, nCountKeyWord), getMainClassType, dicParams={u"checkClass":item})
+        Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType, dicParams={u"checkClass":item})
         X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.25, random_state=42)
 
         clf = BernoulliNB()
@@ -325,10 +365,189 @@ def show2ClassML():
     for index in range(nAllClasscount):
         print(u"%s \t %.02f" % (constListChap[index], dicScore[index]))
 
+def show2ClassMLByAllClassifiers ():
 
+
+    lstClassifiers = [
+        BernoulliNB(),
+        GaussianNB(),
+        KNeighborsClassifier(3),
+        SVC(kernel="linear", C=0.025),
+        SVC(gamma=2, C=1),
+        DecisionTreeClassifier(max_depth=5),
+        RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+        AdaBoostClassifier()]
+    names = ["Basic Naive Bayes", "GaussianNB",
+        "Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree",
+             "Random Forest", "AdaBoost",
+             ]
+
+    nAllClasscount = len(constListChap)
+
+    nAllClassifiers = len(lstClassifiers)
+    dicScore = np.zeros((nAllClasscount, nAllClassifiers))
+    allKeyWord = getListOfAllKeyWord()
+    nCountKeyWord = len(allKeyWord)
+    currentKeyWord = selectTop(allKeyWord, nCountKeyWord)
+
+    for index in range(nAllClasscount):
+        print( constListChap[index])
+        item = constListChap[index]
+        Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType, dicParams={u"checkClass":item})
+        X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.50, random_state=10)
+        for clfIndex in range(nAllClassifiers):
+            print (names[clfIndex])
+            clf = lstClassifiers[clfIndex]
+            clf.fit(X_train, y_train)
+            clf.strTagName = item
+            y_pre = clf.predict(X_test)
+            dicScore[index, clfIndex] = f1_score(y_test, y_pre)
+
+
+    strheader = u"Words," + u",".join(names)
+    print(strheader)
+
+
+    for index in range(nAllClasscount):
+        strRow = constListChap[index]
+        for clfIndex in range(nAllClassifiers):
+            strRow += u", %.02f" %( dicScore[index, clfIndex],)
+        print (strRow)
+
+def loadClassifierAgent(bDrawDTreePNG=False):
+
+    with open(constClassifierAgents, 'rb') as fp:
+        agents = pickle.load(fp)
+
+    #Draw DT picture
+    if bDrawDTreePNG:
+        nIndex = 0
+        for clf in agents:
+            mainFileName = u"DTreeAgent%02d" % (nIndex,)
+            filename = mainFileName+u".dot"
+            allKeyWord = getListOfAllKeyWord()
+            currentKeyWord = selectTop(allKeyWord, clf.nKeyWord)
+            wordtable =[]
+            for item in currentKeyWord:
+                wordtable.append( item.encode("utf8"))
+            export_graphviz(clf, out_file = filename, feature_names = wordtable)
+            postModifyDOT(filename)
+            toPNG(mainFileName)
+            #export_graphviz(clf, out_file=filename)
+            print(u"%s score = %.02f" % (clf.strTagName, clf.ff1))
+            nIndex+=1
+
+    return agents
+
+def toPNG(mainFileName):
+    """
+    將 DOT 圖檔轉換成 PNG 檔
+    :param mainFileName:
+    :return:
+    """
+    os.chdir(constWorkPath)
+    cmdlist = [#u'dot -Tps %.dot -o %.ps',
+               u'dot -Tpng %.dot -o %.png'
+               ]
+    for strTemplate in cmdlist:
+        timer_start = timeit.default_timer()
+        strCmd = strTemplate.replace(u'%', mainFileName)
+        os.system(strCmd.encode(sys.getfilesystemencoding()))
+        timer_end = timeit.default_timer()
+        print("Time usage:", timer_end - timer_start, " sec(s)")
+        print (strCmd+ u" Completed!!")
+
+
+def postModifyDOT(filename):
+    strAll =''
+    with codecs.open(filename, 'r',encoding="utf8") as pt:
+        strAll = pt.read()
+    strAll = strAll.replace(u"node [shape=box] ;",u"node [shape=box, fontname = \"PMingLiu\"] ;")
+    with codecs.open(filename, 'w',encoding="utf8") as pt:
+        pt.write(strAll)
+
+
+def doAbestDTree():
+    """
+    測試各項features 參數 對各決策樹的影響 並且記錄 ff1 score 最好的!
+    :return:
+    """
+    lstD = [3,4,5,6,7,8]
+    lstCountKeyWord =[1000,2000,3000]
+
+    nAllClasscount = len(constListChap)
+    lstClassifierAgent = []
+    for index in range(nAllClasscount):
+        fMax = -1.0
+        lstClassifierAgent.append(None)
+        strTagName = constListChap[index]
+        for d in lstD:
+            for nCount in lstCountKeyWord:
+                clf = DTreeMode(strTagName, nCount, d)
+                if clf.ff1 > fMax:
+                    fMax = clf.ff1
+                    lstClassifierAgent[index]=clf
+    for item in lstClassifierAgent:
+        print (u"%s \tC=%d\tD=%d\tff1=%.02f" % (item.strTagName, item.nKeyWord, item.nLeveldepth, item.ff1))
+    #save agent to pickle
+    with open(constClassifierAgents, 'wb') as fp:
+        pickle.dump(lstClassifierAgent, fp)
+
+
+def DTreeMode(strTagName=u'', nCountKeyWord= 2000, Level_depth =3   ):
+
+    allKeyWord = getListOfAllKeyWord()
+    lstClassifierAgent = []
+    currentKeyWord = selectTop(allKeyWord, nCountKeyWord)
+    print (u"DESC : Decision Tree Params level=%d nCountKeyWord=%d" % (Level_depth, nCountKeyWord))
+
+    # Dump current KeyWord
+    # with open(constXDataKeyWord, "wb") as fp:
+    #     pickle.dump(currentKeyWord, fp )
+
+    #for index in range(nAllClasscount):
+    clf = DecisionTreeClassifier(max_depth=Level_depth)
+
+    Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType,
+                                   dicParams={u"checkClass": strTagName})
+    X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.5, random_state=0)
+    clf.fit(X_train, y_train)
+    clf.strTagName = strTagName
+    clf.nKeyWord = nCountKeyWord
+    clf.nLeveldepth = Level_depth
+
+    y_pred_class = clf.predict(X_test)
+    clf.fRecall = recall_score(y_test, y_pred_class)
+    clf.fPrecision = precision_score(y_test, y_pred_class)
+    clf.ff1 = f1_score(y_test, y_pred_class)
+
+    return clf
+
+class Tagsuggestor:
+    """
+    將Machine learning 好的分類器與字串庫讀入 並暫存
+    """
+    def __init__(self):
+        self.allKeyWord = getListOfAllKeyWord()
+        self.agentsMLTags = loadClassifierAgent()
+
+    def getSuggestionTags(self, qPt):
+        lst = []
+        #getXData for qPt
+        for clf in self.agentsMLTags:
+            XData = getOneXData(qPt, clf.nKeyWord, self.allKeyWord)
+            y = clf.predict(XData)
+            if y[0] != 0.0:
+                lst.append(clf.strTagName)
+            print (u"Check %s %f" % (clf.strTagName, y[0]))
+        if len(lst)!= 0:
+            print (u'ML Tags: %s' % ( ",".join(lst),))
+        return lst
 
 if __name__ == '__main__':
     lstStopWordFromFile = loadStopWordTable()
-    show2ClassML()
-
-
+    #show2ClassML()
+    #show2ClassMLByAllClassifiers()
+    #loadClassifierAgent()
+    #doAbestDTree()
+    loadClassifierAgent()
