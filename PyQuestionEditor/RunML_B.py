@@ -433,7 +433,6 @@ def loadClassifierAgent(bDrawDTreePNG=False):
             export_graphviz(clf, out_file = filename, feature_names = wordtable)
             postModifyDOT(filename)
             toPNG(mainFileName)
-            #export_graphviz(clf, out_file=filename)
             print(u"%s score = %.02f" % (clf.strTagName, clf.ff1))
             nIndex+=1
 
@@ -459,6 +458,11 @@ def toPNG(mainFileName):
 
 
 def postModifyDOT(filename):
+    """
+    更動自動產生的DOT檔案，加入中文字型名稱。
+    :param filename:
+    :return:
+    """
     strAll =''
     with codecs.open(filename, 'r',encoding="utf8") as pt:
         strAll = pt.read()
@@ -539,7 +543,6 @@ class Tagsuggestor:
             y = clf.predict(XData)
             if y[0] != 0.0:
                 lst.append(clf.strTagName)
-            print (u"Check %s %f" % (clf.strTagName, y[0]))
         if len(lst)!= 0:
             print (u'ML Tags: %s' % ( ",".join(lst),))
         return lst
