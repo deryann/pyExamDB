@@ -15,12 +15,12 @@ import sys, os, re, codecs
 import difflib
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QObject, SIGNAL
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #Widget input
 from HDYWidgetPool.HDYTextEdit import HDYTextEdit
+from HDYWidgetPool.HDYNavigator import HDYNavigator
 
 #Data Model input
 from HDYLatexParser import HDYLatexParser
@@ -86,13 +86,18 @@ class QuestionTagsEditor(QWidget):
         self.bUserAction = True
 
         self.layoutFileLoadUI = QHBoxLayout()
+
         self.lblFileName = QLabel(u"File name:")
         self.edtFile = QLineEditWithDirModel(u"FileName" ,self)
 
         self.btnLoadFile = QPushButton (u"Load",self)
+        self.indexNavigator = HDYNavigator(self)
+        self.indexNavigator.indexChanged.connect(self.onIndexChanged)
+
         self.layoutFileLoadUI.addWidget(self.lblFileName)
         self.layoutFileLoadUI.addWidget(self.edtFile)
         self.layoutFileLoadUI.addWidget(self.btnLoadFile)
+        self.layoutFileLoadUI.addWidget(self.indexNavigator)
 
         self.layout().addLayout(self.layoutFileLoadUI)
 
@@ -114,20 +119,14 @@ class QuestionTagsEditor(QWidget):
         self.prepareShowQuestionUI()
         self.prepareTagsLayout()
 
-
-
         self.layout().addWidget(self.tabModes)
 
         self.tabModeOneQuestion.layout().addLayout(self.layoutShowQuestionContentWithMetaData)
         self.tabModeOneQuestion.layout().addLayout(self.layoutBtnTagsList)
 
-        self.prepareIndexSettingLayout()
-
         self.prepareFileModeUI()
 
         self.tabModeOneQuestion.layout().addLayout(self.layoutTagsPanel)
-        self.tabModeOneQuestion.layout().addLayout(self.layoutBtnsControlIndex)
-
 
         self.loadFile(DEFAULT_FILE_INPUT_NAME)
 
@@ -136,14 +135,21 @@ class QuestionTagsEditor(QWidget):
 
         self.setupHotkey()
 
+    def onIndexChanged(self, nIndex):
+        logging.debug("[onIndexChanged]")
+        if self.latex is not None:
+            self.currentQpt = self.latex.getQuestionObject(nIndex)
+        self.showData()
 
+    def getQIndex(self):
+        return self.indexNavigator.getIndex()
 
     def setupHotkey(self):
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'), self.onHotkeySave)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F8), self), QtCore.SIGNAL('activated()'),
-                     self.onbtnNextClicked)
+                     self.indexNavigator.onbtnNextClicked)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), QtCore.SIGNAL('activated()'),
-                     self.onbtnPrevClicked)
+                     self.indexNavigator.onbtnPrevClicked)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_J), self), QtCore.SIGNAL('activated()'),
                      self.onbtnToogleJieba)
 
@@ -163,7 +169,7 @@ class QuestionTagsEditor(QWidget):
         #讀取Tag 表
         self.loadTagsToNewUI()
         self.layoutTagsPanel = QHBoxLayout()
-        self.tabBookChap.setFixedWidth(500)
+        self.tabBookChap.setFixedWidth(550)
         self.layoutTagsPanel.addWidget(self.tabBookChap)
 
         #按照當下的Item 嘗試著找出一些建議的 Tageditor
@@ -263,10 +269,10 @@ class QuestionTagsEditor(QWidget):
         self.setLatestCurrentTagsDict(sender.strCurrTag, Qt.Unchecked)
 
     def getLatestCurrentTags(self):
-        if self.dicNewTagsBuffer.has_key(self.nQIndex):
-            return self.dicNewTagsBuffer[self.nQIndex]
+        if self.dicNewTagsBuffer.has_key(self.getQIndex()):
+            return self.dicNewTagsBuffer[self.getQIndex()]
         else:
-            return self.latex.getQuestionTagList(self.nQIndex)
+            return self.latex.getQuestionTagList(self.getQIndex())
 
 
     def setLatestCurrentTagsDict(self, strTagName, nChecked):
@@ -287,11 +293,11 @@ class QuestionTagsEditor(QWidget):
                 lstnew.append(strTagName)
 
         if self.isTagsListDifferent(lst,lstnew):
-            lstOri = self.latex.getQuestionTagList(self.nQIndex)
+            lstOri = self.latex.getQuestionTagList(self.getQIndex())
             if isSameSet(lstnew, lstOri):
-                self.dicNewTagsBuffer.pop(self.nQIndex)
+                self.dicNewTagsBuffer.pop(self.getQIndex())
             else:
-                self.dicNewTagsBuffer[self.nQIndex] = lstnew
+                self.dicNewTagsBuffer[self.getQIndex()] = lstnew
             self.dprint("[setLatestCurrentTagsDict] modified")
             self.refreshTagsUI()
         else:
@@ -306,38 +312,7 @@ class QuestionTagsEditor(QWidget):
         else:
             self.setWindowTitle(self.strWindowTitle + u' ')
 
-    def setUIIndex(self, nIndex):
-        self.nQIndex = nIndex
-        if self.latex is not None:
-            self.currentQpt = self.latex.getQuestionObject(int(self.nQIndex))
 
-    def prepareIndexSettingLayout(self):
-        """
-        實作控制 index 決定按鈕驅動事件
-        """
-
-
-        self.setUIIndex(0)
-        self.layoutBtnsControlIndex = QHBoxLayout()
-
-        self.btnFirst=QPushButton("|<", self)
-        self.btnPrev=QPushButton("<",self)
-        self.edtIndex = QLineEdit ("1", self)
-        self.edtCount = QLineEdit ("0", self)
-        self.btnNext=QPushButton(">",self)
-        self.btnLast=QPushButton(">|",self)
-
-        self.layoutBtnsControlIndex.addWidget(self.btnFirst)
-        self.layoutBtnsControlIndex.addWidget(self.btnPrev)
-        self.layoutBtnsControlIndex.addWidget(self.edtIndex)
-        self.layoutBtnsControlIndex.addWidget(self.edtCount)
-        self.layoutBtnsControlIndex.addWidget(self.btnNext)
-        self.layoutBtnsControlIndex.addWidget(self.btnLast)
-        self.btnFirst.clicked.connect(self.onbtnFirstClicked)
-        self.btnLast.clicked.connect(self.onbtnLastClicked)
-        self.btnNext.clicked.connect(self.onbtnNextClicked)
-        self.btnPrev.clicked.connect(self.onbtnPrevClicked)
-        self.edtIndex.textChanged.connect(self.onedtIndexChaned)
 
 
     def prepareFileModeUI(self):
@@ -408,7 +383,8 @@ class QuestionTagsEditor(QWidget):
     def loadFile(self, strfileName):
         self.edtFile.setText(strfileName)
         self.getDataModel(strfileName)
-        self.setUIIndex(0)
+        self.indexNavigator.setMax(self.latex.getCountOfQ())
+        self.indexNavigator.setCurrentIndex(0)
         self.showData()
 
     def getDataModel(self,strFileName):
@@ -421,32 +397,22 @@ class QuestionTagsEditor(QWidget):
             self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
             self.latex.read()
 
-    def onedtIndexChaned(self, strText):
-        try:
-            nIndex= int (strText) -1
-        except:
-            nIndex=self.nQIndex
-            pass
-        self.setUIIndex(nIndex)
-        self.refreshoutputAreaOneQuestion()
-        self.dprint("onedtIndexChaned")
-        pass
-
     def dprint (self, strInput):
         logging.debug(strInput)
         pass
 
     def getLatestTagsList(self):
-        if self.nQIndex in self.dicNewTagsBuffer:
-            lst = self.dicNewTagsBuffer[self.nQIndex]
+        if self.getQIndex() in self.dicNewTagsBuffer:
+            lst = self.dicNewTagsBuffer[self.getQIndex()]
         else :
-            lst = self.latex.getQuestionTagList(self.nQIndex)
+            lst = self.latex.getQuestionTagList(self.getQIndex())
         return lst
 
     def refreshoutputAreaOneQuestion(self):
-        if not self.nQIndex in range(0, self.latex.getCountOfQ() ):
+        if not self.getQIndex() in range(0, self.latex.getCountOfQ() ):
             return
         Qpt = self.currentQpt
+        if Qpt is None: return
         self.txtOneQuestion.setText(Qpt.getQBODY())
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
@@ -580,24 +546,6 @@ class QuestionTagsEditor(QWidget):
                     item.setBackground(Qt.red)
             pass
 
-    def setCurrentIndex(self, nIndex):
-        if nIndex < self.latex.getCountOfQ() and nIndex >= 0:
-            self.setUIIndex(nIndex)
-            #事實上，秀出來的Index 是由 1 開始的
-            self.edtIndex.setText(str(self.nQIndex+1))
-
-    def onbtnFirstClicked(self):
-        self.setCurrentIndex(0)
-
-    def onbtnLastClicked(self):
-        self.setCurrentIndex(self.latex.getCountOfQ()-1)
-
-    def onbtnNextClicked(self):
-        self.setCurrentIndex(self.nQIndex +1)
-
-    def onbtnPrevClicked(self):
-        self.setCurrentIndex(self.nQIndex -1)
-
     def addCheckBoxInToUI(self):
         pass
 
@@ -638,7 +586,6 @@ class QuestionTagsEditor(QWidget):
         #New出所有Tag
 
         fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
-        currentTab=None
         #New 出 AllTAB 內頁
         currentTab = QWidget(self)
         currentTab.setLayout(QVBoxLayout())
@@ -668,7 +615,7 @@ class QuestionTagsEditor(QWidget):
     # 當題目裡面存在有App 沒有包含的 QTAG 也必須列出他的UI
     #
     def reNewCustomTagCheckItem(self):
-        lst = self.latex.getQuestionTagList(self.nQIndex)
+        lst = self.latex.getQuestionTagList(self.getQIndex())
         for item in lst :
             if not self.isExistedInCustomTags(item):
                 chkitem = QCheckBox(item,self)
@@ -729,8 +676,6 @@ class QuestionTagsEditor(QWidget):
             self.addTagsIntoAllTags(strNewTagName)
         pass
 
-
-
     def onbtnNewFromClicked(self):
         strQFromName, okay=QInputDialog.getText(self, "Please input new From:", "Q From:")
         if not okay or strQFromName==u"":
@@ -774,7 +719,6 @@ class QuestionTagsEditor(QWidget):
         pass
 
     def showData(self):
-        self.dprint(self.latex.read())
         self.dprint(self.latex.getReport())
         self.txtOneQuestion.clear()
         self.txtAns.clear()
@@ -784,8 +728,6 @@ class QuestionTagsEditor(QWidget):
         self.lblExamName.clear()
         self.lblExamYear.clear()
         self.refreshoutputAreaOneQuestion()
-        self.edtCount.setText(str(self.latex.getCountOfQ()))
-        self.edtCount.setReadOnly(True)
 
         self.showDataInFileMode()
         pass
