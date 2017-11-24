@@ -16,6 +16,9 @@ class HDYNavigator(QWidget):
         self.setFixedWidth(200)
         self.prepareIndexSettingLayout()
 
+    def reset(self):
+        self.currentIndex = None
+
     def refresh(self):
         logging.debug ("[HDYNavigator][refresh]")
         # 事實上，秀出來的Index 是由 1 開始的

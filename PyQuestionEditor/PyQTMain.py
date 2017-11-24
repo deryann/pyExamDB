@@ -33,7 +33,7 @@ from RunML_B import *
 
 #Logging config
 import logging
-#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 #Tex file mode test filename
 #DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
@@ -90,18 +90,29 @@ class QuestionTagsEditor(QWidget):
         self.lblFileName = QLabel(u"File name:")
         self.edtFile = QLineEditWithDirModel(u"FileName" ,self)
 
-        self.btnLoadFile = QPushButton (u"Load",self)
+        self.btnMoreLoadFile = QPushButton (u"...",self)
+        self.btnRunLoadFile = QPushButton(u"Load", self)
+
         self.indexNavigator = HDYNavigator(self)
         self.indexNavigator.indexChanged.connect(self.onIndexChanged)
 
+        self.lblDBKeyWord = QLabel(u"DB Keyword:", self)
+        self.edtDBKeyWord = QLineEdit(u"", self)
+        self.edtDBKeyWord.setFixedWidth(100)
+
         self.layoutFileLoadUI.addWidget(self.lblFileName)
         self.layoutFileLoadUI.addWidget(self.edtFile)
-        self.layoutFileLoadUI.addWidget(self.btnLoadFile)
+        self.layoutFileLoadUI.addWidget(self.lblDBKeyWord)
+        self.layoutFileLoadUI.addWidget(self.edtDBKeyWord)
+        self.layoutFileLoadUI.addWidget(self.btnMoreLoadFile)
+        self.layoutFileLoadUI.addWidget(self.btnRunLoadFile)
+
         self.layoutFileLoadUI.addWidget(self.indexNavigator)
 
         self.layout().addLayout(self.layoutFileLoadUI)
 
-        self.btnLoadFile.clicked.connect(self.onbtnLoadFile)
+        self.btnMoreLoadFile.clicked.connect(self.onbtnMoreLoadFile)
+        self.btnRunLoadFile.clicked.connect(self.onbtnLoadFile)
 
         #Design Two mode(One Question and FileMode)
         self.tabModes = QTabWidget(self)
@@ -211,11 +222,14 @@ class QuestionTagsEditor(QWidget):
 
         self.reNewComboQuestionUI()
 
+        self.lblQID.setFixedWidth(100)
         self.lblExamYear.setFixedWidth(100)
         self.lblExamName.setFixedWidth(100)
         self.lblExamQuestionStyle.setFixedWidth(100)
         self.lblExamQuestionNum.setFixedWidth(100)
         self.txtAns.setFixedWidth(100)
+
+        self.layoutMetaData.addWidget(self.lblQID)
         self.layoutMetaData.addWidget(self.lblExamYear)
         self.layoutMetaData.addWidget(self.lblExamName)
         self.layoutMetaData.addWidget(self.lblExamQuestionStyle)
@@ -365,6 +379,7 @@ class QuestionTagsEditor(QWidget):
 
 
     def reNewComboQuestionUI(self):
+        self.lblQID = QLabel(self)
         self.lblExamName = QLabel(self)
         self.lblExamYear =QLabel(self)
         self.lblExamQuestionStyle =QLabel(self)
@@ -380,28 +395,50 @@ class QuestionTagsEditor(QWidget):
         pass
 
     def onbtnLoadFile(self):
+        strfileName = unicode(self.edtFile.text())
+        self.loadFile(strfileName)
+        pass
+
+    def onbtnMoreLoadFile(self):
         strfileName = QFileDialog.getOpenFileName(self, u"Open HDY Latex", ".", u"Tex Files (*.tex )")
         self.dprint ("fileName:" +strfileName)
+        self.edtFile.setText(unicode(strfileName))
         self.loadFile(unicode(strfileName))
-        pass
 
     def loadFile(self, strfileName):
         self.edtFile.setText(strfileName)
         self.getDataModel(strfileName)
+        self.indexNavigator.reset()
         self.indexNavigator.setMax(self.latex.getCountOfQ())
         self.indexNavigator.setCurrentIndex(0)
+
         self.showData()
+
+    def getWordlist(self, strInput):
+        """
+
+        :param strInput:
+        :return:
+        """
+        return [x.strip() for x in strInput.split(',')]
 
     def getDataModel(self,strFileName):
         if isTexFileMode(strFileName):
             self.latex = HDYLatexParser(strFileName)
         elif isSQLiteDBMode(strFileName):
+            bCheckKeyWordMode = (self.edtDBKeyWord.text() != u"")
+
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
             #self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
             #self.latex = HDYLatexParserFromDB(strFileName, keyword=u'空間')
-            self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
+            #self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
+            if bCheckKeyWordMode:
+                lst = self.getWordlist(unicode(self.edtDBKeyWord.text()))
+                self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=lst)
+            else:
+                self.latex = HDYLatexParserFromDB(strFileName)
             self.latex.read()
 
     def dprint (self, strInput):
@@ -425,6 +462,7 @@ class QuestionTagsEditor(QWidget):
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
 
+        self.lblQID.setText(u"QID："+unicode(Qpt.nQID))
         self.lblExamYear.setText(u"年份："+unicode(Qpt.getExamYear()))
         self.lblExamName.setText(u"試題："+Qpt.getExamName())
         self.lblExamQuestionStyle.setText(u"題型："+Qpt.getExamQuestionStyle())

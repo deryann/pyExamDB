@@ -58,20 +58,28 @@ where b.tag_id IN %s
             lstKeyWord = args[u'keyword_notag']
             strLIKEKeyWordSQL = u""
             nIndex = 0
-            for item in lstKeyWord:
-                if nIndex !=0:
-                    substrLIKEKeyWordSQL = u"OR a.QBODY LIKE '%%%s%%'" % ( item, )
-                else:
-                    substrLIKEKeyWordSQL = u"a.QBODY LIKE '%%%s%%'" % ( item, )
-                nIndex+=1
-                strLIKEKeyWordSQL +=substrLIKEKeyWordSQL
-            strLIKEKeyWordSQL = u" ( %s ) " % (strLIKEKeyWordSQL,)
+            if len(lstKeyWord) != 0:
+                for item in lstKeyWord:
+                    if nIndex !=0:
+                        substrLIKEKeyWordSQL = u"OR a.QBODY LIKE '%%%s%%'" % ( item, )
+                    else:
+                        substrLIKEKeyWordSQL = u"a.QBODY LIKE '%%%s%%'" % ( item, )
+                    nIndex+=1
+                    strLIKEKeyWordSQL +=substrLIKEKeyWordSQL
+                strLIKEKeyWordSQL = u" ( %s ) " % (strLIKEKeyWordSQL,)
 
-            strSQLTemplate = u"""SELECT a.EXAMINFO_STR, a.question_id, a.QBODY FROM EXAM01 as a 
-                                 LEFT JOIN question_tag_relationship as b
-                                 ON b.question_id=a.question_id 
-                                 where %s and b.tag_id ISNULL
-                                """ %(strLIKEKeyWordSQL, )
+                strSQLTemplate = u"""SELECT a.EXAMINFO_STR, a.question_id, a.QBODY FROM EXAM01 as a 
+                                     LEFT JOIN question_tag_relationship as b
+                                     ON b.question_id=a.question_id 
+                                     where %s and b.tag_id ISNULL
+                                    """ % (strLIKEKeyWordSQL,)
+            else:
+                #當輸入 lstKeyWord = [] 不比對 KeyWord 直接找出所有的 tag is NULL
+                strSQLTemplate = u"""SELECT a.EXAMINFO_STR, a.question_id, a.QBODY FROM EXAM01 as a 
+                                     LEFT JOIN question_tag_relationship as b
+                                     ON b.question_id=a.question_id 
+                                     where b.tag_id ISNULL
+                                    """
 
             self.strMainSQL = strSQLTemplate
             pass
