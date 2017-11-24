@@ -3,7 +3,7 @@
 import os
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from QDbReport.toollib import getJiebaCutList
+from QDbReport.Jiebaer import Jiebaer
 
 class HDYTextEdit(QTextEdit):
     def __init__(self, *args):
@@ -15,6 +15,7 @@ class HDYTextEdit(QTextEdit):
         self.setFont(QFont("Consolas", 14))  # 設定字型
         self.bVisibleForJieba = False
         self.strContent = u""
+        self.Jiebaer = Jiebaer()
 
     def setDicKeyWordMappingColor(self, dicInput):
         self.dicKeyWordMapColor = dicInput
@@ -77,7 +78,7 @@ class HDYTextEdit(QTextEdit):
             curCursor.insertText(os.linesep, fm)
 
             #增加比較Jieba 的結果
-            lstString = getJiebaCutList(qstr, True)
+            lstString = self.Jiebaer.getJiebaCutList(qstr, True)
 
             lstcolorSwitch = [Qt.yellow, Qt.white]
             nColorSwitchIndex = 0
