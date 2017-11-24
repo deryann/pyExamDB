@@ -136,7 +136,12 @@ class QuestionTagsEditor(QWidget):
         self.setupHotkey()
 
     def onIndexChanged(self, nIndex):
-        logging.debug("[onIndexChanged]")
+        """
+        接收到 Current 已經改變
+        :param nIndex:
+        :return:
+        """
+        logging.debug("[onIndexChanged] %d" % (nIndex,))
         if self.latex is not None:
             self.currentQpt = self.latex.getQuestionObject(nIndex)
         self.showData()
@@ -394,7 +399,9 @@ class QuestionTagsEditor(QWidget):
             #self.latex = HDYLatexParserFromDB(strFileName)
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
             #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
-            self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
+            #self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
+            #self.latex = HDYLatexParserFromDB(strFileName, keyword=u'空間')
+            self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
             self.latex.read()
 
     def dprint (self, strInput):
@@ -409,6 +416,7 @@ class QuestionTagsEditor(QWidget):
         return lst
 
     def refreshoutputAreaOneQuestion(self):
+        logging.debug(u"[refreshoutputAreaOneQuestion]")
         if not self.getQIndex() in range(0, self.latex.getCountOfQ() ):
             return
         Qpt = self.currentQpt
@@ -454,6 +462,11 @@ class QuestionTagsEditor(QWidget):
         return lst
 
     def getSecTags(self):
+        """
+        找出小節的Tag
+        :return:
+        """
+        logging.debug(u"[getSecTags]")
         lst = []
         lstSuggest = []
         self.readSuggestDict()
@@ -518,6 +531,10 @@ class QuestionTagsEditor(QWidget):
         return False
 
     def refreshTagCheckedUIListData(self):
+        """
+        重新整理 tags UI 相關資料
+        :return:
+        """
         lstTags = self.getLatestTagsList()
         Qpt = self.currentQpt
         lstMLSuggestionTag = self.suggestor.getSuggestionTags(Qpt)

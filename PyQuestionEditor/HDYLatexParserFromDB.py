@@ -31,7 +31,9 @@ class HDYLatexParserFromDB(HDYLatexParser):
         self.strMainSQL = u"select EXAMINFO_STR, question_id from " + constQuestionsTableName
         self.parserArgAsNewMainSQL(args)
 
-    def parserArgAsNewMainSQL(self,args):
+    def parserArgAsNewMainSQL(self, args):
+
+
         if args.has_key(u'list_tag_str'):
             lstTagID = self.translateToTagIDs(args[u'list_tag_str'])
             strTagListSQL=(str(lstTagID).replace("[","(")).replace("]",")")
@@ -45,7 +47,35 @@ where b.tag_id IN %s
             strSQL = u"""SELECT EXAMINFO_STR, question_id FROM %s where EXAMINFO_YEAR IN %s
                         """ % (constQuestionsTableName, strYesrListSQL)
             self.strMainSQL = strSQL
+        elif args.has_key(u'keyword'):
+            strKeyWord = args[u'keyword']
+            strSQL = u"SELECT EXAMINFO_STR, question_id FROM %s where QBODY LIKE " % (constQuestionsTableName,)
+            strSQL = strSQL + u"'" + u"%"
+            strSQL = strSQL + strKeyWord
+            strSQL = strSQL + u"%" + u"'"
+            self.strMainSQL = strSQL
+        elif args.has_key(u'keyword_notag'):
+            lstKeyWord = args[u'keyword_notag']
+            strLIKEKeyWordSQL = u""
+            nIndex = 0
+            for item in lstKeyWord:
+                if nIndex !=0:
+                    substrLIKEKeyWordSQL = u"OR a.QBODY LIKE '%%%s%%'" % ( item, )
+                else:
+                    substrLIKEKeyWordSQL = u"a.QBODY LIKE '%%%s%%'" % ( item, )
+                nIndex+=1
+                strLIKEKeyWordSQL +=substrLIKEKeyWordSQL
+            strLIKEKeyWordSQL = u" ( %s ) " % (strLIKEKeyWordSQL,)
+
+            strSQLTemplate = u"""SELECT a.EXAMINFO_STR, a.question_id, a.QBODY FROM EXAM01 as a 
+                                 LEFT JOIN question_tag_relationship as b
+                                 ON b.question_id=a.question_id 
+                                 where %s and b.tag_id ISNULL
+                                """ %(strLIKEKeyWordSQL, )
+
+            self.strMainSQL = strSQLTemplate
             pass
+
 
     def read(self):
         logging.debug("[HDYLatexParserFromDB][read]")

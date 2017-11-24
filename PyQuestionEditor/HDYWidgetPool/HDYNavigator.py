@@ -82,7 +82,9 @@ class HDYNavigator(QWidget):
 
     def setCurrentIndex(self, nIndex):
         if nIndex < self.nMax and nIndex >= 0:
-            if self.currentIndex != nIndex:
-                self.indexChanged.emit(nIndex)
+            nOricurrentIndex = self.currentIndex
             self.currentIndex = nIndex
+            if nOricurrentIndex != nIndex:
+                self.indexChanged.emit(nIndex)
+
             self.refresh()
