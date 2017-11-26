@@ -153,5 +153,5 @@ def checkWordForMathJax(qPt):
             fpt.write(os.linesep)
 
 if __name__ == '__main__':
-    #runAllPictures()
-    checkAllQuestioForMathJax()
+    runAllPictures()
+    #checkAllQuestioForMathJax()
