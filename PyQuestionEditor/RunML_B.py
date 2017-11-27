@@ -56,7 +56,7 @@ constListChap =  [u"不是99課綱",
 constWorkPath = u"E:\\NCTUG2\\Code\\pyExamDBDevUI\\PyQuestionEditor"
 lstStopWordFromFile = []
 constKeyWordCacheFileNameOutputFilePath = u"KeywordCache.pickle"
-constXDataKeyWord = u"XDataKeyWord.pickle"
+
 constClassifierAgents = u"ClassifierAgents.pickle"
 
 def prepareData():
@@ -366,8 +366,6 @@ def show2ClassML():
         print(u"%s \t %.02f" % (constListChap[index], dicScore[index]))
 
 def show2ClassMLByAllClassifiers ():
-
-
     lstClassifiers = [
         BernoulliNB(),
         GaussianNB(),
@@ -478,6 +476,7 @@ def doAbestDTree():
     """
     lstD = [3,4,5,6,7,8]
     lstCountKeyWord =[1000,2000,3000]
+    lstCriterion = ["gini", "entropy"]
 
     nAllClasscount = len(constListChap)
     lstClassifierAgent = []
@@ -485,20 +484,21 @@ def doAbestDTree():
         fMax = -1.0
         lstClassifierAgent.append(None)
         strTagName = constListChap[index]
-        for d in lstD:
-            for nCount in lstCountKeyWord:
-                clf = DTreeMode(strTagName, nCount, d)
-                if clf.ff1 > fMax:
-                    fMax = clf.ff1
-                    lstClassifierAgent[index]=clf
+        for strCriterion in lstCriterion:
+            for d in lstD:
+                for nCount in lstCountKeyWord:
+                    clf = DTreeMode(strTagName, nCount, d, strCriterion )
+                    if clf.ff1 > fMax:
+                        fMax = clf.ff1
+                        lstClassifierAgent[index]=clf
     for item in lstClassifierAgent:
-        print (u"%s \tC=%d\tD=%d\tff1=%.02f" % (item.strTagName, item.nKeyWord, item.nLeveldepth, item.ff1))
+        print (u"%s \t strCriterion=%s \tC=%d\tD=%d\tff1=%.02f" % (item.strTagName, item.strCriterion ,item.nKeyWord, item.nLeveldepth, item.ff1))
     #save agent to pickle
     with open(constClassifierAgents, 'wb') as fp:
         pickle.dump(lstClassifierAgent, fp)
 
 
-def DTreeMode(strTagName=u'', nCountKeyWord= 2000, Level_depth =3   ):
+def DTreeMode(strTagName=u'', nCountKeyWord= 2000, Level_depth =3, strCriterion = 'gini' ):
 
     allKeyWord = getListOfAllKeyWord()
     lstClassifierAgent = []
@@ -510,7 +510,7 @@ def DTreeMode(strTagName=u'', nCountKeyWord= 2000, Level_depth =3   ):
     #     pickle.dump(currentKeyWord, fp )
 
     #for index in range(nAllClasscount):
-    clf = DecisionTreeClassifier(max_depth=Level_depth)
+    clf = DecisionTreeClassifier(criterion=strCriterion,  max_depth=Level_depth)
 
     Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType,
                                    dicParams={u"checkClass": strTagName})
@@ -524,6 +524,7 @@ def DTreeMode(strTagName=u'', nCountKeyWord= 2000, Level_depth =3   ):
     clf.fRecall = recall_score(y_test, y_pred_class)
     clf.fPrecision = precision_score(y_test, y_pred_class)
     clf.ff1 = f1_score(y_test, y_pred_class)
+    clf.strCriterion = strCriterion
 
     return clf
 
@@ -552,5 +553,5 @@ if __name__ == '__main__':
     #show2ClassML()
     #show2ClassMLByAllClassifiers()
     #loadClassifierAgent()
-    #doAbestDTree()
+    doAbestDTree()
     loadClassifierAgent()
