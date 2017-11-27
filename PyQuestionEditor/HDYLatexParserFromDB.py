@@ -21,6 +21,9 @@ constLatexTailer =u""
 constLatexStyleHeader = u"\\begin{QUESTIONS}"+os.linesep
 constLatexStyleTailer= u"\\end{QUESTIONS}"+os.linesep
 
+def strToSQLString(strInput):
+    return u"QBODY LIKE '%%%s%%'" % (strInput,)
+
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
         HDYLatexParser.__init__(self, strInputFileName)
@@ -48,12 +51,12 @@ where b.tag_id IN %s
                         """ % (constQuestionsTableName, strYesrListSQL)
             self.strMainSQL = strSQL
         elif args.has_key(u'keyword'):
-            strKeyWord = args[u'keyword']
-            strSQL = u"SELECT EXAMINFO_STR, question_id FROM %s where QBODY LIKE " % (constQuestionsTableName,)
-            strSQL = strSQL + u"'" + u"%"
-            strSQL = strSQL + strKeyWord
-            strSQL = strSQL + u"%" + u"'"
-            self.strMainSQL = strSQL
+            lstKeyWord = args[u'keyword']
+            if len(lstKeyWord) != 0:
+                lstSQLKeyWord = map (strToSQLString, lstKeyWord)
+                strKeyWord = u" OR ".join(lstSQLKeyWord)
+                strSQL = u"SELECT EXAMINFO_STR, question_id FROM %s where %s " % (constQuestionsTableName, strKeyWord)
+                self.strMainSQL = strSQL
         elif args.has_key(u'keyword_notag'):
             lstKeyWord = args[u'keyword_notag']
             strLIKEKeyWordSQL = u""

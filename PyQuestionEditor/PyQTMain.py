@@ -436,7 +436,7 @@ class QuestionTagsEditor(QWidget):
             #self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
             if bCheckKeyWordMode:
                 lst = self.getWordlist(unicode(self.edtDBKeyWord.text()))
-                self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=lst)
+                self.latex = HDYLatexParserFromDB(strFileName, keyword=lst)
             else:
                 self.latex = HDYLatexParserFromDB(strFileName)
             self.latex.read()
@@ -842,7 +842,14 @@ class QuestionTagsEditor(QWidget):
 
 def main():
     app=QApplication(sys.argv)
+
     QuestionEditor=QuestionTagsEditor()
+    scriptDir = os.path.dirname(os.path.realpath(__file__))
+
+    #From https://www.flaticon.com/packs/characters-and-numbers
+    strIcon = scriptDir + os.path.sep + 'icon' + os.path.sep+'tag.png'
+    QuestionEditor.setWindowIcon(QtGui.QIcon(strIcon))
+    #app.setWindowIcon(QtGui.QIcon(strIcon))
 
     QuestionEditor.show()
     sys.exit(app.exec_())
