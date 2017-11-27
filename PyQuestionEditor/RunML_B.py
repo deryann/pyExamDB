@@ -421,8 +421,13 @@ def loadClassifierAgent(bDrawDTreePNG=False):
     if bDrawDTreePNG:
         nIndex = 0
         for clf in agents:
+
             mainFileName = u"DTreeAgent%02d" % (nIndex,)
+            scriptDir = os.path.dirname(os.path.realpath(__file__))
+            mainFileName = scriptDir + os.path.sep + 'log' + os.path.sep + mainFileName
+
             filename = mainFileName+u".dot"
+
             allKeyWord = getListOfAllKeyWord()
             currentKeyWord = selectTop(allKeyWord, clf.nKeyWord)
             wordtable =[]
@@ -430,6 +435,7 @@ def loadClassifierAgent(bDrawDTreePNG=False):
                 wordtable.append( item.encode("utf8"))
             export_graphviz(clf, out_file = filename, feature_names = wordtable)
             postModifyDOT(filename)
+
             toPNG(mainFileName)
             print(u"%s score = %.02f" % (clf.strTagName, clf.ff1))
             nIndex+=1
@@ -554,4 +560,4 @@ if __name__ == '__main__':
     #show2ClassMLByAllClassifiers()
     #loadClassifierAgent()
     doAbestDTree()
-    loadClassifierAgent()
+    loadClassifierAgent(bDrawDTreePNG = True)
