@@ -13,7 +13,7 @@ from HDYLatexParserFromDB import HDYLatexParserFromDB
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-from sklearn.metrics import f1_score, recall_score, precision_score
+from sklearn.metrics import f1_score, recall_score, precision_score, accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
@@ -23,6 +23,8 @@ from sklearn.tree import export_graphviz
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 
+import logging
+
 constdefaultname = u"test.sqlitedb"
 constLogFile = u"KeyWordlogger.log"
 
@@ -30,6 +32,8 @@ constDicMath = u"QDbML\\AllMathTerm_ByHand.txt"
 constDicTW = u'QDbReport\\dict.txt.big'
 
 constStopWordFile = u'QDbML\\stop_words_ByHand.txt'
+
+constCSVAllClassifierComparsion = u"log\\AllClassifierCompare.csv"
 
 constListChap =  [u"不是99課綱",
                       u"跨章節試題",
@@ -366,6 +370,12 @@ def show2ClassML():
         print(u"%s \t %.02f" % (constListChap[index], dicScore[index]))
 
 def show2ClassMLByAllClassifiers ():
+    """
+    測試多個分類器，針對每一個tag tree 所能達成的成果。
+
+    :return:
+    """
+    logging.basicConfig(level=logging.DEBUG)
     lstClassifiers = [
         BernoulliNB(),
         GaussianNB(),
@@ -388,29 +398,39 @@ def show2ClassMLByAllClassifiers ():
     nCountKeyWord = len(allKeyWord)
     currentKeyWord = selectTop(allKeyWord, nCountKeyWord)
 
-    for index in range(nAllClasscount):
-        print( constListChap[index])
-        item = constListChap[index]
-        Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType, dicParams={u"checkClass":item})
-        X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.50, random_state=10)
-        for clfIndex in range(nAllClassifiers):
-            print (names[clfIndex])
-            clf = lstClassifiers[clfIndex]
-            clf.fit(X_train, y_train)
-            clf.strTagName = item
-            y_pre = clf.predict(X_test)
-            dicScore[index, clfIndex] = f1_score(y_test, y_pre)
+    with codecs.open(constCSVAllClassifierComparsion, "w", "utf-8") as fpt:
+        fpt.write(u"Word\tAlg\tf1Score\tAScore\tpreScore\trecallScore"+os.linesep) # Add header
+        for index in range(nAllClasscount):
+            print( constListChap[index])
+            item = constListChap[index]
+            Xdata, Ydata = getXYDataFromDB(currentKeyWord, getMainClassType, dicParams={u"checkClass":item})
+            X_train, X_test, y_train, y_test = train_test_split(Xdata, Ydata, test_size=0.50, random_state=10)
+            for clfIndex in range(nAllClassifiers):
+                print (names[clfIndex])
+                clf = lstClassifiers[clfIndex]
+                clf.fit(X_train, y_train)
+                clf.strAlg = names[clfIndex]
+                clf.strTagName = item
+                y_pre = clf.predict(X_test)
 
+                clf.aScore = accuracy_score(y_test, y_pre)
+                clf.preScore = precision_score(y_test, y_pre)
+                clf.recallScore = recall_score(y_test, y_pre)
+                clf.f1Score = f1_score(y_test, y_pre)
 
-    strheader = u"Words," + u",".join(names)
-    print(strheader)
+                strrow = dumptoString(clf) + os.linesep
+                fpt.write(strrow)
 
+def toString (item):
+    if isinstance(item, float):
+        return u"%.02f" % (item,)
+    return item
 
-    for index in range(nAllClasscount):
-        strRow = constListChap[index]
-        for clfIndex in range(nAllClassifiers):
-            strRow += u", %.02f" %( dicScore[index, clfIndex],)
-        print (strRow)
+def dumptoString(clf):
+    lstR = [clf.strTagName, clf.strAlg, clf.f1Score, clf.aScore ,clf.preScore, clf.recallScore]
+    lstR = map(toString, lstR)
+    strR = u"\t".join(lstR)
+    return strR
 
 def loadClassifierAgent(bDrawDTreePNG=False):
 
@@ -557,7 +577,8 @@ class Tagsuggestor:
 if __name__ == '__main__':
     lstStopWordFromFile = loadStopWordTable()
     #show2ClassML()
-    #show2ClassMLByAllClassifiers()
+    show2ClassMLByAllClassifiers()
     #loadClassifierAgent()
-    doAbestDTree()
-    loadClassifierAgent(bDrawDTreePNG = True)
+
+    #doAbestDTree()
+    #loadClassifierAgent(bDrawDTreePNG = True)
