@@ -14,6 +14,7 @@ class HDYTextEdit(QTextEdit):
 #        self.dicColorMapKeyWordList = {Qt.blue:[u'三',u'形']} #Test Function
         self.setFont(QFont("Consolas", 14))  # 設定字型
         self.bVisibleForJieba = False
+        self.bColorKeyWords = False
         self.strContent = u""
         self.Jiebaer = Jiebaer()
 
@@ -23,9 +24,13 @@ class HDYTextEdit(QTextEdit):
     def setColorMappingKeyWordList(self, dicInput):
         self.dicColorMapKeyWordList = dicInput
 
-    def toogleVisibleJieba(self):
+    def toggleVisibleJieba(self):
         self.bVisibleForJieba = not self.bVisibleForJieba
         self.setText(self.strContent) #refresh
+
+    def toggleColorKeyWords(self):
+        self.bColorKeyWords = not self.bColorKeyWords
+        self.setText(self.strContent)  # refresh
 
     def setText(self, qstr):
         '''
@@ -51,21 +56,21 @@ class HDYTextEdit(QTextEdit):
                 curCursor=cursor
 
         #另用顏色與KeyWord的Mapping 將其著色
-
-        for key in self.dicColorMapKeyWordList.keys():
-            cr = key
-            lst = self.dicColorMapKeyWordList[cr]
-            fmt = QTextCharFormat()
-            fmt.setBackground(cr)
-            for keyword in lst:
-                doc = self.document()
-                curCursor = QTextCursor(doc)
-                while True:
-                    cursor = doc.find(keyword, curCursor)
-                    if cursor.isNull():
-                        break
-                    cursor.setCharFormat(fmt)
-                    curCursor = cursor
+        if self.bColorKeyWords:
+            for key in self.dicColorMapKeyWordList.keys():
+                cr = key
+                lst = self.dicColorMapKeyWordList[cr]
+                fmt = QTextCharFormat()
+                fmt.setBackground(cr)
+                for keyword in lst:
+                    doc = self.document()
+                    curCursor = QTextCursor(doc)
+                    while True:
+                        cursor = doc.find(keyword, curCursor)
+                        if cursor.isNull():
+                            break
+                        cursor.setCharFormat(fmt)
+                        curCursor = cursor
 
         if self.bVisibleForJieba :
             self.moveCursor(QTextCursor.End)

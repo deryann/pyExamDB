@@ -168,9 +168,13 @@ class QuestionTagsEditor(QWidget):
                      self.indexNavigator.onbtnPrevClicked)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_J), self), QtCore.SIGNAL('activated()'),
                      self.onbtnToogleJieba)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_K), self), QtCore.SIGNAL('activated()'),
+                     self.onbtnColorKeyWords)
 
+    def onbtnColorKeyWords(self):
+        self.txtOneQuestion.toggleColorKeyWords()
     def onbtnToogleJieba(self):
-        self.txtOneQuestion.toogleVisibleJieba()
+        self.txtOneQuestion.toggleVisibleJieba()
 
     def onHotkeySave(self):
         self.dprint("[onHotkeySave]")
@@ -600,9 +604,6 @@ class QuestionTagsEditor(QWidget):
                 if self.isAutoRelativeTag(item.strTagName):
                     item.setBackground(Qt.red)
             pass
-
-    def addCheckBoxInToUI(self):
-        pass
 
     def prepare99TagsUI(self):
         """
