@@ -193,13 +193,21 @@ class QuestionTagsEditor(QWidget):
         self.layoutTagsPanel.addWidget(self.tabBookChap)
 
         #按照當下的Item 嘗試著找出一些建議的 Tageditor
+        self.listwidgetForSecTags = QListWidget(self)
+        self.listwidgetForSecTags.itemChanged.connect(self.onSuggestedItemChanged)
+        self.qForSecTags = QGroupBox(u"For sections:", self)
+        self.qForSecTags.setLayout(QHBoxLayout())
+        self.qForSecTags.layout().addWidget(self.listwidgetForSecTags)
 
         self.listwidgetForSuggestedTags = QListWidget(self)
         self.listwidgetForSuggestedTags.itemChanged.connect(self.onSuggestedItemChanged)
-        self.listwidgetForSecTags = QListWidget(self)
-        self.listwidgetForSecTags.itemChanged.connect(self.onSuggestedItemChanged)
-        self.layoutTagsPanel.addWidget(self.listwidgetForSecTags)
-        self.layoutTagsPanel.addWidget(self.listwidgetForSuggestedTags)
+        self.qForSuggestedTags = QGroupBox(u"For more detail tags:", self)
+        self.qForSuggestedTags.setLayout(QHBoxLayout())
+        self.qForSuggestedTags.layout().addWidget(self.listwidgetForSuggestedTags)
+
+
+        self.layoutTagsPanel.addWidget(self.qForSecTags)
+        self.layoutTagsPanel.addWidget(self.qForSuggestedTags)
 
         #增加檔案操作的按鈕
 
@@ -207,9 +215,9 @@ class QuestionTagsEditor(QWidget):
         self.btnSaveFile=QPushButton("Save", self)
         self.btnSaveFile.clicked.connect(self.onbtnSaveFileClicked)
         self.btnsPanel.addWidget(self.btnSaveFile)
-        self.btnGroupTag=QPushButton("GroupingTags", self)
-        self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
-        self.btnsPanel.addWidget(self.btnGroupTag)
+        #self.btnGroupTag=QPushButton("GroupingTags", self)
+        #self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
+        #self.btnsPanel.addWidget(self.btnGroupTag)
 
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
@@ -336,8 +344,6 @@ class QuestionTagsEditor(QWidget):
             self.setWindowTitle(self.strWindowTitle + u' ')
 
 
-
-
     def prepareFileModeUI(self):
         container= self.tabModeFilemode
         container.setLayout(QVBoxLayout())
@@ -389,9 +395,9 @@ class QuestionTagsEditor(QWidget):
         self.lblExamQuestionStyle =QLabel(self)
         self.lblExamQuestionNum =QLabel(self)
 
-    def onbtnbtnGroupTagClicked(self):
-        self.dprint("onbtnbtnGroupTagClicked")
-        self.testOupoutGroupingSelectedTags()
+    # def onbtnbtnGroupTagClicked(self):
+    #     self.dprint("onbtnbtnGroupTagClicked")
+    #     self.testOupoutGroupingSelectedTags()
 
     def onbtnSaveFileClicked(self):
         self.dprint("onbtnSaveFileClicked")
@@ -641,24 +647,24 @@ class QuestionTagsEditor(QWidget):
         self.prepare99TagsUI()
         #New出所有Tag
 
-        fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
-        #New 出 AllTAB 內頁
-        currentTab = QWidget(self)
-        currentTab.setLayout(QVBoxLayout())
-        self.tabBookChap.addTab(currentTab, u"all")
-        while True:
-            strLine=fPt.readline()
-            if strLine !=None and strLine!='':
-                lst = re.findall(u"QTAG{(.*?)}", strLine, re.DOTALL)
-                if len(lst) !=0:
-                    strNew = lst[0]
-                    chkitem = QCheckBox(strNew,self)
-                    chkitem.strTagName=strNew
-                    chkitem.stateChanged.connect(self.onChkitemStateChange)
-                    self.lstCheckboxs.append(chkitem)
-                    currentTab.layout().addWidget(chkitem)
-            else:
-                break
+        # fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
+        # #New 出 AllTAB 內頁
+        # currentTab = QWidget(self)
+        # currentTab.setLayout(QVBoxLayout())
+        # self.tabBookChap.addTab(currentTab, u"all")
+        # while True:
+        #     strLine=fPt.readline()
+        #     if strLine !=None and strLine!='':
+        #         lst = re.findall(u"QTAG{(.*?)}", strLine, re.DOTALL)
+        #         if len(lst) !=0:
+        #             strNew = lst[0]
+        #             chkitem = QCheckBox(strNew,self)
+        #             chkitem.strTagName=strNew
+        #             chkitem.stateChanged.connect(self.onChkitemStateChange)
+        #             self.lstCheckboxs.append(chkitem)
+        #             currentTab.layout().addWidget(chkitem)
+        #     else:
+        #         break
 
         self.tabCustom=QWidget(self)
         #TODO: Move out this ThisQ function 
@@ -672,6 +678,7 @@ class QuestionTagsEditor(QWidget):
     #
     def reNewCustomTagCheckItem(self):
         lst = self.latex.getQuestionTagList(self.getQIndex())
+        self.removeAllWidgetsInLayout(self.tabCustom.layout())
         for item in lst :
             if not self.isExistedInCustomTags(item):
                 chkitem = QCheckBox(item,self)
