@@ -642,6 +642,22 @@ class QuestionTagsEditor(QWidget):
             else:
                 break
 
+        self.lblML = QLabel(self)
+        self.lblML.setFixedHeight(18)
+        self.lblML.setStyleSheet("QLabel { color : red; }")
+        self.lblML.setText(u"@機器學習分類器")
+
+        nCurrentRow+=1
+        nCurrentCol = 0
+        currentGrid.addWidget(self.lblML, nCurrentRow, nCurrentCol)
+        nCurrentCol +=1
+        self.lblSubWord = QLabel(self)
+        self.lblSubWord.setFixedHeight(18)
+        self.lblSubWord.setStyleSheet("QLabel { background-color : red; }")
+        self.lblSubWord.setText(u"@子字串判別")
+        currentGrid.addWidget(self.lblSubWord, nCurrentRow, nCurrentCol)
+
+
     def loadTagsToNewUI(self):
         self.tabBookChap.clear()
         self.prepare99TagsUI()
