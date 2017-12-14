@@ -1,0 +1,73 @@
+% !TEX encoding = UTF-8 Unicode
+% !TEX TS-program = xelatex
+\documentclass[12pt,a4paper]{article} %,twocolumn
+\def\SelectFontMode{2}
+\input{E:/NCTUG2/TEX/LatexCodeTemplate/inputFile/Qheader.tex}
+
+\linespread{1} 
+
+%% 定義考卷常數區：
+%\def\numForQuizTitle{第$I$回實力評量} 
+\def\numForQuizTitle{小模考第$I$回}
+\def\classNameString{台中$/$豐原分校}
+\def\yearString{高三}
+\def\ChenLi{陳立教育}
+
+\def\QuizDATE{$2017.01.20$}
+\def\QuizTime{$100$分鐘}
+\def\QuizRange{$B1 \sim B4$}
+
+
+%頁首頁尾的配置
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+%\lhead{}
+%\chead{}
+%\rhead{}
+\fancyhf{}
+\lfoot{}
+\cfoot{陳立教育 -\thepage- 絕對智慧 }%中間 footer 擺放頁碼
+\rfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\def\SOLUTIONBOX{{\begin{minipage}{15cm} \hfill\vspace{3cm} \end{minipage} }}
+\def\titleonetopic{
+    第一部分：選擇題 \\
+    壹、單選題 (30分) \\
+    \fbox{
+        說明：每題答對者，得 5 分，答錯、未作答或畫記多於一個選項者，該題以零分計算。} \\
+    }
+\def\titletwotopic
+{
+    貳、多選題 (35分) \\
+    \fbox{ \parbox{\textwidth}{
+            說明：每題至少有一個選項是正確的。各題之選項獨立判定，所有選項均答對者，得5分；答錯1個
+            選項者，得3分；答錯2個選項者，得1分；答錯多於2個選項或所有選項均未作答者，該題
+            以零分計算。}}\\
+    }
+\def\titlethreetopic{ 
+    第二部份：選填題(35分)\\
+    \fbox{
+        說明：每題完全答對得5分，答錯不倒扣，未完全答對不給分。}\\}   
+\def\FlagShowFrom{0}    % 設定顯現QFROM的資料
+\def\FlagShowAnswer{0}  %設定顯現 QANS environment 裡面的資料
+\def\FlagShowSolution{0} %設定顯現 QSOL environment 裡面的資料
+\def\FlagAddSolutionBox{1}
+\def\FlagShowTAG{0}
+\def\FlagUseTCNBOX{1}
+%選填題的格號設定
+\def\BLANKSTART{14}
+\newcounter{BLANKcounter}
+\newcommand{\ADDTO}{\addtocounter{BLANKcounter}{1}} % 簡化增加1 的指令
+\newcommand{\TCN}{\textcps{\arabic{BLANKcounter}} \ADDTO }
+
+\includeonly{ProblemPages,SoluctionPages}
+\begin{document}
+%\setlength{\parskip}{10pt}
+\input{FrontCover.tex}
+%\include{ProblemPages}
+\include{SoluctionPages}
+
+%\input{BackUpDB}
+\end{document}
