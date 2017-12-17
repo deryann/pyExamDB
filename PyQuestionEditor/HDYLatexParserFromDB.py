@@ -4,8 +4,7 @@ import os
 import codecs
 from HDYQuestionParser import HDYQuestionParser, getListOfTagFromString
 from HDYQuestionParserFromDB import HDYQuestionParserFromDB
-from HDYLatexParser import HDYLatexParser
-import sqlite3
+from HDYLatexParser import HDYLatexParser, isMySQLDBMode
 from datetime import datetime
 import re
 import logging
@@ -27,7 +26,17 @@ def strToSQLString(strInput):
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
         HDYLatexParser.__init__(self, strInputFileName)
-        self.conn = sqlite3.connect(strInputFileName)
+        if isMySQLDBMode(strInputFileName):
+            import MySQLdb
+            self.conn = MySQLdb.connect(host="localhost",    # your host, usually localhost
+                                        user="testuser",         # your username
+                                        passwd="test2017",  # your password
+                                        db="qer",
+                                        charset='utf8', use_unicode=True)
+        else:
+            import sqlite3
+            self.conn = sqlite3.connect(strInputFileName)
+
         self.nCountQ = 0
         self.mainKey = None
 
@@ -182,9 +191,6 @@ where b.tag_id IN %s
         pass
 
     def saveSqliteDBIntoTexFileByYears(self, nStart, nEnd):
-        conn = sqlite3.connect(self.strFileName)
-
-        lstFileNameList = []
         for number in range(nStart, nEnd+1):
             strFileName = u"Exam01All\\q%03d.tex" % number
 

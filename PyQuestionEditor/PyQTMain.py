@@ -24,7 +24,7 @@ from HDYWidgetPool.HDYNavigator import HDYNavigator
 
 #Data Model input
 from HDYLatexParser import HDYLatexParser
-from HDYLatexParser import isSQLiteDBMode, isTexFileMode
+from HDYLatexParser import isSQLiteDBMode, isTexFileMode, isMySQLDBMode
 from HDYLatexParserFromDB import HDYLatexParserFromDB
 from HDYQuestionParser import HDYQuestionParser as QParser
 
@@ -39,6 +39,8 @@ logging.basicConfig(level=logging.DEBUG)
 #DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
 #SQLiteDb mode filename
 DEFAULT_FILE_INPUT_NAME = u"test.sqlitedb"
+#MySQL
+DEFAULT_FILE_INPUT_NAME = u"mysql"
 
 ##
 # 程式所使用的常數區
@@ -435,7 +437,8 @@ class QuestionTagsEditor(QWidget):
     def getDataModel(self,strFileName):
         if isTexFileMode(strFileName):
             self.latex = HDYLatexParser(strFileName)
-        elif isSQLiteDBMode(strFileName):
+
+        elif isSQLiteDBMode(strFileName) or isMySQLDBMode(strFileName):
             bCheckKeyWordMode = (self.edtDBKeyWord.text() != u"")
 
             #self.latex = HDYLatexParserFromDB(strFileName)

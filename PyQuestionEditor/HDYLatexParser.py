@@ -24,6 +24,13 @@ def isSQLiteDBMode(strFileName):
         return False
     return True
 
+def isMySQLDBMode(strInput):
+    if len(strInput) < 5 :
+        return False
+    if strInput[:5] == u'mysql':
+        return True
+    return False
+
 ##
 #
 # 針對檔案讀出做管理
