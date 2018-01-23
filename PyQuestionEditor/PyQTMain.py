@@ -1,6 +1,6 @@
-#coding=utf-8
+# coding=utf-8
 # -*- coding: utf-8 -*-
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Name:        Questions Tags editor
 # Purpose:
 #
@@ -9,7 +9,7 @@
 # Created:     08/08/2015
 # Copyright:   (c) deryann 2015
 # Licence:     <your licence>
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 import sys, os, re, codecs
 import difflib
@@ -18,11 +18,11 @@ from PyQt4 import QtCore, QtGui
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-#Widget input
+# Widget input
 from HDYWidgetPool.HDYTextEdit import HDYTextEdit
 from HDYWidgetPool.HDYNavigator import HDYNavigator
 
-#Data Model input
+# Data Model input
 from HDYLatexParser import HDYLatexParser
 from HDYLatexParser import isSQLiteDBMode, isTexFileMode, isMySQLDBMode
 from HDYLatexParserFromDB import HDYLatexParserFromDB
@@ -31,15 +31,20 @@ from HDYQuestionParser import HDYQuestionParser as QParser
 from QDbML.toollib import getMathTermList
 from RunML_B import *
 
-#Logging config
+from selenium import webdriver
+
+from appst_extras import translateQBODY
+
+# Logging config
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 
-#Tex file mode test filename
-#DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
-#SQLiteDb mode filename
+# Tex file mode test filename
+# DEFAULT_FILE_INPUT_NAME = u"Exam01All\\q106.tex"
+# SQLiteDb mode filename
 DEFAULT_FILE_INPUT_NAME = u"test.sqlitedb"
-#MySQL
+# MySQL
 DEFAULT_FILE_INPUT_NAME = u"mysql"
 
 ##
@@ -49,12 +54,14 @@ const99TagFileName = u"99TagGroup.txt"
 constAllStrTagFileName = u"allTags.txt"
 constSuggestionTag = u"SuggestionTag.ini"
 
-constExamStringList = [u"學測",u"指考甲",u"指考乙"]
-constExamYearStringList = [u"106",u"105"]
-constExamQuestionStyleStringList = [u"單選",u"多選",u"選填",u"填充",u"計算"]
+constExamStringList = [u"學測", u"指考甲", u"指考乙"]
+constExamYearStringList = [u"106", u"105"]
+constExamQuestionStyleStringList = [u"單選", u"多選", u"選填", u"填充", u"計算"]
+
+DEFAULT_HTML_FILE_NAME =u"E://test.html"
 
 class QLineEditWithDirModel(QLineEdit):
-    def __init__(self,strInputName, parent):
+    def __init__(self, strInputName, parent):
         QLineEdit.__init__(self, strInputName, parent)
         self.completer = QCompleter()
         self.dir_model = QDirModel()
@@ -62,10 +69,11 @@ class QLineEditWithDirModel(QLineEdit):
         self.setCompleter(self.completer)
 
 
-def isSameSet(listA,listB):
+def isSameSet(listA, listB):
     A = set(listA)
     B = set(listB)
-    return A==B
+    return A == B
+
 
 ##
 # UI 呈現的程式碼
@@ -79,9 +87,11 @@ class QuestionTagsEditor(QWidget):
 
         #
         # 建構編輯Tags 的暫存資料結構
-        #self.agentsMLTags = loadClassifierAgent()
+        # self.agentsMLTags = loadClassifierAgent()
         self.latex = None
         self.currentQpt = None
+        self.web_control = None
+
 
         self.suggestor = Tagsuggestor()
         self.dicNewTagsBuffer = {}
@@ -90,9 +100,9 @@ class QuestionTagsEditor(QWidget):
         self.layoutFileLoadUI = QHBoxLayout()
 
         self.lblFileName = QLabel(u"File name:")
-        self.edtFile = QLineEditWithDirModel(u"FileName" ,self)
+        self.edtFile = QLineEditWithDirModel(u"FileName", self)
 
-        self.btnMoreLoadFile = QPushButton (u"...",self)
+        self.btnMoreLoadFile = QPushButton(u"...", self)
         self.btnRunLoadFile = QPushButton(u"Load", self)
 
         self.indexNavigator = HDYNavigator(self)
@@ -116,7 +126,7 @@ class QuestionTagsEditor(QWidget):
         self.btnMoreLoadFile.clicked.connect(self.onbtnMoreLoadFile)
         self.btnRunLoadFile.clicked.connect(self.onbtnLoadFile)
 
-        #Design Two mode(One Question and FileMode)
+        # Design Two mode(One Question and FileMode)
         self.tabModes = QTabWidget(self)
         self.tabBookChap = QTabWidget(self)
         self.tabModeOneQuestion = QWidget(self)
@@ -163,7 +173,8 @@ class QuestionTagsEditor(QWidget):
         return self.indexNavigator.getIndex()
 
     def setupHotkey(self):
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'), self.onHotkeySave)
+        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'),
+                     self.onHotkeySave)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F8), self), QtCore.SIGNAL('activated()'),
                      self.indexNavigator.onbtnNextClicked)
         self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), QtCore.SIGNAL('activated()'),
@@ -175,6 +186,7 @@ class QuestionTagsEditor(QWidget):
 
     def onbtnColorKeyWords(self):
         self.txtOneQuestion.toggleColorKeyWords()
+
     def onbtnToogleJieba(self):
         self.txtOneQuestion.toggleVisibleJieba()
 
@@ -187,14 +199,14 @@ class QuestionTagsEditor(QWidget):
         Prepare checked item for tags editing
         :return: None
         """
-        self.lstCheckboxs= []
-        #讀取Tag 表
+        self.lstCheckboxs = []
+        # 讀取Tag 表
         self.loadTagsToNewUI()
         self.layoutTagsPanel = QHBoxLayout()
         self.tabBookChap.setFixedWidth(550)
         self.layoutTagsPanel.addWidget(self.tabBookChap)
 
-        #按照當下的Item 嘗試著找出一些建議的 Tageditor
+        # 按照當下的Item 嘗試著找出一些建議的 Tageditor
         self.listwidgetForSecTags = QListWidget(self)
         self.listwidgetForSecTags.itemChanged.connect(self.onSuggestedItemChanged)
         self.qForSecTags = QGroupBox(u"For sections:", self)
@@ -207,19 +219,18 @@ class QuestionTagsEditor(QWidget):
         self.qForSuggestedTags.setLayout(QHBoxLayout())
         self.qForSuggestedTags.layout().addWidget(self.listwidgetForSuggestedTags)
 
-
         self.layoutTagsPanel.addWidget(self.qForSecTags)
         self.layoutTagsPanel.addWidget(self.qForSuggestedTags)
 
-        #增加檔案操作的按鈕
+        # 增加檔案操作的按鈕
 
         self.btnsPanel = QVBoxLayout()
-        self.btnSaveFile=QPushButton("Save", self)
+        self.btnSaveFile = QPushButton("Save", self)
         self.btnSaveFile.clicked.connect(self.onbtnSaveFileClicked)
         self.btnsPanel.addWidget(self.btnSaveFile)
-        #self.btnGroupTag=QPushButton("GroupingTags", self)
-        #self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
-        #self.btnsPanel.addWidget(self.btnGroupTag)
+        # self.btnGroupTag=QPushButton("GroupingTags", self)
+        # self.btnGroupTag.clicked.connect(self.onbtnbtnGroupTagClicked)
+        # self.btnsPanel.addWidget(self.btnGroupTag)
 
         self.layoutTagsPanel.addLayout(self.btnsPanel)
 
@@ -231,27 +242,32 @@ class QuestionTagsEditor(QWidget):
         self.layoutShowQuestionData = QHBoxLayout()
         self.layoutMetaData = QGridLayout()
 
-        self.txtAns =QLineEdit("Ans" ,self)
-        self.txtSol =QTextBrowser(self)
+        self.txtAns = QLineEdit("Ans", self)
+        self.txtSol = QTextBrowser(self)
+        self.btnPreview = QPushButton(u"Preview", self)
+        self.btnUpdate = QPushButton(u"Update", self)
+
+        self.btnPreview.clicked.connect(self.onbtnPreviewClicked)
+        self.btnUpdate.clicked.connect(self.onbtnUpdateClicked)
 
         self.reNewComboQuestionUI()
 
-        self.lblQID.setFixedWidth(100)
-        self.lblExamYear.setFixedWidth(100)
-        self.lblExamName.setFixedWidth(100)
-        self.lblExamQuestionStyle.setFixedWidth(100)
-        self.lblExamQuestionNum.setFixedWidth(100)
-        self.txtAns.setFixedWidth(100)
+        lstUIControls = [self.lblQID,
+            self.lblExamYear,
+            self.lblExamName,
+            self.lblExamQuestionStyle,
+            self.lblExamQuestionNum,
+            self.txtAns,
+            self.btnPreview,
+            self.btnUpdate,]
 
-        self.layoutMetaData.addWidget(self.lblQID)
-        self.layoutMetaData.addWidget(self.lblExamYear)
-        self.layoutMetaData.addWidget(self.lblExamName)
-        self.layoutMetaData.addWidget(self.lblExamQuestionStyle)
-        self.layoutMetaData.addWidget(self.lblExamQuestionNum)
-        self.layoutMetaData.addWidget(self.txtAns)
+        for ui_item in lstUIControls:
+            ui_item.setFixedWidth(100)
+            self.layoutMetaData.addWidget(ui_item)
+
 
         self.txtOneQuestion = HDYTextEdit(self)
-        self.txtOneQuestion.setColorMappingKeyWordList({Qt.blue:getMathTermList()})
+        self.txtOneQuestion.setColorMappingKeyWordList({Qt.blue: getMathTermList()})
 
         self.layoutShowQuestionData.addWidget(self.txtOneQuestion)
         self.layoutShowQuestionData.addLayout(self.layoutMetaData)
@@ -265,9 +281,109 @@ class QuestionTagsEditor(QWidget):
 
         self.layoutBtnTagsList = QHBoxLayout(self)
 
+
+    def onbtnPreviewClicked(self):
+        self.save_current_qid_into_page()
+        self.showdata_in_web()
+
+
+    def save_current_qid_into_page(self):
+        if self.txtOneQuestion is not None:
+            strTempQBODY = unicode(self.txtOneQuestion.toPlainText())
+        else:
+            strTempQBODY = u""
+        strpageTemplete = u"""
+        <!DOCTYPE html>
+        <html>
+            <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        
+                <title>測試用頁面 </title>
+        
+            </head>
+            <body>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+            <script type="text/javascript">
+            MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+            },
+        
+            TeX: {
+                Macros: {
+                    lvec: ['\\\\overset\{\\\\rightharpoonup\}\{#1\}', 1],
+                    Sum: ['\\\\sum\\\\limits'],
+                    FR: ['\\\\dfrac']
+                }
+            },
+            "HTML-CSS": {
+                preferredFont: "TeX",
+                availableFonts: ["TeX"],
+                styles: {
+                    ".MathJax nobr": {
+                        padding: "0.3em 0.3em"
+                    }
+                }
+            }
+        });
+        MathJax.Hub.Configured();</script>
+            <script src="http://d3js.org/d3.v3.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+            <script type="text/javascript">
+                $( document ).on( "mobileinit", function() {
+                    $.mobile.ajaxEnabled = false;
+                    $.mobile.loading().hide();
+                });
+            </script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+            <script src="/static/hdyJQuery.js"></script>
+            <br>
+            <h1> 題目(Mathjax)：</h1>
+            <br>
+                    %s
+                <br>
+            <h1> 題目(原始碼)：</h1>    
+                <div class="tex2jax_ignore">
+                    %s    
+                </div>
+                
+             <h1> 修正後題目(Mathjax)：</h1>
+            <br>
+                    %s
+                <br>
+            <h1> 修正後題目(原始碼)：</h1>    
+                <div class="tex2jax_ignore">
+                    %s    
+                </div>       
+            </body>
+        </html>        
+        """ % (translateQBODY(self.currentQpt.getQBODY(), self.currentQpt.nQID),
+               translateQBODY(self.currentQpt.getQBODY(), self.currentQpt.nQID),
+               translateQBODY(strTempQBODY, self.currentQpt.nQID),
+               translateQBODY(strTempQBODY, self.currentQpt.nQID),
+               )
+        with codecs.open(DEFAULT_HTML_FILE_NAME, "w", "utf-8") as fptHTML:
+            fptHTML.write(strpageTemplete)
+
+        pass
+
+    def showdata_in_web(self):
+        if self.web_control is None:
+            self.web_control = webdriver.Chrome()
+        self.web_control.get('file://E:/test.html')
+
+    def onbtnUpdateClicked(self):
+        strTempQBODY = unicode(self.txtOneQuestion.toPlainText()).replace(u'\\', u'\\\\')
+        self.latex.update_qbody_by_qid(strTempQBODY, self.currentQpt.nQID, b_commitDB=True)
+        pass
+
+
     def removeAllWidgetsInLayout(self, layout):
         nNumDelete = layout.count()
-        self.dprint (u"[removeAllWidgetsInLayout] %d" % (nNumDelete))
+        self.dprint(u"[removeAllWidgetsInLayout] %d" % (nNumDelete,))
         for i in reversed(range(nNumDelete)):
             widgetTemp = layout.takeAt(i).widget()
             if widgetTemp in self.lstCheckboxs:
@@ -288,17 +404,17 @@ class QuestionTagsEditor(QWidget):
             self.layoutBtnTagsList.addWidget(btn)
             return
 
-        for item in lst :
+        for item in lst:
             strButtonTitle = u"x %s" % (item,)
-            btn=QPushButton(strButtonTitle, self)
+            btn = QPushButton(strButtonTitle, self)
             btn.strCurrTag = item
             btn.clicked.connect(self.onbtnRemoveTagClicked)
             self.layoutBtnTagsList.addWidget(btn)
-            
+
     def onbtnRemoveTagClicked(self):
         sender = self.sender()
         strMessage = "[onbtnRemoveTagClicked2] %s" % (sender.strCurrTag,)
-        self.dprint (strMessage)
+        self.dprint(strMessage)
         self.setLatestCurrentTagsDict(sender.strCurrTag, Qt.Unchecked)
 
     def getLatestCurrentTags(self):
@@ -307,7 +423,6 @@ class QuestionTagsEditor(QWidget):
         else:
             return self.latex.getQuestionTagList(self.getQIndex())
 
-
     def setLatestCurrentTagsDict(self, strTagName, nChecked):
         """
         將輸入的標籤設定進入最新資料的暫存區
@@ -315,9 +430,9 @@ class QuestionTagsEditor(QWidget):
         :param nChecked: 要新增(True)，或者是移除(False)
         :return: None
         """
-        self.dprint (u"[setLatestCurrentTagsDict] %s %d" %(strTagName, nChecked))
+        self.dprint(u"[setLatestCurrentTagsDict] %s %d" % (strTagName, nChecked))
         lst = self.getLatestCurrentTags()
-        lstnew= lst[:]
+        lstnew = lst[:]
         if not nChecked:
             if strTagName in lst:
                 lstnew.remove(strTagName)
@@ -325,7 +440,7 @@ class QuestionTagsEditor(QWidget):
             if strTagName not in lst:
                 lstnew.append(strTagName)
 
-        if self.isTagsListDifferent(lst,lstnew):
+        if self.isTagsListDifferent(lst, lstnew):
             lstOri = self.latex.getQuestionTagList(self.getQIndex())
             if isSameSet(lstnew, lstOri):
                 self.dicNewTagsBuffer.pop(self.getQIndex())
@@ -335,37 +450,36 @@ class QuestionTagsEditor(QWidget):
             self.refreshTagsUI()
         else:
             self.dprint("[setLatestCurrentTagsDict] un-modified")
-        self.dprint ("[self.dicNewTagsBuffer]:" +str(self.dicNewTagsBuffer) )
+        self.dprint("[self.dicNewTagsBuffer]:" + str(self.dicNewTagsBuffer))
 
         self.updateWindowtitle()
 
     def updateWindowtitle(self):
         if self.isEditedAndNotSave():
-            self.setWindowTitle(self.strWindowTitle+u' '+ u'*')
+            self.setWindowTitle(self.strWindowTitle + u' ' + u'*')
         else:
             self.setWindowTitle(self.strWindowTitle + u' ')
 
-
     def prepareFileModeUI(self):
-        container= self.tabModeFilemode
+        container = self.tabModeFilemode
         container.setLayout(QVBoxLayout())
         self.txtbFile = QTextBrowser(self)
-        self.txtbFile.setFont(QFont ("Consolas", 14)) #設定字型
+        self.txtbFile.setFont(QFont("Consolas", 14))  # 設定字型
         container.layout().addWidget(self.txtbFile)
 
-        self.qGroupExamInfoEditor = QGroupBox( u"Add ExamInfo For All Question",self)
+        self.qGroupExamInfoEditor = QGroupBox(u"Add ExamInfo For All Question", self)
         self.qGroupExamInfoEditor.setLayout(QHBoxLayout())
 
         self.comboExamAdder = QComboBox(self)
         self.comboExamAdder.addItems(constExamStringList)
-        self.comboExamYearAdder =QComboBox(self)
+        self.comboExamYearAdder = QComboBox(self)
         self.comboExamYearAdder.addItems(constExamYearStringList)
-        self.comboExamQuestionStyleAdder =QComboBox(self)
+        self.comboExamQuestionStyleAdder = QComboBox(self)
         self.comboExamQuestionStyleAdder.addItems(constExamQuestionStyleStringList)
 
-        self.edtStart = QLineEdit(u"1" ,self)
+        self.edtStart = QLineEdit(u"1", self)
         self.lblStart = QLabel(u"Start Label：")
-        self.btnRunAddExamInfo=QPushButton(u"Run",self)
+        self.btnRunAddExamInfo = QPushButton(u"Run", self)
         self.btnRunAddExamInfo.clicked.connect(self.onbtnRunAddExamInfoClicked)
 
         self.qGroupExamInfoEditor.layout().addWidget(self.comboExamAdder)
@@ -383,19 +497,18 @@ class QuestionTagsEditor(QWidget):
         """
         strExamAdder = self.comboExamAdder.currentText()
         strExamYearAdder = self.comboExamYearAdder.currentText()
-        strExamQuestionStyleAdder =self.comboExamQuestionStyleAdder.currentText()
-        self.dprint(strExamYearAdder+strExamAdder+strExamQuestionStyleAdder)
+        strExamQuestionStyleAdder = self.comboExamQuestionStyleAdder.currentText()
+        self.dprint(strExamYearAdder + strExamAdder + strExamQuestionStyleAdder)
         strStartNum = self.edtStart.text()
-        self.latex.setExamInfoForAllQuestions(strExamYearAdder,strExamAdder,strExamQuestionStyleAdder,strStartNum)
+        self.latex.setExamInfoForAllQuestions(strExamYearAdder, strExamAdder, strExamQuestionStyleAdder, strStartNum)
         self.showData()
-
 
     def reNewComboQuestionUI(self):
         self.lblQID = QLabel(self)
         self.lblExamName = QLabel(self)
-        self.lblExamYear =QLabel(self)
-        self.lblExamQuestionStyle =QLabel(self)
-        self.lblExamQuestionNum =QLabel(self)
+        self.lblExamYear = QLabel(self)
+        self.lblExamQuestionStyle = QLabel(self)
+        self.lblExamQuestionNum = QLabel(self)
 
     # def onbtnbtnGroupTagClicked(self):
     #     self.dprint("onbtnbtnGroupTagClicked")
@@ -403,7 +516,7 @@ class QuestionTagsEditor(QWidget):
 
     def onbtnSaveFileClicked(self):
         self.dprint("onbtnSaveFileClicked")
-        self.saveUpdatedTagIntoFile( )
+        self.saveUpdatedTagIntoFile()
         pass
 
     def onbtnLoadFile(self):
@@ -413,7 +526,7 @@ class QuestionTagsEditor(QWidget):
 
     def onbtnMoreLoadFile(self):
         strfileName = QFileDialog.getOpenFileName(self, u"Open HDY Latex", ".", u"Tex Files (*.tex )")
-        self.dprint ("fileName:" +strfileName)
+        self.dprint("fileName:" + strfileName)
         self.edtFile.setText(unicode(strfileName))
         self.loadFile(unicode(strfileName))
 
@@ -434,19 +547,19 @@ class QuestionTagsEditor(QWidget):
         """
         return [x.strip() for x in strInput.split(',')]
 
-    def getDataModel(self,strFileName):
+    def getDataModel(self, strFileName):
         if isTexFileMode(strFileName):
             self.latex = HDYLatexParser(strFileName)
 
         elif isSQLiteDBMode(strFileName) or isMySQLDBMode(strFileName):
             bCheckKeyWordMode = (self.edtDBKeyWord.text() != u"")
 
-            #self.latex = HDYLatexParserFromDB(strFileName)
-            #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
-            #self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
-            #self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
-            #self.latex = HDYLatexParserFromDB(strFileName, keyword=u'空間')
-            #self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
+            # self.latex = HDYLatexParserFromDB(strFileName)
+            # self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"不是99課綱",u"跨章節試題"])
+            # self.latex = HDYLatexParserFromDB(strFileName, list_tag_str=[u"B4C2空間中的平面與直線"])
+            # self.latex = HDYLatexParserFromDB(strFileName, list_year=[86,87,88,89,90])
+            # self.latex = HDYLatexParserFromDB(strFileName, keyword=u'空間')
+            # self.latex = HDYLatexParserFromDB(strFileName, keyword_notag=[u'空間', u'z'])
             if bCheckKeyWordMode:
                 lst = self.getWordlist(unicode(self.edtDBKeyWord.text()))
                 self.latex = HDYLatexParserFromDB(strFileName, keyword=lst)
@@ -454,32 +567,35 @@ class QuestionTagsEditor(QWidget):
                 self.latex = HDYLatexParserFromDB(strFileName)
             self.latex.read()
 
-    def dprint (self, strInput):
+    def dprint(self, strInput):
         logging.debug(strInput)
         pass
 
     def getLatestTagsList(self):
         if self.getQIndex() in self.dicNewTagsBuffer:
             lst = self.dicNewTagsBuffer[self.getQIndex()]
-        else :
+        else:
             lst = self.latex.getQuestionTagList(self.getQIndex())
         return lst
 
     def refreshoutputAreaOneQuestion(self):
         logging.debug(u"[refreshoutputAreaOneQuestion]")
-        if not self.getQIndex() in range(0, self.latex.getCountOfQ() ):
+        if not self.getQIndex() in range(0, self.latex.getCountOfQ()):
             return
         Qpt = self.currentQpt
         if Qpt is None: return
+
         self.txtOneQuestion.setText(Qpt.getQBODY())
+        self.save_current_qid_into_page()
+        self.showdata_in_web()
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
 
-        self.lblQID.setText(u"QID："+unicode(Qpt.nQID))
-        self.lblExamYear.setText(u"年份："+unicode(Qpt.getExamYear()))
-        self.lblExamName.setText(u"試題："+Qpt.getExamName())
-        self.lblExamQuestionStyle.setText(u"題型："+Qpt.getExamQuestionStyle())
-        self.lblExamQuestionNum.setText(u"題號："+Qpt.getExamQuestionNum())
+        self.lblQID.setText(u"QID：" + unicode(Qpt.nQID))
+        self.lblExamYear.setText(u"年份：" + unicode(Qpt.getExamYear()))
+        self.lblExamName.setText(u"試題：" + Qpt.getExamName())
+        self.lblExamQuestionStyle.setText(u"題型：" + Qpt.getExamQuestionStyle())
+        self.lblExamQuestionNum.setText(u"題號：" + Qpt.getExamQuestionNum())
         self.reNewCustomTagCheckItem()
 
         self.refreshTagsUI()
@@ -487,7 +603,7 @@ class QuestionTagsEditor(QWidget):
     def saveUpdatedTagIntoFile(self):
         self.dprint("[saveUpdatedTagIntoFile]")
         self.latex.saveFileWithNewTag(self.dicNewTagsBuffer)
-        self.dicNewTagsBuffer={}
+        self.dicNewTagsBuffer = {}
         self.updateWindowtitle()
 
     def refreshTagsUI(self):
@@ -497,7 +613,7 @@ class QuestionTagsEditor(QWidget):
     def readSuggestDict(self):
         import ConfigParser
         self.configSuggestionTag = ConfigParser.ConfigParser()
-        self.configSuggestionTag.readfp(codecs.open(constSuggestionTag,u"r",u"utf8"))
+        self.configSuggestionTag.readfp(codecs.open(constSuggestionTag, u"r", u"utf8"))
 
     def getSuggestedTags(self):
         lst = [u"不是99課綱", u"跨章節試題"]
@@ -531,25 +647,24 @@ class QuestionTagsEditor(QWidget):
         return lst
 
     def onSuggestedItemChanged(self, widgetItem):
-        self.dprint ("[onSuggestedItemChanged]"+ widgetItem.strTagName)
+        self.dprint("[onSuggestedItemChanged]" + widgetItem.strTagName)
         if widgetItem.checkState() == QtCore.Qt.Unchecked:
-            self.setLatestCurrentTagsDict( widgetItem.strTagName, False)
+            self.setLatestCurrentTagsDict(widgetItem.strTagName, False)
         elif widgetItem.checkState() == QtCore.Qt.Checked:
-            self.setLatestCurrentTagsDict( widgetItem.strTagName, True)
+            self.setLatestCurrentTagsDict(widgetItem.strTagName, True)
 
     def cleanSuggestedTagsAndSectionTags(self):
-        lstListWidget = [self.listwidgetForSuggestedTags,self.listwidgetForSecTags]
+        lstListWidget = [self.listwidgetForSuggestedTags, self.listwidgetForSecTags]
         for listw in lstListWidget:
             for k in range(listw.count()):
                 itemWantRemoved = listw.item(k)
                 self.lstCheckboxs.remove(itemWantRemoved)
             listw.clear()
 
-
     def refreshSuggestedTagsLayout(self):
         self.dprint("[refreshSuggestedTagsLayout]")
         lst = self.getSuggestedTags()
-        lstsec =self.getSecTags()
+        lstsec = self.getSecTags()
         self.cleanSuggestedTagsAndSectionTags()
 
         for item in lst:
@@ -560,7 +675,7 @@ class QuestionTagsEditor(QWidget):
             self.listwidgetForSuggestedTags.addItem(chkitem)
             self.lstCheckboxs.append(chkitem)
 
-        for item in lstsec :
+        for item in lstsec:
             chkitem = QListWidgetItem(item)
             chkitem.strTagName = item
             chkitem.setFlags(chkitem.flags() | QtCore.Qt.ItemIsUserCheckable)
@@ -572,12 +687,12 @@ class QuestionTagsEditor(QWidget):
 
         Qpt = self.currentQpt
         strQBODY = Qpt.getQBODY()
-        if strQBODY.find(strTag) !=-1:
+        if strQBODY.find(strTag) != -1:
             return True
 
-        if strTag[0:1]==u'B' and len(strTag)>6:
+        if strTag[0:1] == u'B' and len(strTag) > 6:
             strTest = strTag[6:]
-            if strQBODY.find(strTest) !=-1:
+            if strQBODY.find(strTest) != -1:
                 return True
         return False
 
@@ -596,7 +711,7 @@ class QuestionTagsEditor(QWidget):
         self.refreshSuggestedTagsLayout()
 
         for item in self.lstCheckboxs:
-            if isinstance(item, QCheckBox ):
+            if isinstance(item, QCheckBox):
                 item.setChecked(item.strTagName in lstTags)
 
                 if item.strTagName in lstMLSuggestionTag:
@@ -618,30 +733,30 @@ class QuestionTagsEditor(QWidget):
         """
         準備所有99課綱章節的Tags UI (GridLayout)
         """
-        fPt = codecs.open( const99TagFileName, "r", "utf-8" )
+        fPt = codecs.open(const99TagFileName, "r", "utf-8")
         currentTab = QWidget(self)
         currentGrid = QGridLayout(self)
         currentTab.setLayout(currentGrid)
         self.tabBookChap.addTab(currentTab, u"99課綱Tag")
-        nCurrentRow =0
-        nCurrentCol =0
+        nCurrentRow = 0
+        nCurrentCol = 0
         while True:
-            strLine=fPt.readline()
-            if strLine !=None and strLine!='':
+            strLine = fPt.readline()
+            if strLine != None and strLine != '':
                 lst = re.findall(u"\[(.*?)\]", strLine, re.DOTALL)
-                if len(lst) !=0:
-                    nCurrentRow +=1
-                    nCurrentCol =0
+                if len(lst) != 0:
+                    nCurrentRow += 1
+                    nCurrentCol = 0
                 else:
                     lst = re.findall(u"QTAG{(.*?)}", strLine, re.DOTALL)
-                    if len(lst) !=0:
+                    if len(lst) != 0:
                         strNew = lst[0]
-                        chkitem = QCheckBox(strNew,self)
-                        chkitem.strTagName=strNew
+                        chkitem = QCheckBox(strNew, self)
+                        chkitem.strTagName = strNew
                         chkitem.stateChanged.connect(self.onChkitemStateChange)
                         self.lstCheckboxs.append(chkitem)
                         currentGrid.addWidget(chkitem, nCurrentRow, nCurrentCol)
-                        nCurrentCol+=1
+                        nCurrentCol += 1
             else:
                 break
 
@@ -650,21 +765,20 @@ class QuestionTagsEditor(QWidget):
         self.lblML.setStyleSheet("QLabel { color : red; }")
         self.lblML.setText(u"@機器學習分類器")
 
-        nCurrentRow+=1
+        nCurrentRow += 1
         nCurrentCol = 0
         currentGrid.addWidget(self.lblML, nCurrentRow, nCurrentCol)
-        nCurrentCol +=1
+        nCurrentCol += 1
         self.lblSubWord = QLabel(self)
         self.lblSubWord.setFixedHeight(18)
         self.lblSubWord.setStyleSheet("QLabel { background-color : red; }")
         self.lblSubWord.setText(u"@子字串判別")
         currentGrid.addWidget(self.lblSubWord, nCurrentRow, nCurrentCol)
 
-
     def loadTagsToNewUI(self):
         self.tabBookChap.clear()
         self.prepare99TagsUI()
-        #New出所有Tag
+        # New出所有Tag
 
         # fPt = codecs.open( constAllStrTagFileName, "r", "utf-8" )
         # #New 出 AllTAB 內頁
@@ -685,8 +799,8 @@ class QuestionTagsEditor(QWidget):
         #     else:
         #         break
 
-        self.tabCustom=QWidget(self)
-        #TODO: Move out this ThisQ function 
+        self.tabCustom = QWidget(self)
+        # TODO: Move out this ThisQ function
         self.tabBookChap.addTab(self.tabCustom, u"ThisQ")
         self.tabCustom.setLayout(QVBoxLayout())
         self.newUIforEditTag()
@@ -698,27 +812,27 @@ class QuestionTagsEditor(QWidget):
     def reNewCustomTagCheckItem(self):
         lst = self.latex.getQuestionTagList(self.getQIndex())
         self.removeAllWidgetsInLayout(self.tabCustom.layout())
-        for item in lst :
+        for item in lst:
             if not self.isExistedInCustomTags(item):
-                chkitem = QCheckBox(item,self)
-                chkitem.strTagName=item
+                chkitem = QCheckBox(item, self)
+                chkitem.strTagName = item
                 chkitem.stateChanged.connect(self.onChkitemStateChange)
                 self.lstCheckboxs.append(chkitem)
                 self.tabCustom.layout().addWidget(chkitem)
 
         self.refreshRemoveButtonsUIforQuetionTag()
-        
-    #TODO:
+
+    # TODO:
     def isExistedInCustomTags(self, item):
         bReturn = False
         pass
 
     def onChkitemStateChange(self, state):
-        #透過使用者對於UI的操作才需要重新跑過的
+        # 透過使用者對於UI的操作才需要重新跑過的
         self.dprint("[onChkitemStateChange]")
         sender = self.sender()
         if state == Qt.Unchecked:
-            self.setLatestCurrentTagsDict(sender.strTagName ,False)
+            self.setLatestCurrentTagsDict(sender.strTagName, False)
         else:
             self.setLatestCurrentTagsDict(sender.strTagName, True)
 
@@ -736,13 +850,13 @@ class QuestionTagsEditor(QWidget):
         return bDifferent
 
     def newUIforEditTag(self):
-        #New 出 EditTag 內頁
+        # New 出 EditTag 內頁
         currentTab = QWidget(self)
         currentTab.setLayout(QVBoxLayout())
         self.tabBookChap.addTab(currentTab, u"edit")
-        self.btnNewTag=QPushButton("New Tag",self)
+        self.btnNewTag = QPushButton("New Tag", self)
         self.btnNewTag.clicked.connect(self.onbtnNewTagClicked)
-        self.btnNewFrom=QPushButton("New Q From" ,self)
+        self.btnNewFrom = QPushButton("New Q From", self)
         self.btnNewFrom.clicked.connect(self.onbtnNewFromClicked)
         currentTab.layout().addWidget(self.btnNewTag)
         currentTab.layout().addWidget(self.btnNewFrom)
@@ -750,21 +864,21 @@ class QuestionTagsEditor(QWidget):
         pass
 
     def onbtnNewTagClicked(self):
-        strNewTagName, okay=QInputDialog.getText(self, "Please input new tage:", "New Tag String:")
-        if not okay or strNewTagName==u"":
+        strNewTagName, okay = QInputDialog.getText(self, "Please input new tage:", "New Tag String:")
+        if not okay or strNewTagName == u"":
             self.dprint("Please Input new tag string.")
         else:
-            self.dprint("You add New string \""+ strNewTagName +"\"" )
+            self.dprint("You add New string \"" + strNewTagName + "\"")
             self.addTagsIntoAllTags(strNewTagName)
         pass
 
     def onbtnNewFromClicked(self):
-        strQFromName, okay=QInputDialog.getText(self, "Please input new From:", "Q From:")
-        if not okay or strQFromName==u"":
+        strQFromName, okay = QInputDialog.getText(self, "Please input new From:", "Q From:")
+        if not okay or strQFromName == u"":
             self.dprint("Please Input Q from string.")
         else:
-            self.dprint("You add New Q From \""+ strQFromName +"\"" )
-            strfileName =QFileDialog.getSaveFileName(self, u"Save HDY Latex", ".", u"Tex Files (*.tex )")
+            self.dprint("You add New Q From \"" + strQFromName + "\"")
+            strfileName = QFileDialog.getSaveFileName(self, u"Save HDY Latex", ".", u"Tex Files (*.tex )")
             self.addQFromIntoAllQuestions(strQFromName, strfileName)
         pass
 
@@ -772,32 +886,32 @@ class QuestionTagsEditor(QWidget):
         self.latex.setFromTagToAllQuestions(strQFromName, strfileName)
         pass
 
-    def addTagsIntoAllTags(self,strNewTag):
-        #1.讀入所有tags
-        #New出所有Tag
+    def addTagsIntoAllTags(self, strNewTag):
+        # 1.讀入所有tags
+        # New出所有Tag
         constStrTagFileName = u"allTags.txt"
-        fPt = codecs.open( constStrTagFileName, "r", "utf-8" )
+        fPt = codecs.open(constStrTagFileName, "r", "utf-8")
         lstTags = []
         while True:
-            strLine=fPt.readline()
-            if strLine !=None and strLine!='':
+            strLine = fPt.readline()
+            if strLine != None and strLine != '':
                 lst = re.findall(u"QTAG{(.*?)}", strLine, re.DOTALL)
                 lstTags += lst
             else:
                 break
 
         if not strNewTag in lstTags:
-            fPt = codecs.open( constStrTagFileName, "a+", "utf-8" )
+            fPt = codecs.open(constStrTagFileName, "a+", "utf-8")
             strInput = os.linesep + u"\\QTAG{" + strNewTag + u"}"
             fPt.write(strInput)
             fPt.close()
-            #重新整理Tag UI
+            # 重新整理Tag UI
             self.loadTagsToNewUI()
         else:
-            self.dprint ("檔案裡面已經有這個Tag了!!")
+            self.dprint("檔案裡面已經有這個Tag了!!")
 
-        #3.存入新檔案
-        self.dprint (str(lstTags))
+        # 3.存入新檔案
+        self.dprint(str(lstTags))
         pass
 
     def showData(self):
@@ -821,25 +935,24 @@ class QuestionTagsEditor(QWidget):
     ##
     # 測試兩個問題字串的相似度
     #
-    def compareQustionStrings (self):
+    def compareQustionStrings(self):
         nQcount = self.latex.getCountOfQ()
         for i in range(0, nQcount):
             for j in range(0, nQcount):
-                strNum = str(i) + " - " + str (j)
-                self.dprint (strNum)
-                strA =self.latex.getQuestionString(i)
-                strB =self.latex.getQuestionString(j)
-                self.dprint (difflib.SequenceMatcher(None, strA, strB).ratio())
+                strNum = str(i) + " - " + str(j)
+                self.dprint(strNum)
+                strA = self.latex.getQuestionString(i)
+                strB = self.latex.getQuestionString(j)
+                self.dprint(difflib.SequenceMatcher(None, strA, strB).ratio())
 
     ##
     # 篩選想要的 Tags 與排序進入新檔案
     #
     def testOupoutGroupingSelectedTags(self):
         strOutPutFileName = u"GroupingTagsOutput.tex"
-        lstSelectedTags = [ u"B1C1數與式",u"B1C2-1", u"B1C2-2", u"B1C2-3", u"B1C2-4", u"B1C3-1", u"B1C3-2"]
+        lstSelectedTags = [u"B1C1數與式", u"B1C2-1", u"B1C2-2", u"B1C2-3", u"B1C2-4", u"B1C3-1", u"B1C3-2"]
         self.latex.saveNewFileWithSelectedTag(strOutPutFileName, lstSelectedTags)
         pass
-
 
     def isEditedAndNotSave(self):
         if self.dicNewTagsBuffer == {}:
@@ -847,9 +960,8 @@ class QuestionTagsEditor(QWidget):
         else:
             return True
 
-
     def closeEvent(self, event):
-        self.dprint ("[closeEvent]")
+        self.dprint("[closeEvent]")
         if self.isEditedAndNotSave():
             self.runSaveDialogBeforeClosed(event)
 
@@ -867,16 +979,17 @@ class QuestionTagsEditor(QWidget):
             closeEvent.ignore()
         pass
 
-def main():
-    app=QApplication(sys.argv)
 
-    QuestionEditor=QuestionTagsEditor()
+def main():
+    app = QApplication(sys.argv)
+
+    QuestionEditor = QuestionTagsEditor()
     scriptDir = os.path.dirname(os.path.realpath(__file__))
 
-    #From https://www.flaticon.com/packs/characters-and-numbers
-    strIcon = scriptDir + os.path.sep + 'icon' + os.path.sep+'tag.png'
+    # From https://www.flaticon.com/packs/characters-and-numbers
+    strIcon = scriptDir + os.path.sep + 'icon' + os.path.sep + 'tag.png'
     QuestionEditor.setWindowIcon(QtGui.QIcon(strIcon))
-    #app.setWindowIcon(QtGui.QIcon(strIcon))
+    # app.setWindowIcon(QtGui.QIcon(strIcon))
 
     QuestionEditor.show()
     sys.exit(app.exec_())

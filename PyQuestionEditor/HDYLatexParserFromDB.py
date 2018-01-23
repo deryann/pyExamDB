@@ -26,13 +26,15 @@ def strToSQLString(strInput):
 class HDYLatexParserFromDB(HDYLatexParser):
     def __init__(self,strInputFileName= u'test.sqlitedb', **args):
         HDYLatexParser.__init__(self, strInputFileName)
-        if isMySQLDBMode(strInputFileName):
+        self.strInputFileName = strInputFileName
+        if self.isMySQLDBMode():
             import MySQLdb
             self.conn = MySQLdb.connect(host="localhost",    # your host, usually localhost
                                         user="testuser",         # your username
                                         passwd="test2017",  # your password
                                         db="qer",
                                         charset='utf8', use_unicode=True)
+            self.cur = None
         else:
             import sqlite3
             self.conn = sqlite3.connect(strInputFileName)
@@ -42,6 +44,10 @@ class HDYLatexParserFromDB(HDYLatexParser):
 
         self.strMainSQL = u"select EXAMINFO_STR, question_id from " + constQuestionsTableName
         self.parserArgAsNewMainSQL(args)
+
+
+    def isMySQLDBMode(self):
+        return isMySQLDBMode(self.strInputFileName)
 
     def parserArgAsNewMainSQL(self, args):
 
@@ -175,12 +181,28 @@ where b.tag_id IN %s
             self.executeSQL(strInsertSQL)
         self.commitDB()
 
-    def executeSQL(self,strSQL):
+    def executeSQL(self,strSQL, b_commit = False):
         logging.info(strSQL)
-        self.conn.execute(strSQL)
+        if self.isMySQLDBMode():
+            if self.cur is None:
+                self.cur = self.conn.cursor()
+
+            self.cur.execute(strSQL)
+
+            if b_commit:
+                self.commitDB()
+                self.cur.close()
+                self.cur = None
+
+        else:
+            self.conn.execute(strSQL)
 
     def commitDB(self):
         self.conn.commit()
+        if self.isMySQLDBMode():
+            self.cur.close()
+            self.cur = None
+
 
     def setExamInfoForAllQuestions(self, strYear, strExam, strStyle, strStartNum):
         logging.debug("[HDYLatexParserFromDB][setExamInfoForAllQuestions][DO NOT SUPPORT THIS FUNCTION]")
@@ -407,9 +429,7 @@ where b.tag_id IN %s
             logging.debug(u"=====================")
         else:
             for qid in dicNeedToUpdateQBODY.keys():
-                strUpdateSQL = u"""UPDATE %s SET QBODY='%s' WHERE question_id = %d 
-                """ % (constQuestionsTableName, self.correctSQL(dicNeedToUpdateQBODY[qid]), qid)
-                self.executeSQL(strUpdateSQL)
+                self.update_qbody_by_qid(self.correctSQL(dicNeedToUpdateQBODY[qid]), qid)
 
             for qid in dicNeedToUpdateQANS.keys():
                 strUpdateSQL = u"""UPDATE %s SET QANS='%s' WHERE question_id = %d 
@@ -418,6 +438,15 @@ where b.tag_id IN %s
 
             self.commitDB()
         return len(dicUpdateQuestionidMapUpdateDic.keys()), nCount
+
+
+    def update_qbody_by_qid(self, qbody, qid, b_commitDB = False):
+        strUpdateSQL = u"""UPDATE %s SET QBODY='%s' WHERE question_id = %d 
+                        """ % (constQuestionsTableName, qbody, qid)
+        self.executeSQL(strUpdateSQL)
+        if b_commitDB:
+            self.commitDB()
+
 
     def appendTexFile(self,strFileName):
         """
