@@ -41,7 +41,7 @@ def generateTexFileTemplate():
     lstQstyle = [["單選","1","6"],["多選","7","13"],["選填","A","G"] ]
     strOutFileName = "105.tex"
     latexPt = HDYLatexParser(None)
-    latexPt.newTemplate(strYear, strExam, lstQstyle, "105.tex")
+    latexPt.newTemplate(strYear, strExam, lstQstyle, strOutFileName)
 
 def generateTexFileTemplateByCSVFile():
     """
@@ -83,9 +83,30 @@ def generate83to90():
         pass
     pass
 
+
+def generate107():
+    """
+    利用所有題型的起始編號跟終了編號，生成空殼 tex 檔案
+    :return:
+    """
+    dicTable = {
+        107: [[u"單選", u"1", u"7"] ,[u"多選",u"8", u"12"],[u"選填",u"A", u"H"]],
+    }
+
+    for nYear in dicTable.keys():
+        strYear = unicode(nYear)
+        strExam = u"學測"
+        strOutputFileName = u"q%03d.tex" %(nYear,)
+        lstQstyle = dicTable[nYear]
+        latexPt = HDYLatexParser(None)
+        latexPt.newTemplate(strYear, strExam, lstQstyle, strOutputFileName)
+        pass
+    pass
+
 def main():
     #generateTexFileTemplateByCSVFile()
-    generate83to90()
+    #generate83to90()
+    generate107()
     pass
 
 if __name__ == '__main__':

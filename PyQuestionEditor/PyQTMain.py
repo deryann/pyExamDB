@@ -33,7 +33,7 @@ from RunML_B import *
 
 from selenium import webdriver
 
-from appst_extras import translateQBODY
+from appst_extras import translateQBODY, replaceInTextMode
 
 # Logging config
 import logging
@@ -58,7 +58,8 @@ constExamStringList = [u"學測", u"指考甲", u"指考乙"]
 constExamYearStringList = [u"106", u"105"]
 constExamQuestionStyleStringList = [u"單選", u"多選", u"選填", u"填充", u"計算"]
 
-DEFAULT_HTML_FILE_NAME =u"E://test.html"
+DEFAULT_TEST_FILE_ROOT = u"E://NCTUG2/Code/pyExamDBDevUI/Dsite/appst/"
+DEFAULT_HTML_FILE_NAME = DEFAULT_TEST_FILE_ROOT + u"test.html"
 
 class QLineEditWithDirModel(QLineEdit):
     def __init__(self, strInputName, parent):
@@ -300,7 +301,9 @@ class QuestionTagsEditor(QWidget):
             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         
                 <title>測試用頁面 </title>
-        
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="/static/hdycss.css">
             </head>
             <body>
             <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -331,7 +334,8 @@ class QuestionTagsEditor(QWidget):
             <script src="http://d3js.org/d3.v3.min.js"></script>
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+            <link rel="stylesheet" type="text/css" href="%sstatic/hdycss.css">
             <script type="text/javascript">
                 $( document ).on( "mobileinit", function() {
                     $.mobile.ajaxEnabled = false;
@@ -341,29 +345,61 @@ class QuestionTagsEditor(QWidget):
             <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
             <script src="/static/hdyJQuery.js"></script>
             <br>
-            <h1> 題目(Mathjax)：</h1>
-            <br>
-                    %s
-                <br>
-            <h1> 題目(原始碼)：</h1>    
-                <div class="tex2jax_ignore">
-                    %s    
-                </div>
                 
-             <h1> 修正後題目(Mathjax)：</h1>
-            <br>
-                    %s
-                <br>
-            <h1> 修正後題目(原始碼)：</h1>    
-                <div class="tex2jax_ignore">
-                    %s    
-                </div>       
+            <table class="table table-bordered" >
+                <tr>
+                    <th width="50%%">
+                        題目(Mathjax)：
+                    </th>
+                    <th width="50%%">
+                        題目(原始碼)：
+                    </tdh
+                </tr>
+                <tr>
+                
+                </tr>
+                    <td width="50%%">
+                        %s
+                    </td width="50%%">
+                    <td>
+                        <div class="tex2jax_ignore">
+                        %s
+                        </div>
+                    </td>        
+
+            </table>        
+                
+            <table class="table table-bordered">
+                <tr>
+                    <th width="50%%">
+                        修正後題目(Mathjax)：
+                    </th>
+                    <th width="50%%">
+                        修正後題目(原始碼)：
+                    </th>
+                </tr>
+                <tr>
+                
+                </tr>
+                    <td width="50%%">
+                        %s
+                    </td>
+                    <td width="50%%">
+                        <div class="tex2jax_ignore">
+                        %s
+                        </div>
+                    </td>        
+                
+                
+            </table>    
+                   
             </body>
         </html>        
-        """ % (translateQBODY(self.currentQpt.getQBODY(), self.currentQpt.nQID),
+        """ % (DEFAULT_TEST_FILE_ROOT,
                translateQBODY(self.currentQpt.getQBODY(), self.currentQpt.nQID),
+               self.currentQpt.getQBODY().replace(u'\n', u'<br>\n'),
                translateQBODY(strTempQBODY, self.currentQpt.nQID),
-               translateQBODY(strTempQBODY, self.currentQpt.nQID),
+               strTempQBODY.replace(u'\n', u'<br>\n'),
                )
         with codecs.open(DEFAULT_HTML_FILE_NAME, "w", "utf-8") as fptHTML:
             fptHTML.write(strpageTemplete)
@@ -373,7 +409,7 @@ class QuestionTagsEditor(QWidget):
     def showdata_in_web(self):
         if self.web_control is None:
             self.web_control = webdriver.Chrome()
-        self.web_control.get('file://E:/test.html')
+        self.web_control.get(DEFAULT_HTML_FILE_NAME)
 
     def onbtnUpdateClicked(self):
         strTempQBODY = unicode(self.txtOneQuestion.toPlainText()).replace(u'\\', u'\\\\')
