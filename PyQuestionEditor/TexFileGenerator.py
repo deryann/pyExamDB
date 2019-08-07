@@ -94,7 +94,7 @@ def generate107():
     }
 
     for nYear in dicTable.keys():
-        strYear = unicode(nYear)
+        strYear = str(nYear)
         strExam = u"學測"
         strOutputFileName = u"q%03d.tex" %(nYear,)
         lstQstyle = dicTable[nYear]

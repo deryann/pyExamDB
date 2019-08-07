@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from PyQt4.QtGui import *
-from PyQt4.Qt import *
-from PyQt4.QtCore import pyqtSignal, QSize, Qt
+from PyQt5.QtGui import *
+from PyQt5.Qt import *
+from PyQt5.QtCore import pyqtSignal, QSize, Qt
 import logging
 
 
 class HDYNavigator(QWidget):
-
     indexChanged = pyqtSignal(int)
 
     def __init__(self, *args):
@@ -20,7 +19,7 @@ class HDYNavigator(QWidget):
         self.currentIndex = None
 
     def refresh(self):
-        logging.debug ("[HDYNavigator][refresh]")
+        logging.debug("[HDYNavigator][refresh]")
         # 事實上，秀出來的Index 是由 1 開始的
         self.edtIndex.setText(str(self.currentIndex + 1))
 
@@ -34,13 +33,13 @@ class HDYNavigator(QWidget):
         self.setLayout(QHBoxLayout())
         self.layoutBtnsControlIndex = self.layout()
 
-        self.btnFirst=QPushButton("|<", self)
-        self.btnPrev=QPushButton("<",self)
-        self.edtIndex = QLineEdit ("1", self)
-        self.lblgap = QLabel(u"/",self)
-        self.lblCount =  QLabel("0", self)
-        self.btnNext=QPushButton(">",self)
-        self.btnLast=QPushButton(">|",self)
+        self.btnFirst = QPushButton("|<", self)
+        self.btnPrev = QPushButton("<", self)
+        self.edtIndex = QLineEdit("1", self)
+        self.lblgap = QLabel(u"/", self)
+        self.lblCount = QLabel("0", self)
+        self.btnNext = QPushButton(">", self)
+        self.btnLast = QPushButton(">|", self)
 
         self.layoutBtnsControlIndex.addWidget(self.btnFirst)
         self.layoutBtnsControlIndex.addWidget(self.btnPrev)
@@ -70,13 +69,13 @@ class HDYNavigator(QWidget):
 
     def setMax(self, nInput):
         self.nMax = nInput
-        self.lblCount.setText(unicode(self.nMax))
+        self.lblCount.setText(str(self.nMax))
 
     def onedtIndexChaned(self, strText):
         try:
-            nIndex= int (strText) -1
+            nIndex = int(strText) - 1
         except:
-            nIndex=self.nQIndex
+            nIndex = 0
             pass
         self.setCurrentIndex(nIndex)
 
@@ -84,7 +83,7 @@ class HDYNavigator(QWidget):
         pass
 
     def setCurrentIndex(self, nIndex):
-        if nIndex < self.nMax and nIndex >= 0:
+        if (nIndex < self.nMax) and (nIndex >= 0):
             nOricurrentIndex = self.currentIndex
             self.currentIndex = nIndex
             if nOricurrentIndex != nIndex:

@@ -1,17 +1,20 @@
-#coding=utf-8
+# coding=utf-8
 # -*- coding: utf-8 -*-
 import os
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5 import QtCore, QtGui, QtWidgets  # works for pyqt5
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from QDbReport.Jiebaer import Jiebaer
+from PyQt5.QtWidgets import QTextEdit
+
 
 class HDYTextEdit(QTextEdit):
     def __init__(self, *args):
-        QTextEdit.__init__(self,*args)
-        self.dicKeyWordMapColor={}
-        self.dicColorMapKeyWordList={}
-#        self.dicKeyWordMapColor={u"平":Qt.yellow} #Test Function
-#        self.dicColorMapKeyWordList = {Qt.blue:[u'三',u'形']} #Test Function
+        QTextEdit.__init__(self, *args)
+        self.dicKeyWordMapColor = {}
+        self.dicColorMapKeyWordList = {}
+        #        self.dicKeyWordMapColor={u"平":Qt.yellow} #Test Function
+        #        self.dicColorMapKeyWordList = {Qt.blue:[u'三',u'形']} #Test Function
         self.setFont(QFont("Consolas", 14))  # 設定字型
         self.bVisibleForJieba = False
         self.bColorKeyWords = False
@@ -26,7 +29,7 @@ class HDYTextEdit(QTextEdit):
 
     def toggleVisibleJieba(self):
         self.bVisibleForJieba = not self.bVisibleForJieba
-        self.setText(self.strContent) #refresh
+        self.setText(self.strContent)  # refresh
 
     def toggleColorKeyWords(self):
         self.bColorKeyWords = not self.bColorKeyWords
@@ -53,9 +56,9 @@ class HDYTextEdit(QTextEdit):
                 if cursor.isNull():
                     break
                 cursor.setCharFormat(fmt)
-                curCursor=cursor
+                curCursor = cursor
 
-        #另用顏色與KeyWord的Mapping 將其著色
+        # 另用顏色與KeyWord的Mapping 將其著色
         if self.bColorKeyWords:
             for key in self.dicColorMapKeyWordList.keys():
                 cr = key
@@ -72,7 +75,7 @@ class HDYTextEdit(QTextEdit):
                         cursor.setCharFormat(fmt)
                         curCursor = cursor
 
-        if self.bVisibleForJieba :
+        if self.bVisibleForJieba:
             self.moveCursor(QTextCursor.End)
             curCursor = self.textCursor()
 
@@ -82,7 +85,7 @@ class HDYTextEdit(QTextEdit):
             curCursor.insertText(u"========================================", fm)
             curCursor.insertText(os.linesep, fm)
 
-            #增加比較Jieba 的結果
+            # 增加比較Jieba 的結果
             lstString = self.Jiebaer.getJiebaCutList(qstr, True)
 
             lstcolorSwitch = [Qt.yellow, Qt.white]
@@ -90,7 +93,7 @@ class HDYTextEdit(QTextEdit):
             for item in lstString:
                 self.moveCursor(QTextCursor.End)
                 curCursor = self.textCursor()
-                nColorSwitchIndex=(nColorSwitchIndex+1) % len(lstcolorSwitch)
+                nColorSwitchIndex = (nColorSwitchIndex + 1) % len(lstcolorSwitch)
                 fmt = QTextCharFormat()
                 fmt.setBackground(lstcolorSwitch[nColorSwitchIndex])
                 curCursor.insertText(item, fmt)

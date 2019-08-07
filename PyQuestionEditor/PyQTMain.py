@@ -13,11 +13,12 @@
 
 import sys, os, re, codecs
 import difflib
-from PyQt4.Qt import Qt
-from PyQt4 import QtCore, QtGui
+from PyQt5.Qt import Qt
+from PyQt5 import QtCore, QtGui, QtWidgets  # works for pyqt5
+from PyQt5.QtWidgets import *
 
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 # Widget input
 from HDYWidgetPool.HDYTextEdit import HDYTextEdit
 from HDYWidgetPool.HDYNavigator import HDYNavigator
@@ -58,8 +59,9 @@ constExamStringList = [u"學測", u"指考甲", u"指考乙"]
 constExamYearStringList = [u"106", u"105"]
 constExamQuestionStyleStringList = [u"單選", u"多選", u"選填", u"填充", u"計算"]
 
-DEFAULT_TEST_FILE_ROOT = u"E://NCTUG2/Code/pyExamDBDevUI/Dsite/appst/"
+DEFAULT_TEST_FILE_ROOT = u"D:/Code/pyExamDB/Dsite/appst/"
 DEFAULT_HTML_FILE_NAME = DEFAULT_TEST_FILE_ROOT + u"test.html"
+
 
 class QLineEditWithDirModel(QLineEdit):
     def __init__(self, strInputName, parent):
@@ -92,7 +94,6 @@ class QuestionTagsEditor(QWidget):
         self.latex = None
         self.currentQpt = None
         self.web_control = None
-
 
         self.suggestor = Tagsuggestor()
         self.dicNewTagsBuffer = {}
@@ -174,16 +175,13 @@ class QuestionTagsEditor(QWidget):
         return self.indexNavigator.getIndex()
 
     def setupHotkey(self):
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), QtCore.SIGNAL('activated()'),
-                     self.onHotkeySave)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F8), self), QtCore.SIGNAL('activated()'),
-                     self.indexNavigator.onbtnNextClicked)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), QtCore.SIGNAL('activated()'),
-                     self.indexNavigator.onbtnPrevClicked)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_J), self), QtCore.SIGNAL('activated()'),
-                     self.onbtnToogleJieba)
-        self.connect(QtGui.QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_K), self), QtCore.SIGNAL('activated()'),
-                     self.onbtnColorKeyWords)
+        lst = [(QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_S), self), self.onHotkeySave),
+               (QShortcut(QtGui.QKeySequence(Qt.Key_F8), self), self.indexNavigator.onbtnNextClicked),
+               (QShortcut(QtGui.QKeySequence(Qt.Key_F7), self), self.indexNavigator.onbtnPrevClicked),
+               (QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_J), self), self.onbtnToogleJieba),
+               (QShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_K), self), self.onbtnColorKeyWords)]
+        for item, fun in lst:
+            item.activated.connect(fun)
 
     def onbtnColorKeyWords(self):
         self.txtOneQuestion.toggleColorKeyWords()
@@ -254,18 +252,17 @@ class QuestionTagsEditor(QWidget):
         self.reNewComboQuestionUI()
 
         lstUIControls = [self.lblQID,
-            self.lblExamYear,
-            self.lblExamName,
-            self.lblExamQuestionStyle,
-            self.lblExamQuestionNum,
-            self.txtAns,
-            self.btnPreview,
-            self.btnUpdate,]
+                         self.lblExamYear,
+                         self.lblExamName,
+                         self.lblExamQuestionStyle,
+                         self.lblExamQuestionNum,
+                         self.txtAns,
+                         self.btnPreview,
+                         self.btnUpdate, ]
 
         for ui_item in lstUIControls:
             ui_item.setFixedWidth(100)
             self.layoutMetaData.addWidget(ui_item)
-
 
         self.txtOneQuestion = HDYTextEdit(self)
         self.txtOneQuestion.setColorMappingKeyWordList({Qt.blue: getMathTermList()})
@@ -282,15 +279,13 @@ class QuestionTagsEditor(QWidget):
 
         self.layoutBtnTagsList = QHBoxLayout(self)
 
-
     def onbtnPreviewClicked(self):
         self.save_current_qid_into_page()
         self.showdata_in_web()
 
-
     def save_current_qid_into_page(self):
         if self.txtOneQuestion is not None:
-            strTempQBODY = unicode(self.txtOneQuestion.toPlainText())
+            strTempQBODY = str(self.txtOneQuestion.toPlainText())
         else:
             strTempQBODY = u""
         strpageTemplete = u"""
@@ -412,10 +407,9 @@ class QuestionTagsEditor(QWidget):
         self.web_control.get(DEFAULT_HTML_FILE_NAME)
 
     def onbtnUpdateClicked(self):
-        strTempQBODY = unicode(self.txtOneQuestion.toPlainText()).replace(u'\\', u'\\\\')
+        strTempQBODY = str(self.txtOneQuestion.toPlainText()).replace(u'\\', u'\\\\')
         self.latex.update_qbody_by_qid(strTempQBODY, self.currentQpt.nQID, b_commitDB=True)
         pass
-
 
     def removeAllWidgetsInLayout(self, layout):
         nNumDelete = layout.count()
@@ -454,7 +448,8 @@ class QuestionTagsEditor(QWidget):
         self.setLatestCurrentTagsDict(sender.strCurrTag, Qt.Unchecked)
 
     def getLatestCurrentTags(self):
-        if self.dicNewTagsBuffer.has_key(self.getQIndex()):
+
+        if self.getQIndex() in self.dicNewTagsBuffer:
             return self.dicNewTagsBuffer[self.getQIndex()]
         else:
             return self.latex.getQuestionTagList(self.getQIndex())
@@ -556,15 +551,15 @@ class QuestionTagsEditor(QWidget):
         pass
 
     def onbtnLoadFile(self):
-        strfileName = unicode(self.edtFile.text())
+        strfileName = str(self.edtFile.text())
         self.loadFile(strfileName)
         pass
 
     def onbtnMoreLoadFile(self):
         strfileName = QFileDialog.getOpenFileName(self, u"Open HDY Latex", ".", u"Tex Files (*.tex )")
         self.dprint("fileName:" + strfileName)
-        self.edtFile.setText(unicode(strfileName))
-        self.loadFile(unicode(strfileName))
+        self.edtFile.setText(str(strfileName))
+        self.loadFile(str(strfileName))
 
     def loadFile(self, strfileName):
         self.edtFile.setText(strfileName)
@@ -627,8 +622,8 @@ class QuestionTagsEditor(QWidget):
         self.txtAns.setText(Qpt.getQANS())
         self.txtSol.setText(Qpt.getQSOLLISTstring())
 
-        self.lblQID.setText(u"QID：" + unicode(Qpt.nQID))
-        self.lblExamYear.setText(u"年份：" + unicode(Qpt.getExamYear()))
+        self.lblQID.setText(u"QID：" + str(Qpt.nQID))
+        self.lblExamYear.setText(u"年份：" + str(Qpt.getExamYear()))
         self.lblExamName.setText(u"試題：" + Qpt.getExamName())
         self.lblExamQuestionStyle.setText(u"題型：" + Qpt.getExamQuestionStyle())
         self.lblExamQuestionNum.setText(u"題號：" + Qpt.getExamQuestionNum())
@@ -647,9 +642,9 @@ class QuestionTagsEditor(QWidget):
         self.refreshRemoveButtonsUIforQuetionTag()
 
     def readSuggestDict(self):
-        import ConfigParser
-        self.configSuggestionTag = ConfigParser.ConfigParser()
-        self.configSuggestionTag.readfp(codecs.open(constSuggestionTag, u"r", u"utf8"))
+        import configparser
+        self.configSuggestionTag = configparser.ConfigParser()
+        self.configSuggestionTag.read_file(codecs.open(constSuggestionTag, u"r", u"utf8"))
 
     def getSuggestedTags(self):
         lst = [u"不是99課綱", u"跨章節試題"]
